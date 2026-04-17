@@ -311,6 +311,11 @@ const ShipmentForm = () => {
               </div>
               <div><Label>Progress (%)</Label><Input type="number" min={0} max={100} value={form.progress} onChange={(e) => set("progress", Number(e.target.value))} /></div>
               <div><Label>Estimated delivery</Label><Input type="date" value={form.estimated_delivery_date} onChange={(e) => set("estimated_delivery_date", e.target.value)} /></div>
+              <div className="md:col-span-2">
+                <Label>Registration date (when entered facility)</Label>
+                <Input type="datetime-local" value={form.shipped_at} onChange={(e) => set("shipped_at", e.target.value)} />
+                <p className="mt-1 text-xs text-muted-foreground">You can backdate or set a future date — this is what customers see as "Registered on".</p>
+              </div>
             </CardContent>
           </Card>
 
@@ -384,7 +389,7 @@ const ShipmentForm = () => {
           <Card className="lg:col-span-3">
             <CardHeader><CardTitle>Timeline</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-2 md:grid-cols-[200px_1fr_1fr_auto]">
+              <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-[180px_1fr_1fr_220px_auto]">
                 <Select value={newEvent.status} onValueChange={(v) => setNewEvent({ ...newEvent, status: v as ShipmentStatus })}>
                   <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
                   <SelectContent>
@@ -393,6 +398,7 @@ const ShipmentForm = () => {
                 </Select>
                 <Input placeholder="Location" value={newEvent.location} onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })} />
                 <Input placeholder="Note (optional)" value={newEvent.note} onChange={(e) => setNewEvent({ ...newEvent, note: e.target.value })} />
+                <Input type="datetime-local" value={newEvent.event_at} onChange={(e) => setNewEvent({ ...newEvent, event_at: e.target.value })} title="Event date — can be past or future" />
                 <Button type="button" onClick={handleAddEvent} className="gap-1"><Plus className="h-4 w-4" />Add event</Button>
               </div>
 
