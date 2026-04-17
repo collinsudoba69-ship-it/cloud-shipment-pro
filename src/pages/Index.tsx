@@ -1,4 +1,6 @@
-import { useNavigate } from "react-router-dom";  import { Shipmentmap } from "@/components/ShipmentMap";
+import { useNavigate } from "react-router-dom";
+// Make sure this name matches exactly what you named the file in Step 1
+import { ShipmentMap } from "@/components/ShipmentMap"; 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Plane, Ship, Zap, Warehouse, Search, ShieldCheck, Globe2, Clock } from "lucide-react";
@@ -42,7 +44,7 @@ const Index = () => {
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
 
-      {/* HERO */}
+      {/* HERO SECTION */}
       <section className="relative overflow-hidden bg-hero text-primary-foreground">
         <div className="absolute inset-0 opacity-20" style={{
           backgroundImage: "radial-gradient(circle at 20% 30%, hsl(217 91% 60% / 0.4), transparent 50%), radial-gradient(circle at 80% 70%, hsl(217 91% 50% / 0.3), transparent 50%)",
@@ -87,7 +89,21 @@ const Index = () => {
         </div>
       </section>
 
-      {/* SERVICES */}
+      {/* NEW: LIVE TRACKING DEMONSTRATION SECTION */}
+      <section className="bg-background py-16">
+        <div className="container">
+          <div className="mx-auto max-w-2xl text-center mb-10">
+            <h2 className="text-2xl font-bold md:text-3xl">Live Global Network</h2>
+            <p className="mt-3 text-muted-foreground">Monitor your shipments in real-time across our global transit corridors.</p>
+          </div>
+          {/* THE MAP COMPONENT */}
+          <div className="rounded-2xl border-4 border-slate-100 shadow-2xl">
+            <ShipmentMap />
+          </div>
+        </div>
+      </section>
+
+      {/* SERVICES SECTION */}
       <section className="bg-gradient-subtle py-20">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
@@ -110,7 +126,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* TRUST */}
+      {/* TRUST SECTION */}
       <section className="border-t border-border/60 py-20">
         <div className="container grid gap-10 md:grid-cols-3">
           {trust.map((item) => (
