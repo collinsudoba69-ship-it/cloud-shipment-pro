@@ -147,6 +147,7 @@ export type Database = {
           sender_name: string
           sender_phone: string | null
           shipment_type: string
+          shipped_at: string
           status: Database["public"]["Enums"]["shipment_status"]
           tracking_number: string
           updated_at: string
@@ -177,6 +178,7 @@ export type Database = {
           sender_name: string
           sender_phone?: string | null
           shipment_type: string
+          shipped_at?: string
           status?: Database["public"]["Enums"]["shipment_status"]
           tracking_number: string
           updated_at?: string
@@ -207,6 +209,7 @@ export type Database = {
           sender_name?: string
           sender_phone?: string | null
           shipment_type?: string
+          shipped_at?: string
           status?: Database["public"]["Enums"]["shipment_status"]
           tracking_number?: string
           updated_at?: string
