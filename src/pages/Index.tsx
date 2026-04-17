@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";  import { Shipmentmap } from "@/components/Shipmentmap";
+import { useNavigate } from "react-router-dom";  import { Shipmentmap } from "@/components/ShipmentMap";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Plane, Ship, Zap, Warehouse, Search, ShieldCheck, Globe2, Clock } from "lucide-react";
