@@ -27,10 +27,17 @@ interface FormState {
   is_fragile: boolean; is_express: boolean;
   status: ShipmentStatus; progress: number;
   estimated_delivery_date: string; description: string;
+  shipped_at: string;
   payment_status: "pending" | "paid"; amount_to_pay: string; payment_method: string; payment_reason: string;
   images: string[];
   send_email: boolean;
 }
+
+const toLocalInput = (iso?: string | null) => {
+  const d = iso ? new Date(iso) : new Date();
+  const tz = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - tz).toISOString().slice(0, 16);
+};
 
 const empty: FormState = {
   tracking_number: "", courier: "Cloud Shipment Express",
@@ -41,6 +48,7 @@ const empty: FormState = {
   is_fragile: false, is_express: false,
   status: "queued", progress: 10,
   estimated_delivery_date: "", description: "",
+  shipped_at: toLocalInput(),
   payment_status: "pending", amount_to_pay: "", payment_method: "", payment_reason: "",
   images: [],
   send_email: false,
@@ -63,7 +71,7 @@ const ShipmentForm = () => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [newEvent, setNewEvent] = useState({ status: "" as ShipmentStatus | "", location: "", note: "" });
+  const [newEvent, setNewEvent] = useState({ status: "" as ShipmentStatus | "", location: "", note: "", event_at: toLocalInput() });
 
   useEffect(() => {
     if (!isEdit) {
@@ -82,6 +90,7 @@ const ShipmentForm = () => {
         is_fragile: data.is_fragile, is_express: data.is_express,
         status: data.status, progress: data.progress,
         estimated_delivery_date: data.estimated_delivery_date ?? "", description: data.description ?? "",
+        shipped_at: toLocalInput((data as { shipped_at?: string }).shipped_at ?? data.created_at),
         payment_status: data.payment_status, amount_to_pay: data.amount_to_pay?.toString() ?? "",
         payment_method: data.payment_method ?? "", payment_reason: data.payment_reason ?? "",
         images: data.images ?? [], send_email: false,
@@ -140,6 +149,7 @@ const ShipmentForm = () => {
       status: form.status, progress: form.progress,
       estimated_delivery_date: form.estimated_delivery_date || null,
       description: form.description || null,
+      shipped_at: form.shipped_at ? new Date(form.shipped_at).toISOString() : new Date().toISOString(),
       payment_status: form.payment_status,
       amount_to_pay: form.amount_to_pay ? Number(form.amount_to_pay) : null,
       payment_method: form.payment_method || null, payment_reason: form.payment_reason || null,
@@ -155,10 +165,11 @@ const ShipmentForm = () => {
       const { data, error } = await supabase.from("shipments").insert(payload).select("id").single();
       if (error) { setLoading(false); return toast.error(error.message); }
       shipmentId = data.id;
-      // Initial timeline event
+      // Initial timeline event uses the chosen registration date
       await supabase.from("shipment_events").insert({
         shipment_id: shipmentId, status: form.status, location: form.origin,
-        note: "Shipment created", created_by: user?.id ?? null,
+        note: "Shipment registered", created_by: user?.id ?? null,
+        event_at: payload.shipped_at,
       });
     }
 
@@ -189,12 +200,13 @@ const ShipmentForm = () => {
     const { error } = await supabase.from("shipment_events").insert({
       shipment_id: id, status: newEvent.status, location: newEvent.location || null,
       note: newEvent.note || null, created_by: user?.id ?? null,
+      event_at: newEvent.event_at ? new Date(newEvent.event_at).toISOString() : new Date().toISOString(),
     });
     if (error) return toast.error(error.message);
     // Sync shipment status to latest event
     await supabase.from("shipments").update({ status: newEvent.status, progress: progressForStatus(newEvent.status) }).eq("id", id);
     toast.success("Timeline event added");
-    setNewEvent({ status: "", location: "", note: "" });
+    setNewEvent({ status: "", location: "", note: "", event_at: toLocalInput() });
     const { data: evs } = await supabase.from("shipment_events").select("*").eq("shipment_id", id).order("event_at", { ascending: false });
     setEvents((evs ?? []) as TimelineEvent[]);
     setForm((p) => ({ ...p, status: newEvent.status as ShipmentStatus, progress: progressForStatus(newEvent.status as ShipmentStatus) }));
@@ -299,6 +311,11 @@ const ShipmentForm = () => {
               </div>
               <div><Label>Progress (%)</Label><Input type="number" min={0} max={100} value={form.progress} onChange={(e) => set("progress", Number(e.target.value))} /></div>
               <div><Label>Estimated delivery</Label><Input type="date" value={form.estimated_delivery_date} onChange={(e) => set("estimated_delivery_date", e.target.value)} /></div>
+              <div className="md:col-span-2">
+                <Label>Registration date (when entered facility)</Label>
+                <Input type="datetime-local" value={form.shipped_at} onChange={(e) => set("shipped_at", e.target.value)} />
+                <p className="mt-1 text-xs text-muted-foreground">You can backdate or set a future date — this is what customers see as "Registered on".</p>
+              </div>
             </CardContent>
           </Card>
 
@@ -372,7 +389,7 @@ const ShipmentForm = () => {
           <Card className="lg:col-span-3">
             <CardHeader><CardTitle>Timeline</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-2 md:grid-cols-[200px_1fr_1fr_auto]">
+              <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-[180px_1fr_1fr_220px_auto]">
                 <Select value={newEvent.status} onValueChange={(v) => setNewEvent({ ...newEvent, status: v as ShipmentStatus })}>
                   <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
                   <SelectContent>
@@ -381,6 +398,7 @@ const ShipmentForm = () => {
                 </Select>
                 <Input placeholder="Location" value={newEvent.location} onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })} />
                 <Input placeholder="Note (optional)" value={newEvent.note} onChange={(e) => setNewEvent({ ...newEvent, note: e.target.value })} />
+                <Input type="datetime-local" value={newEvent.event_at} onChange={(e) => setNewEvent({ ...newEvent, event_at: e.target.value })} title="Event date — can be past or future" />
                 <Button type="button" onClick={handleAddEvent} className="gap-1"><Plus className="h-4 w-4" />Add event</Button>
               </div>
 

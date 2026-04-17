@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Package2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export const SiteHeader = () => {
   const { user, isAdmin } = useAuth();
@@ -24,6 +25,7 @@ export const SiteHeader = () => {
           )}
         </nav>
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           {user ? (
             <Button asChild size="sm">
               <Link to={isAdmin ? "/admin" : "/"}>{isAdmin ? "Dashboard" : "Account"}</Link>
