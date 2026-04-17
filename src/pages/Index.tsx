@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Plane, Ship, Zap, Warehouse, Search, ShieldCheck, Globe2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,23 +8,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 
-const services = [
-  { icon: Plane, title: "Air Freight", desc: "Fast cross-border air cargo with end-to-end visibility." },
-  { icon: Ship, title: "Sea Freight", desc: "Reliable container shipping for FCL and LCL loads." },
-  { icon: Zap, title: "Express Delivery", desc: "Time-critical door-to-door delivery in 1-3 days." },
-  { icon: Warehouse, title: "Warehousing", desc: "Secure storage and fulfillment in 40+ hubs worldwide." },
-];
-
-const stats = [
-  { value: "120+", label: "Countries served" },
-  { value: "2.4M", label: "Shipments tracked" },
-  { value: "99.4%", label: "On-time delivery" },
-  { value: "24/7", label: "Live support" },
-];
-
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [tracking, setTracking] = useState("");
+
+  const services = [
+    { icon: Plane, title: t("services.air"), desc: t("services.airDesc") },
+    { icon: Ship, title: t("services.sea"), desc: t("services.seaDesc") },
+    { icon: Zap, title: t("services.express"), desc: t("services.expressDesc") },
+    { icon: Warehouse, title: t("services.warehousing"), desc: t("services.warehousingDesc") },
+  ];
+
+  const stats = [
+    { value: "120+", label: t("stats.countries") },
+    { value: "2.4M", label: t("stats.shipments") },
+    { value: "99.4%", label: t("stats.onTime") },
+    { value: "24/7", label: t("stats.support") },
+  ];
+
+  const trust = [
+    { icon: ShieldCheck, title: t("trust.insured"), desc: t("trust.insuredDesc") },
+    { icon: Globe2, title: t("trust.network"), desc: t("trust.networkDesc") },
+    { icon: Clock, title: t("trust.realtime"), desc: t("trust.realtimeDesc") },
+  ];
 
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,13 +51,13 @@ const Index = () => {
           <div className="mx-auto max-w-3xl text-center animate-fade-in-up">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/5 px-3 py-1 text-xs font-medium backdrop-blur">
               <span className="h-1.5 w-1.5 rounded-full bg-primary-glow" />
-              Global logistics platform
+              {t("hero.badge")}
             </span>
             <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-              Ship anywhere. <span className="bg-gradient-to-r from-primary-glow to-primary-foreground bg-clip-text text-transparent">Track everywhere.</span>
+              {t("hero.title1")} <span className="bg-gradient-to-r from-primary-glow to-primary-foreground bg-clip-text text-transparent">{t("hero.title2")}</span>
             </h1>
             <p className="mt-6 text-lg text-primary-foreground/80 md:text-xl">
-              Real-time visibility across air, sea, and ground for businesses moving the world.
+              {t("hero.subtitle")}
             </p>
 
             <form onSubmit={handleTrack} className="mx-auto mt-10 flex max-w-xl flex-col gap-3 rounded-2xl bg-background/95 p-3 shadow-elegant backdrop-blur sm:flex-row">
@@ -58,12 +66,12 @@ const Index = () => {
                 <Input
                   value={tracking}
                   onChange={(e) => setTracking(e.target.value)}
-                  placeholder="Enter tracking number (e.g. CS-2025-04-AB12CD)"
+                  placeholder={t("hero.placeholder")}
                   className="h-12 border-0 bg-transparent pl-10 text-foreground placeholder:text-muted-foreground focus-visible:ring-0"
                 />
               </div>
               <Button type="submit" size="lg" className="h-12 gap-2">
-                Track <ArrowRight className="h-4 w-4" />
+                {t("hero.button")} <ArrowRight className="h-4 w-4" />
               </Button>
             </form>
           </div>
@@ -83,8 +91,8 @@ const Index = () => {
       <section className="bg-gradient-subtle py-20">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">Built for modern logistics</h2>
-            <p className="mt-4 text-muted-foreground">Four service lines, one platform — designed for speed, scale, and transparency.</p>
+            <h2 className="text-3xl font-bold md:text-4xl">{t("services.heading")}</h2>
+            <p className="mt-4 text-muted-foreground">{t("services.sub")}</p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {services.map((s, i) => (
@@ -105,11 +113,7 @@ const Index = () => {
       {/* TRUST */}
       <section className="border-t border-border/60 py-20">
         <div className="container grid gap-10 md:grid-cols-3">
-          {[
-            { icon: ShieldCheck, title: "Insured & secure", desc: "Every shipment covered by global cargo insurance up to $100K." },
-            { icon: Globe2, title: "Worldwide network", desc: "Direct partnerships with carriers in 120+ countries and territories." },
-            { icon: Clock, title: "Real-time tracking", desc: "Live status, ETA updates, and proof-of-delivery at every milestone." },
-          ].map((item) => (
+          {trust.map((item) => (
             <div key={item.title} className="flex gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <item.icon className="h-6 w-6" />

@@ -17,10 +17,13 @@ interface Props {
 
 export const LanguageSwitcher = ({ variant = "ghost", invert = false }: Props) => {
   const { i18n } = useTranslation();
-  const current = LANGUAGES.find((l) => l.code === i18n.language.split("-")[0]) ?? LANGUAGES[0];
+  const current =
+    LANGUAGES.find((l) => l.code === i18n.language) ??
+    LANGUAGES.find((l) => l.code === i18n.language.split("-")[0]) ??
+    LANGUAGES[0];
 
   useEffect(() => {
-    document.documentElement.dir = i18n.language === "ar" ? "rtl" : "ltr";
+    document.documentElement.dir = i18n.language.startsWith("ar") ? "rtl" : "ltr";
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
 
