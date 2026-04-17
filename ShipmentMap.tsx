@@ -1,154 +1,220 @@
-import { useState } from 'react';
-import { MapPin, Package, Truck, Clock, Navigation } from 'lucide-react';
+import { useEffect, useMemo, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { Truck } from 'lucide-react';
+import { renderToString } from 'react-dom/server';
 
-interface ShipmentData {
-  origin: string;
-  destination: string;
-  status: 'in-transit' | 'delivered' | 'pending';
-  progress: number; // 0-100
-  estimatedDelivery: string;
-  trackingNumber: string;
+interface ShipmentMapProps {
+  shipment: {
+    origin: string;
+    destination: string;
+    status: string;
+    progress: number;
+    estimatedDelivery: string;
+    trackingNumber: string;
+  };
 }
 
-const ShipmentMap = ({ 
-  shipment = defaultShipment 
-}: { 
-  shipment?: ShipmentData 
-}) => {
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [activeView, setActiveView] = useState<'map' | 'route'>('map');
+// Helper to create custom div icons from Lucide icons
+const createCustomIcon = (color: string, iconSvg: string) => {
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="
+      background-color: ${color};
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      color: white;
+    ">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconSvg}</svg>
+    </div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    popupAnchor: [0, -20],
+  });
+};
 
-  // Clean embed URL (removed the malformed space)
-  const embedUrl = "https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1552554.437341395!2d-76.0369!3d39.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1713330000000!5m2!1sen!2sus";
+// Pulse animation for live tracking marker
+const createPulseIcon = () => {
+  return L.divIcon({
+    className: 'pulse-marker',
+    html: `<div style="position: relative; width: 20px; height: 20px;">
+      <div style="
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: #3b82f6;
+        border-radius: 50%;
+        animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+      "></div>
+      <div style="
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 12px;
+        height: 12px;
+        background: #1d4ed8;
+        border-radius: 50%;
+        border: 2px solid white;
+      "></div>
+    </div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  });
+};
+
+// Map bounds fitter
+const MapBounds = ({ bounds }: { bounds: L.LatLngBoundsExpression }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+  }, [map, bounds]);
+  return null;
+};
+
+// Simple geocoding dictionary for demo (replace with real geocoding API)
+const getCoordinates = (location: string): [number, number] => {
+  const coords: Record<string, [number, number]> = {
+    'Washington, DC': [38.9072, -77.0369],
+    'New Jersey': [40.0583, -74.4057],
+    'New York, NY': [40.7128, -74.0060],
+    'Los Angeles, CA': [34.0522, -118.2437],
+    'Chicago, IL': [41.8781, -87.6298],
+    'Miami, FL': [25.7617, -80.1918],
+    'Seattle, WA': [47.6062, -122.3321],
+  };
+  
+  const key = Object.keys(coords).find(k => 
+    location.toLowerCase().includes(k.toLowerCase().split(',')[0])
+  );
+  return key ? coords[key] : [39.5, -76.0]; // Default fallback
+};
+
+// Interpolate position along line based on progress
+const getPositionAlongLine = (
+  start: [number, number], 
+  end: [number, number], 
+  progress: number
+): [number, number] => {
+  const lat = start[0] + (end[0] - start[0]) * (progress / 100);
+  const lng = start[1] + (end[1] - start[1]) * (progress / 100);
+  return [lat, lng];
+};
+
+const ShipmentMap = ({ shipment }: ShipmentMapProps) => {
+  const mapRef = useRef<L.Map | null>(null);
+
+  const originCoords = useMemo(() => getCoordinates(shipment.origin), [shipment.origin]);
+  const destCoords = useMemo(() => getCoordinates(shipment.destination), [shipment.destination]);
+  const currentPos = useMemo(() => 
+    getPositionAlongLine(originCoords, destCoords, shipment.progress),
+  [originCoords, destCoords, shipment.progress]);
+
+  const routeBounds = useMemo(() => 
+    L.latLngBounds([originCoords, destCoords]),
+  [originCoords, destCoords]);
+
+  // Icons using Lucide SVG paths
+  const originIcon = useMemo(() => createCustomIcon('#16a34a', 
+    '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'
+  ), []);
+
+  const destIcon = useMemo(() => createCustomIcon('#2563eb', 
+    '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'
+  ), []);
+
+  const liveIcon = useMemo(() => createPulseIcon(), []);
+
+  const isLive = shipment.status === 'in-transit' || shipment.status === 'out-for-delivery';
 
   return (
-    <div className="w-full space-y-4">
-      {/* Tracking Header Card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Package className="w-4 h-4" />
-              <span>Tracking Number</span>
-            </div>
-            <p className="text-lg font-mono font-semibold text-slate-900">
-              {shipment.trackingNumber}
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              shipment.status === 'in-transit' 
-                ? 'bg-blue-100 text-blue-700' 
-                : shipment.status === 'delivered'
-                ? 'bg-green-100 text-green-700'
-                : 'bg-amber-100 text-amber-700'
-            }`}>
-              {shipment.status === 'in-transit' ? 'In Transit' : 
-               shipment.status === 'delivered' ? 'Delivered' : 'Pending'}
-            </span>
-            <div className="flex items-center gap-1 text-sm text-slate-600">
-              <Clock className="w-4 h-4" />
-              <span>ETA: {shipment.estimatedDelivery}</span>
-            </div>
-          </div>
-        </div>
+    <div className="relative w-full h-[400px] rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-900">
+      {/* Inject pulse animation styles */}
+      <style>{`
+        @keyframes pulse-ring {
+          0% { transform: scale(0.33); opacity: 1; }
+          80%, 100% { transform: scale(2); opacity: 0; }
+        }
+        .leaflet-container { background: #0f172a; }
+      `}</style>
 
-        {/* Progress Bar */}
-        <div className="mt-6 relative">
-          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-blue-600 rounded-full transition-all duration-1000 ease-out"
-              style={{ width: `${shipment.progress}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-2 text-sm text-slate-500">
-            <div className="flex items-center gap-1">
-              <MapPin className="w-4 h-4 text-green-600" />
-              <span className="font-medium text-slate-700">{shipment.origin}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Navigation className="w-4 h-4 text-blue-600" />
-              <span className="font-medium text-slate-700">{shipment.destination}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Map Container */}
-      <div className="relative h-[400px] w-full rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-50">
-        {!mapLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-50 z-10">
-            <div className="flex items-center gap-2 text-slate-500">
-              <Truck className="w-5 h-5 animate-bounce" />
-              <span>Loading route map...</span>
-            </div>
-          </div>
-        )}
-        
-        <iframe
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          src={embedUrl}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          onLoad={() => setMapLoaded(true)}
-          title="Shipment Route Map"
+      <MapContainer
+        center={currentPos}
+        zoom={7}
+        scrollWheelZoom={false}
+        style={{ height: '100%', width: '100%', zIndex: 1 }}
+        ref={mapRef}
+      >
+        {/* Dark mode tiles - CartoDB Dark Matter */}
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          subdomains="abcd"
+          maxZoom={20}
         />
 
-        {/* Live Indicator Overlay */}
-        {shipment.status === 'in-transit' && mapLoaded && (
-          <div className="absolute top-4 right-4 z-20">
-            <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-md border border-slate-200">
+        <MapBounds bounds={routeBounds} />
+
+        {/* Route Line - dashed animated */}
+        <Polyline
+          positions={[originCoords, destCoords]}
+          pathOptions={{
+            color: '#3b82f6',
+            weight: 4,
+            opacity: 0.8,
+            dashArray: '10, 10',
+            lineCap: 'round',
+            className: 'animate-dash', // You can add CSS animation for dash offset
+          }}
+        />
+
+        {/* Origin Marker */}
+        <Marker position={originCoords} icon={originIcon}>
+          {/* Popup optional */}
+        </Marker>
+
+        {/* Destination Marker */}
+        <Marker position={destCoords} icon={destIcon} />
+
+        {/* Live Position Marker */}
+        {isLive && (
+          <Marker position={currentPos} icon={liveIcon} />
+        )}
+
+        {/* Progress label overlay */}
+        <div className="absolute bottom-4 left-4 z-[400] bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-lg border border-slate-700 shadow-xl">
+          <div className="flex items-center gap-2">
+            <Truck className="w-4 h-4 text-blue-400" />
+            <span className="text-sm font-medium">
+              {shipment.progress}% complete
+            </span>
+          </div>
+          <div className="text-xs text-slate-400 mt-1">
+            {shipment.origin} → {shipment.destination}
+          </div>
+        </div>
+
+        {/* Live indicator */}
+        {isLive && (
+          <div className="absolute top-4 right-4 z-[400]">
+            <div className="flex items-center gap-2 bg-slate-900/90 backdrop-blur-md px-3 py-2 rounded-lg border border-slate-700 shadow-xl">
               <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
               </span>
-              <span className="text-sm font-medium text-slate-700">Live Tracking</span>
+              <span className="text-sm font-medium text-white">Live</span>
             </div>
           </div>
         )}
-      </div>
-
-      {/* Route Details */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider">Origin</p>
-              <p className="font-semibold text-slate-900">{shipment.origin}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-              <Navigation className="w-4 h-4 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider">Destination</p>
-              <p className="font-semibold text-slate-900">{shipment.destination}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      </MapContainer>
     </div>
   );
-};
-
-const defaultShipment: ShipmentData = {
-  origin: "Washington, DC",
-  destination: "New Jersey",
-  status: "in-transit",
-  progress: 65,
-  estimatedDelivery: "Today by 8:00 PM",
-  trackingNumber: "CLD-8291-5734"
 };
 
 export default ShipmentMap;
