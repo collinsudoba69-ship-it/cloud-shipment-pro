@@ -14,16 +14,249 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          credits: number
+          display_name: string | null
+          email: string
+          id: string
+          unlimited_credits: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          display_name?: string | null
+          email: string
+          id?: string
+          unlimited_credits?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          display_name?: string | null
+          email?: string
+          id?: string
+          unlimited_credits?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shipment_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          event_at: string
+          id: string
+          location: string | null
+          note: string | null
+          shipment_id: string
+          status: Database["public"]["Enums"]["shipment_status"] | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          event_at?: string
+          id?: string
+          location?: string | null
+          note?: string | null
+          shipment_id: string
+          status?: Database["public"]["Enums"]["shipment_status"] | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          event_at?: string
+          id?: string
+          location?: string | null
+          note?: string | null
+          shipment_id?: string
+          status?: Database["public"]["Enums"]["shipment_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_events_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipments: {
+        Row: {
+          amount_to_pay: number | null
+          courier: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          destination: string
+          estimated_delivery_date: string | null
+          id: string
+          images: string[]
+          is_express: boolean
+          is_fragile: boolean
+          origin: string
+          payment_method: string | null
+          payment_reason: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          progress: number
+          quantity: number
+          receiver_email: string | null
+          receiver_name: string
+          receiver_phone: string | null
+          sender_email: string | null
+          sender_name: string
+          sender_phone: string | null
+          shipment_type: string
+          status: Database["public"]["Enums"]["shipment_status"]
+          tracking_number: string
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          amount_to_pay?: number | null
+          courier?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          destination: string
+          estimated_delivery_date?: string | null
+          id?: string
+          images?: string[]
+          is_express?: boolean
+          is_fragile?: boolean
+          origin: string
+          payment_method?: string | null
+          payment_reason?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          progress?: number
+          quantity?: number
+          receiver_email?: string | null
+          receiver_name: string
+          receiver_phone?: string | null
+          sender_email?: string | null
+          sender_name: string
+          sender_phone?: string | null
+          shipment_type: string
+          status?: Database["public"]["Enums"]["shipment_status"]
+          tracking_number: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          amount_to_pay?: number | null
+          courier?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          destination?: string
+          estimated_delivery_date?: string | null
+          id?: string
+          images?: string[]
+          is_express?: boolean
+          is_fragile?: boolean
+          origin?: string
+          payment_method?: string | null
+          payment_reason?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          progress?: number
+          quantity?: number
+          receiver_email?: string | null
+          receiver_name?: string
+          receiver_phone?: string | null
+          sender_email?: string | null
+          sender_name?: string
+          sender_phone?: string | null
+          shipment_type?: string
+          status?: Database["public"]["Enums"]["shipment_status"]
+          tracking_number?: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "super_admin" | "admin" | "staff"
+      payment_status: "pending" | "paid"
+      shipment_status:
+        | "queued"
+        | "in_transit"
+        | "out_for_delivery"
+        | "delivered"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +383,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["super_admin", "admin", "staff"],
+      payment_status: ["pending", "paid"],
+      shipment_status: [
+        "queued",
+        "in_transit",
+        "out_for_delivery",
+        "delivered",
+      ],
+    },
   },
 } as const
