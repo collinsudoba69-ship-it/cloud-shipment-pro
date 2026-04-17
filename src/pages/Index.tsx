@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { ShipmentMap } from "@/components/ShipmentMap"; 
 {/* LIVE TRACKING MAP SECTION */}
       <section className="py-12 bg-slate-50 border-y border-slate-200">
         <div className="container mx-auto px-4">
@@ -147,6 +146,28 @@ const Index = () => {
           </div>
         </div>
       </section>
+       {/* EMERGENCY DIRECT MAP SECTION */}
+<section className="py-12 bg-slate-50 border-y border-slate-200">
+  <div className="container mx-auto px-4">
+    <div className="flex items-center gap-2 mb-6">
+      <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
+      <h2 className="text-2xl font-bold text-slate-900">Live Global Network</h2>
+    </div>
+    
+    <div className="shadow-2xl rounded-2xl overflow-hidden bg-white p-2 h-[450px]">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d1565555.748682054!2d-76.3243147854612!3d39.40775952046467!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x89b7c6de5af66771%3A0x777bca565b0b67f2!2sWashington%2C%20DC!3m2!1d38.9071923!2d-77.0368707!4m5!1s0x89c0fb959e00409f%3A0x2eb27d0727db022!2sNew%20Jersey!3m2!1d40.0583238!2d-74.4056612!5e0!3m2!1sen!2sus!4v1713350000000!5m2!1sen!2sus"
+        width="100%"
+        height="100%"
+        style={{ border: 0 }}
+        allowFullScreen={true}
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+        title="Cloud Shipment Route"
+      />
+    </div>
+  </div>
+</section>   
 
       {/* TRUST SECTION */}
       <section className="border-t border-border/60 py-20">
