@@ -183,10 +183,33 @@ const ShipmentForm = () => {
       });
     }
 
-    // Optional email notification
+    // Optional email notification to receiver
     if (form.send_email && form.receiver_email && shipmentId) {
-      // Placeholder: a Lovable transactional email function can be wired in phase 2.
-      toast.message("Email notification queued (configure in phase 2).");
+      try {
+        const trackUrl = `${window.location.origin}/track?n=${encodeURIComponent(form.tracking_number.trim())}`;
+        const { error: emailErr } = await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "shipment-update",
+            recipientEmail: form.receiver_email,
+            idempotencyKey: `shipment-${shipmentId}-${form.status}-${Date.now()}`,
+            templateData: {
+              receiverName: form.receiver_name,
+              trackingNumber: form.tracking_number,
+              status: form.status,
+              origin: form.origin,
+              destination: form.destination,
+              trackUrl,
+            },
+          },
+        });
+        if (emailErr) {
+          toast.error("Email not sent: " + emailErr.message + ". Set up your email domain in Cloud → Emails first.");
+        } else {
+          toast.success("Email notification sent to receiver.");
+        }
+      } catch (err) {
+        toast.error("Email service not configured yet. Open Cloud → Emails to set up your sender domain.");
+      }
     }
 
     setLoading(false);
