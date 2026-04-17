@@ -1,0 +1,62 @@
+-- Add points column to profiles table
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin', 'super_admin'));
+
+-- Create transactions table for audit trail
+CREATE TABLE IF NOT EXISTS point_transactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  amount INTEGER NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('credit', 'debit')),
+  description TEXT NOT NULL,
+  reference_type TEXT, -- 'shipment_create', 'shipment_edit', 'admin_adjustment', 'purchase'
+  reference_id UUID,
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Function to check if user has sufficient points
+CREATE OR REPLACE FUNCTION has_sufficient_points(user_uuid UUID, required_points INTEGER)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM profiles 
+    WHERE id = user_uuid AND (points >= required_points OR role = 'admin')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to deduct points (with admin bypass)
+CREATE OR REPLACE FUNCTION deduct_points(
+  user_uuid UUID, 
+  points_to_deduct INTEGER, 
+  description TEXT,
+  ref_type TEXT,
+  ref_id UUID
+) RETURNS BOOLEAN AS $$
+DECLARE
+  user_role TEXT;
+  current_points INTEGER;
+BEGIN
+  -- Get user info
+  SELECT role, points INTO user_role, current_points 
+  FROM profiles WHERE id = user_uuid;
+  
+  -- Admin bypass: unlimited points
+  IF user_role = 'admin' THEN
+    INSERT INTO point_transactions (user_id, amount, type, description, reference_type, reference_id)
+    VALUES (user_uuid, points_to_deduct, 'debit', description || ' (Admin Bypass)', ref_type, ref_id);
+    RETURN TRUE;
+  END IF;
+  
+  -- Check sufficient points
+  IF current_points < points_to_deduct THEN
+    RETURN FALSE;
+  END IF;
+  
+  -- Deduct points
+  UPDATE profiles SET points = points - points_to_deduct WHERE id = user_uuid;
+  
+  -- Record transaction
+  INSERT INTO point_transactions (user_id, amount, type, description, reference_type, reference_id)
+  VALUES (user
