@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"; import { Shipmentmap } from "@/components/Shipmentmap";
+import { useEffect, useState, useCallback } from "react"; import { Shipmentmap } from "@/components/ShipmentMap";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
