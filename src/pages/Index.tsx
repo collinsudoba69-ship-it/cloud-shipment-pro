@@ -1,6 +1,28 @@
 import { useNavigate } from "react-router-dom";
-// Make sure this name matches exactly what you named the file in Step 1
 import { ShipmentMap } from "@/components/ShipmentMap"; 
+{/* LIVE TRACKING MAP SECTION */}
+      <section className="py-12 bg-slate-50 border-y border-slate-200">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
+            <h2 className="text-2xl font-bold text-slate-900">Live Global Network</h2>
+          </div>
+          
+          {/* This is the magic line that calls your map code */}
+          <div className="shadow-2xl rounded-2xl overflow-hidden bg-white p-2">
+            <ShipmentMap />
+          </div>
+          
+          <div className="mt-4 flex gap-6 text-sm text-slate-500">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-blue-500" /> In Transit
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-slate-300" /> Pending
+            </div>
+          </div>
+        </div>
+      </section>
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Plane, Ship, Zap, Warehouse, Search, ShieldCheck, Globe2, Clock } from "lucide-react";
