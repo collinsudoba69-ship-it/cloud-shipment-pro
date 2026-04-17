@@ -2,182 +2,24 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 
+import en from "./locales/en";
+import enUS from "./locales/en-US";
+import fr from "./locales/fr";
+import es from "./locales/es";
+import de from "./locales/de";
+import ar from "./locales/ar";
+import zh from "./locales/zh";
+import pt from "./locales/pt";
+
 const resources = {
-  en: {
-    translation: {
-      track: {
-        title: "Track your shipment",
-        subtitle: "Enter your tracking number to see live status.",
-        placeholder: "CS-2025-04-XXXXXX",
-        button: "Track",
-        looking: "Looking up your shipment…",
-        notFound: "Tracking number not found",
-        notFoundDesc: "No shipment found with that tracking number.",
-        prompt: "Enter a tracking number above to begin.",
-        trackingNo: "Tracking #",
-        progress: "Progress",
-        from: "From",
-        to: "To",
-        eta: "Estimated delivery",
-        registered: "Registered on",
-        type: "Type",
-        express: "Express",
-        fragile: "Fragile",
-        timeline: "Shipment timeline",
-        noEvents: "No timeline events yet.",
-        update: "Update",
-        images: "Shipment / Proof images",
-        tbc: "To be confirmed",
-        language: "Language",
-      },
-      status: {
-        queued: "Queued",
-        in_transit: "In Transit",
-        out_for_delivery: "Out for Delivery",
-        delivered: "Delivered",
-      },
-    },
-  },
-  fr: {
-    translation: {
-      track: {
-        title: "Suivez votre envoi",
-        subtitle: "Entrez votre numéro de suivi pour voir l'état en direct.",
-        placeholder: "CS-2025-04-XXXXXX",
-        button: "Suivre",
-        looking: "Recherche de votre envoi…",
-        notFound: "Numéro de suivi introuvable",
-        notFoundDesc: "Aucun envoi trouvé avec ce numéro.",
-        prompt: "Entrez un numéro de suivi ci-dessus pour commencer.",
-        trackingNo: "N° de suivi",
-        progress: "Progression",
-        from: "De",
-        to: "À",
-        eta: "Livraison estimée",
-        registered: "Enregistré le",
-        type: "Type",
-        express: "Express",
-        fragile: "Fragile",
-        timeline: "Chronologie de l'envoi",
-        noEvents: "Aucun événement pour le moment.",
-        update: "Mise à jour",
-        images: "Images / Preuves",
-        tbc: "À confirmer",
-        language: "Langue",
-      },
-      status: {
-        queued: "En attente",
-        in_transit: "En transit",
-        out_for_delivery: "En livraison",
-        delivered: "Livré",
-      },
-    },
-  },
-  es: {
-    translation: {
-      track: {
-        title: "Rastrea tu envío",
-        subtitle: "Introduce tu número de seguimiento para ver el estado en vivo.",
-        placeholder: "CS-2025-04-XXXXXX",
-        button: "Rastrear",
-        looking: "Buscando tu envío…",
-        notFound: "Número de seguimiento no encontrado",
-        notFoundDesc: "No se encontró ningún envío con ese número.",
-        prompt: "Introduce un número de seguimiento arriba para comenzar.",
-        trackingNo: "N.º de seguimiento",
-        progress: "Progreso",
-        from: "Desde",
-        to: "Hasta",
-        eta: "Entrega estimada",
-        registered: "Registrado el",
-        type: "Tipo",
-        express: "Exprés",
-        fragile: "Frágil",
-        timeline: "Cronología del envío",
-        noEvents: "Aún no hay eventos.",
-        update: "Actualización",
-        images: "Imágenes / Pruebas",
-        tbc: "Por confirmar",
-        language: "Idioma",
-      },
-      status: {
-        queued: "En cola",
-        in_transit: "En tránsito",
-        out_for_delivery: "En reparto",
-        delivered: "Entregado",
-      },
-    },
-  },
-  de: {
-    translation: {
-      track: {
-        title: "Sendung verfolgen",
-        subtitle: "Geben Sie Ihre Sendungsnummer ein, um den Live-Status zu sehen.",
-        placeholder: "CS-2025-04-XXXXXX",
-        button: "Verfolgen",
-        looking: "Sendung wird gesucht…",
-        notFound: "Sendungsnummer nicht gefunden",
-        notFoundDesc: "Keine Sendung mit dieser Nummer gefunden.",
-        prompt: "Geben Sie oben eine Sendungsnummer ein.",
-        trackingNo: "Sendungsnr.",
-        progress: "Fortschritt",
-        from: "Von",
-        to: "Nach",
-        eta: "Voraussichtliche Lieferung",
-        registered: "Registriert am",
-        type: "Typ",
-        express: "Express",
-        fragile: "Zerbrechlich",
-        timeline: "Sendungsverlauf",
-        noEvents: "Noch keine Ereignisse.",
-        update: "Aktualisierung",
-        images: "Bilder / Nachweise",
-        tbc: "Wird bestätigt",
-        language: "Sprache",
-      },
-      status: {
-        queued: "Eingereiht",
-        in_transit: "Unterwegs",
-        out_for_delivery: "In Zustellung",
-        delivered: "Zugestellt",
-      },
-    },
-  },
-  ar: {
-    translation: {
-      track: {
-        title: "تتبع شحنتك",
-        subtitle: "أدخل رقم التتبع لرؤية الحالة المباشرة.",
-        placeholder: "CS-2025-04-XXXXXX",
-        button: "تتبع",
-        looking: "جارٍ البحث عن شحنتك…",
-        notFound: "رقم التتبع غير موجود",
-        notFoundDesc: "لم يتم العثور على شحنة بهذا الرقم.",
-        prompt: "أدخل رقم تتبع أعلاه للبدء.",
-        trackingNo: "رقم التتبع",
-        progress: "التقدم",
-        from: "من",
-        to: "إلى",
-        eta: "التسليم المتوقع",
-        registered: "مسجَّل في",
-        type: "النوع",
-        express: "سريع",
-        fragile: "قابل للكسر",
-        timeline: "الجدول الزمني للشحنة",
-        noEvents: "لا توجد أحداث بعد.",
-        update: "تحديث",
-        images: "صور / إثباتات",
-        tbc: "سيتم التأكيد",
-        language: "اللغة",
-      },
-      status: {
-        queued: "في الانتظار",
-        in_transit: "قيد النقل",
-        out_for_delivery: "خارج للتوصيل",
-        delivered: "تم التسليم",
-      },
-    },
-  },
+  en: { translation: en },
+  "en-US": { translation: enUS },
+  fr: { translation: fr },
+  es: { translation: es },
+  de: { translation: de },
+  ar: { translation: ar },
+  zh: { translation: zh },
+  pt: { translation: pt },
 };
 
 i18n
@@ -186,7 +28,9 @@ i18n
   .init({
     resources,
     fallbackLng: "en",
-    supportedLngs: ["en", "fr", "es", "de", "ar"],
+    supportedLngs: ["en", "en-US", "fr", "es", "de", "ar", "zh", "pt"],
+    nonExplicitSupportedLngs: false,
+    load: "currentOnly",
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],
@@ -195,11 +39,16 @@ i18n
   });
 
 export const LANGUAGES = [
-  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "en", label: "English (UK)", flag: "🇬🇧" },
+  { code: "en-US", label: "English (US)", flag: "🇺🇸" },
   { code: "fr", label: "Français", flag: "🇫🇷" },
   { code: "es", label: "Español", flag: "🇪🇸" },
+  { code: "pt", label: "Português", flag: "🇵🇹" },
   { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "zh", label: "中文", flag: "🇨🇳" },
   { code: "ar", label: "العربية", flag: "🇸🇦" },
 ];
+
+export const SUPPORT_EMAIL = "cloudshipmentcontact@gmail.com";
 
 export default i18n;

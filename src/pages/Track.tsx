@@ -111,7 +111,7 @@ const Track = () => {
         <div className="container relative">
           <div className="mx-auto max-w-2xl text-center animate-fade-in">
             <Badge className="mb-4 border-0 bg-primary-foreground/15 text-primary-foreground backdrop-blur">
-              <Truck className="mr-1.5 h-3.5 w-3.5" /> Cloud Shipment Tracking
+              <Truck className="mr-1.5 h-3.5 w-3.5" /> {t("track.badge")}
             </Badge>
             <h1 className="text-4xl font-bold md:text-5xl">{t("track.title")}</h1>
             <p className="mt-4 text-primary-foreground/80">{t("track.subtitle")}</p>
