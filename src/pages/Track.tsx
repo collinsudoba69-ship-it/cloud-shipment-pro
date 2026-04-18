@@ -858,6 +858,53 @@ const Track = () => {
                   </CardContent>
                 </Card>
 
+                {/* Shipment Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">{t('trackPage.shipmentDetails')}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">{t('trackPage.carrier')}</span>
+                      <span className="font-medium">{shipment.carrier}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">{t('trackPage.service')}</span>
+                      <span className="font-medium">{shipment.service}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">{t('trackPage.weight')}</span>
+                      <span className="font-medium">{shipment.weight}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">{t('trackPage.quantity')}</span>
+                      <span className="font-medium">{shipment.quantity}</span>
+                    </div>
+                    {shipment.isFragile && (
+                      <>
+                        <Separator />
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500">{t('trackPage.handling')}</span>
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">{t('trackPage.fragile')}</Badge>
+                        </div>
+                      </>
+                    )}
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">{t('trackPage.from')}</span>
+                      <span className="font-medium text-right">{shipment.origin}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">{t('trackPage.to')}</span>
+                      <span className="font-medium text-right">{shipment.destination}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Package Description */}
                 {shipment.description && (
                   <Card>
