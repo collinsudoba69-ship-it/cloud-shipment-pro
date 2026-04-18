@@ -50,7 +50,7 @@ export const SiteFooter = () => {
         </div>
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-6 text-sm text-muted-foreground md:flex-row">
           <p>© {new Date().getFullYear()} Cloud Shipment. {t("footer.rights")}</p>
-          <p>Logistics platform · v1.1</p>
+          <p>{t("home.footerVersion")}</p>
         </div>
       </div>
     </footer>

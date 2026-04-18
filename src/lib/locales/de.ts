@@ -94,6 +94,14 @@ const de: TranslationSchema = {
     trackShipment: "Sendung verfolgen",
     staffPortal: "Mitarbeiterportal",
   },
+  home: {
+    heroTitle: "Cloud Shipment",
+    heroSubtitle: "Schnelle, zuverlässige, globale Logistik",
+    heroPlaceholder: "Sendungsnummer eingeben...",
+    heroButton: "Jetzt verfolgen",
+    liveMap: "Live-Karte des globalen Transits",
+    footerVersion: "Logistikplattform · v1.1",
+  },
 };
 
 export default de;

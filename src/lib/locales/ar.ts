@@ -91,6 +91,14 @@ const ar: TranslationSchema = {
     trackShipment: "تتبع الشحنة",
     staffPortal: "بوابة الموظفين",
   },
+  home: {
+    heroTitle: "Cloud Shipment",
+    heroSubtitle: "خدمات لوجستية عالمية سريعة وموثوقة",
+    heroPlaceholder: "أدخل رقم التتبع...",
+    heroButton: "تتبع الآن",
+    liveMap: "خريطة النقل العالمية المباشرة",
+    footerVersion: "منصة لوجستية · v1.1",
+  },
 };
 
 export default ar;

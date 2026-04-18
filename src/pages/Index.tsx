@@ -27,17 +27,17 @@ const Index = () => {
       {/* HERO SECTION */}
       <section className="relative overflow-hidden bg-hero text-primary-foreground py-20">
         <div className="container relative text-center">
-          <h1 className="text-4xl font-bold md:text-6xl mb-6">Cloud Shipment</h1>
-          <p className="text-lg mb-10">Fast, Reliable, Global Logistics</p>
-          
+          <h1 className="text-4xl font-bold md:text-6xl mb-6">{t("home.heroTitle")}</h1>
+          <p className="text-lg mb-10">{t("home.heroSubtitle")}</p>
+
           <form onSubmit={handleTrack} className="mx-auto flex max-w-xl gap-3 bg-white p-3 rounded-2xl shadow-lg">
-            <Input 
-              value={tracking} 
+            <Input
+              value={tracking}
               onChange={(e) => setTracking(e.target.value)}
-              placeholder="Enter Tracking Number..." 
+              placeholder={t("home.heroPlaceholder")}
               className="text-black border-0 focus-visible:ring-0"
             />
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Track Now</Button>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">{t("home.heroButton")}</Button>
           </form>
         </div>
       </section>
@@ -47,7 +47,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <span className="h-3 w-3 bg-green-500 rounded-full animate-pulse" />
-            Live Global Transit Map
+            {t("home.liveMap")}
           </h2>
           <ShipmentMap
             shipment={{

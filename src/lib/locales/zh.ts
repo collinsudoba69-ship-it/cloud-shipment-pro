@@ -91,6 +91,14 @@ const zh: TranslationSchema = {
     trackShipment: "查询货件",
     staffPortal: "员工门户",
   },
+  home: {
+    heroTitle: "Cloud Shipment",
+    heroSubtitle: "快速、可靠的全球物流",
+    heroPlaceholder: "请输入跟踪号...",
+    heroButton: "立即跟踪",
+    liveMap: "全球实时运输地图",
+    footerVersion: "物流平台 · v1.1",
+  },
 };
 
 export default zh;

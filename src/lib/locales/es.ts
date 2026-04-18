@@ -93,6 +93,14 @@ const es: TranslationSchema = {
     trackShipment: "Rastrear envío",
     staffPortal: "Portal staff",
   },
+  home: {
+    heroTitle: "Cloud Shipment",
+    heroSubtitle: "Logística global rápida y confiable",
+    heroPlaceholder: "Ingrese el número de seguimiento...",
+    heroButton: "Rastrear ahora",
+    liveMap: "Mapa global de tránsito en vivo",
+    footerVersion: "Plataforma logística · v1.1",
+  },
 };
 
 export default es;
