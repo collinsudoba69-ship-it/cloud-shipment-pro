@@ -94,6 +94,10 @@ const da: TranslationSchema = {
     rights: "Alle rettigheder forbeholdes.",
     trackShipment: "Spor forsendelse",
     staffPortal: "Medarbejderportal",
+    globalOffices: "Kontakt vores globale kontorer",
+    usHqTitle: "USA-hovedkontor (Selskab)",
+    usHubTitle: "USA logistikcenter (Drift)",
+    euUkTitle: "Europa & UK-drift",
   },
   home: {
     heroTitle: "Cloud Shipment",

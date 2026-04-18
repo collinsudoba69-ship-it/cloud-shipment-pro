@@ -41,6 +41,10 @@ const nl: TranslationSchema = {
     supportDesc: "Vragen over een pakket? Mail ons direct.", emailUs: "E-mail ondersteuning",
     legal: "Juridisch", privacy: "Privacybeleid", terms: "Gebruiksvoorwaarden",
     rights: "Alle rechten voorbehouden.", trackShipment: "Zending volgen", staffPortal: "Personeelsportaal",
+    globalOffices: "Neem contact op met onze wereldwijde kantoren",
+    usHqTitle: "Hoofdkantoor Verenigde Staten (Bedrijf)",
+    usHubTitle: "Logistiek centrum VS (Operations)",
+    euUkTitle: "Europa & VK-operaties",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "Snelle, betrouwbare, wereldwijde logistiek",

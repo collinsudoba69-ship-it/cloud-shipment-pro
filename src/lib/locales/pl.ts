@@ -41,6 +41,10 @@ const pl: TranslationSchema = {
     supportDesc: "Pytania o paczkę? Napisz do nas bezpośrednio.", emailUs: "Wsparcie e-mail",
     legal: "Prawne", privacy: "Polityka prywatności", terms: "Warunki usługi",
     rights: "Wszelkie prawa zastrzeżone.", trackShipment: "Śledź przesyłkę", staffPortal: "Portal personelu",
+    globalOffices: "Skontaktuj się z naszymi globalnymi biurami",
+    usHqTitle: "Siedziba główna w USA (Korporacyjna)",
+    usHubTitle: "Centrum logistyczne w USA (Operacje)",
+    euUkTitle: "Operacje Europa i Wielka Brytania",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "Szybka, niezawodna, globalna logistyka",

@@ -41,6 +41,10 @@ const el: TranslationSchema = {
     supportDesc: "Ερωτήσεις για ένα δέμα; Στείλτε μας email απευθείας.", emailUs: "Υποστήριξη email",
     legal: "Νομικά", privacy: "Πολιτική απορρήτου", terms: "Όροι χρήσης",
     rights: "Με την επιφύλαξη παντός δικαιώματος.", trackShipment: "Παρακολούθηση αποστολής", staffPortal: "Πύλη προσωπικού",
+    globalOffices: "Επικοινωνήστε με τα παγκόσμια γραφεία μας",
+    usHqTitle: "Έδρα Ηνωμένων Πολιτειών (Εταιρική)",
+    usHubTitle: "Κόμβος Logistics Η.Π.Α. (Λειτουργίες)",
+    euUkTitle: "Λειτουργίες Ευρώπης και Ηνωμένου Βασιλείου",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "Γρήγορα, αξιόπιστα, παγκόσμια logistics",

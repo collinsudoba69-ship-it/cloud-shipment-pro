@@ -41,6 +41,10 @@ const hu: TranslationSchema = {
     supportDesc: "Kérdése van egy csomagról? Írjon nekünk közvetlenül.", emailUs: "E-mail támogatás",
     legal: "Jogi", privacy: "Adatvédelmi szabályzat", terms: "Felhasználási feltételek",
     rights: "Minden jog fenntartva.", trackShipment: "Küldemény követése", staffPortal: "Munkatársi portál",
+    globalOffices: "Lépjen kapcsolatba globális irodáinkkal",
+    usHqTitle: "Egyesült Államok központja (Vállalati)",
+    usHubTitle: "USA logisztikai központ (Műveletek)",
+    euUkTitle: "Európa és az Egyesült Királyság műveletek",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "Gyors, megbízható, globális logisztika",

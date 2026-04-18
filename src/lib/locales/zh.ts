@@ -90,6 +90,10 @@ const zh: TranslationSchema = {
     rights: "保留所有权利。",
     trackShipment: "查询货件",
     staffPortal: "员工门户",
+    globalOffices: "联系我们的全球办事处",
+    usHqTitle: "美国总部（公司）",
+    usHubTitle: "美国物流中心（运营）",
+    euUkTitle: "欧洲及英国业务",
   },
   home: {
     heroTitle: "Cloud Shipment",

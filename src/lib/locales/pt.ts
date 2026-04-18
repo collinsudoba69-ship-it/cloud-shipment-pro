@@ -92,6 +92,10 @@ const pt: TranslationSchema = {
     rights: "Todos os direitos reservados.",
     trackShipment: "Rastrear envio",
     staffPortal: "Portal da equipe",
+    globalOffices: "Contacte os nossos escritórios globais",
+    usHqTitle: "Sede dos Estados Unidos (Corporativa)",
+    usHubTitle: "Centro Logístico dos EUA (Operações)",
+    euUkTitle: "Operações Europa e Reino Unido",
   },
   home: {
     heroTitle: "Cloud Shipment",
