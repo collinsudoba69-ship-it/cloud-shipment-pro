@@ -8,7 +8,7 @@ export function generateTrackingNumber(): string {
 }
 
 export const SHIPMENT_STATUSES = [
-  { value: "queued", label: "Queued", progress: 10 },
+  { value: "queued", label: "Queued", progress: 1 },
   { value: "in_transit", label: "In Transit", progress: 50 },
   { value: "out_for_delivery", label: "Out for Delivery", progress: 85 },
   { value: "delivered", label: "Delivered", progress: 100 },
