@@ -132,15 +132,30 @@ const Track = () => {
         completed: true,
       }));
 
+      // Use the most advanced status between the row and the latest event with a known status.
+      // This keeps the Journey, badge, and progress bar in sync with the Recent Updates.
+      const statusRank: Record<string, number> = {
+        queued: 0, in_transit: 1, out_for_delivery: 2, delivered: 3,
+      };
+      let effectiveRawStatus: string = shipmentRow.status;
+      for (const e of eventsRows ?? []) {
+        if (e.status && (statusRank[e.status] ?? -1) > (statusRank[effectiveRawStatus] ?? -1)) {
+          effectiveRawStatus = e.status;
+        }
+      }
+
       const real: ShipmentData = {
         trackingNumber: shipmentRow.tracking_number,
-        status: statusMap[shipmentRow.status] ?? 'pending',
+        status: statusMap[effectiveRawStatus] ?? 'pending',
         origin: shipmentRow.origin,
         destination: shipmentRow.destination,
         estimatedDelivery: shipmentRow.estimated_delivery_date
           ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
           : 'TBD',
-        progress: shipmentRow.progress ?? progressForStatus(shipmentRow.status),
+        progress: Math.max(
+          shipmentRow.progress ?? 0,
+          progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'delivered')
+        ),
         carrier: shipmentRow.courier ?? 'Cloud Shipment',
         weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
         service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
