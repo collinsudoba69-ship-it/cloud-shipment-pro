@@ -75,6 +75,12 @@ const Track = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [shipment, setShipment] = useState<ShipmentData | null>(null);
   const [error, setError] = useState('');
+  const [isLive, setIsLive] = useState(false);
+  const [liveEventId, setLiveEventId] = useState<string | null>(null);
+  const [liveStatusFlash, setLiveStatusFlash] = useState(false);
+  const shipmentIdRef = useRef<string | null>(null);
+  const prevStatusRef = useRef<string | null>(null);
+  const prevEventCountRef = useRef<number>(0);
 
   // Check for tracking number in URL on mount
   useEffect(() => {
@@ -85,6 +91,105 @@ const Track = () => {
     }
   }, []);
 
+  const buildShipmentData = useCallback((shipmentRow: any, eventsRows: any[]): ShipmentData => {
+    const statusMap: Record<string, ShipmentData['status']> = {
+      queued: 'pending',
+      in_transit: 'in-transit',
+      out_for_delivery: 'out-for-delivery',
+      delivered: 'delivered',
+    };
+
+    const events: TrackingEvent[] = (eventsRows ?? []).map((e) => ({
+      id: e.id,
+      status: e.status ? statusLabel(e.status) : 'Update',
+      rawStatus: e.status ?? null,
+      location: e.location ?? shipmentRow.origin,
+      timestamp: format(new Date(e.event_at), 'yyyy-MM-dd hh:mm a'),
+      description: e.note ?? '',
+      completed: true,
+    }));
+
+    const statusRank: Record<string, number> = {
+      queued: 0, in_transit: 1, out_for_delivery: 2, delivered: 3,
+    };
+    let effectiveRawStatus: string = shipmentRow.status;
+    for (const e of eventsRows ?? []) {
+      if (e.status && (statusRank[e.status] ?? -1) > (statusRank[effectiveRawStatus] ?? -1)) {
+        effectiveRawStatus = e.status;
+      }
+    }
+
+    return {
+      trackingNumber: shipmentRow.tracking_number,
+      status: statusMap[effectiveRawStatus] ?? 'pending',
+      origin: shipmentRow.origin,
+      destination: shipmentRow.destination,
+      estimatedDelivery: shipmentRow.estimated_delivery_date
+        ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
+        : 'TBD',
+      progress: Math.max(
+        shipmentRow.progress ?? 0,
+        progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'delivered')
+      ),
+      carrier: shipmentRow.courier ?? 'Cloud Shipment',
+      weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
+      service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
+      events,
+      senderName: shipmentRow.sender_name,
+      senderEmail: shipmentRow.sender_email,
+      senderPhone: shipmentRow.sender_phone,
+      receiverName: shipmentRow.receiver_name,
+      receiverEmail: shipmentRow.receiver_email,
+      receiverPhone: shipmentRow.receiver_phone,
+      description: shipmentRow.description,
+      images: Array.isArray(shipmentRow.images) ? shipmentRow.images : [],
+      quantity: shipmentRow.quantity ?? 1,
+      isFragile: shipmentRow.is_fragile ?? false,
+    };
+  }, []);
+
+  const refetchShipment = useCallback(async (shipmentId: string, opts?: { notifyNewEvent?: boolean; notifyStatusChange?: boolean }) => {
+    const { data: shipmentRow } = await supabase
+      .from('shipments')
+      .select('*')
+      .eq('id', shipmentId)
+      .maybeSingle();
+    if (!shipmentRow) return;
+
+    const { data: eventsRows } = await supabase
+      .from('shipment_events')
+      .select('*')
+      .eq('shipment_id', shipmentId)
+      .order('event_at', { ascending: true });
+
+    const next = buildShipmentData(shipmentRow, eventsRows ?? []);
+    setShipment(next);
+
+    if (opts?.notifyStatusChange && prevStatusRef.current && prevStatusRef.current !== next.status) {
+      const label = next.status === 'out-for-delivery'
+        ? 'Out for Delivery'
+        : next.status.charAt(0).toUpperCase() + next.status.slice(1);
+      toast.success(`Shipment update: ${label}`, {
+        description: `Your package is now ${label.toLowerCase()}.`,
+      });
+      setLiveStatusFlash(true);
+      setTimeout(() => setLiveStatusFlash(false), 2500);
+    }
+    prevStatusRef.current = next.status;
+
+    if (opts?.notifyNewEvent && next.events.length > prevEventCountRef.current) {
+      const latest = next.events[next.events.length - 1];
+      if (latest) {
+        setLiveEventId(latest.id);
+        toast(`New tracking update`, {
+          description: `${latest.status}${latest.location ? ` • ${latest.location}` : ''}`,
+        });
+        setTimeout(() => setLiveEventId(null), 4000);
+      }
+    }
+    prevEventCountRef.current = next.events.length;
+  }, [buildShipmentData]);
+
   const handleTrack = async (number: string = trackingNumber) => {
     if (!number.trim()) {
       toast.error('Please enter a tracking number');
@@ -94,6 +199,7 @@ const Track = () => {
     setIsLoading(true);
     setError('');
     setShipment(null);
+    setIsLive(false);
 
     try {
       setSearchParams({ n: number });
@@ -117,64 +223,11 @@ const Track = () => {
         .eq('shipment_id', shipmentRow.id)
         .order('event_at', { ascending: true });
 
-      const statusMap: Record<string, ShipmentData['status']> = {
-        queued: 'pending',
-        in_transit: 'in-transit',
-        out_for_delivery: 'out-for-delivery',
-        delivered: 'delivered',
-      };
-
-      const events: TrackingEvent[] = (eventsRows ?? []).map((e) => ({
-        id: e.id,
-        status: e.status ? statusLabel(e.status) : 'Update',
-        rawStatus: e.status ?? null,
-        location: e.location ?? shipmentRow.origin,
-        timestamp: format(new Date(e.event_at), 'yyyy-MM-dd hh:mm a'),
-        description: e.note ?? '',
-        completed: true,
-      }));
-
-      // Use the most advanced status between the row and the latest event with a known status.
-      // This keeps the Journey, badge, and progress bar in sync with the Recent Updates.
-      const statusRank: Record<string, number> = {
-        queued: 0, in_transit: 1, out_for_delivery: 2, delivered: 3,
-      };
-      let effectiveRawStatus: string = shipmentRow.status;
-      for (const e of eventsRows ?? []) {
-        if (e.status && (statusRank[e.status] ?? -1) > (statusRank[effectiveRawStatus] ?? -1)) {
-          effectiveRawStatus = e.status;
-        }
-      }
-
-      const real: ShipmentData = {
-        trackingNumber: shipmentRow.tracking_number,
-        status: statusMap[effectiveRawStatus] ?? 'pending',
-        origin: shipmentRow.origin,
-        destination: shipmentRow.destination,
-        estimatedDelivery: shipmentRow.estimated_delivery_date
-          ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
-          : 'TBD',
-        progress: Math.max(
-          shipmentRow.progress ?? 0,
-          progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'delivered')
-        ),
-        carrier: shipmentRow.courier ?? 'Cloud Shipment',
-        weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
-        service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
-        events,
-        senderName: shipmentRow.sender_name,
-        senderEmail: shipmentRow.sender_email,
-        senderPhone: shipmentRow.sender_phone,
-        receiverName: shipmentRow.receiver_name,
-        receiverEmail: shipmentRow.receiver_email,
-        receiverPhone: shipmentRow.receiver_phone,
-        description: shipmentRow.description,
-        images: Array.isArray(shipmentRow.images) ? shipmentRow.images : [],
-        quantity: shipmentRow.quantity ?? 1,
-        isFragile: shipmentRow.is_fragile ?? false,
-      };
-
+      const real = buildShipmentData(shipmentRow, eventsRows ?? []);
       setShipment(real);
+      shipmentIdRef.current = shipmentRow.id;
+      prevStatusRef.current = real.status;
+      prevEventCountRef.current = real.events.length;
       toast.success('Tracking information found!');
     } catch (err) {
       console.error(err);
@@ -184,6 +237,32 @@ const Track = () => {
       setIsLoading(false);
     }
   };
+
+  // Realtime: subscribe to live updates for the current shipment
+  useEffect(() => {
+    const sid = shipmentIdRef.current;
+    if (!shipment || !sid) return;
+
+    const channel = supabase
+      .channel(`track-${sid}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'shipments', filter: `id=eq.${sid}`,
+      }, () => refetchShipment(sid, { notifyStatusChange: true }))
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'shipment_events', filter: `shipment_id=eq.${sid}`,
+      }, () => refetchShipment(sid, { notifyNewEvent: true, notifyStatusChange: true }))
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'shipment_events', filter: `shipment_id=eq.${sid}`,
+      }, () => refetchShipment(sid, { notifyStatusChange: true }))
+      .subscribe((status) => {
+        setIsLive(status === 'SUBSCRIBED');
+      });
+
+    return () => {
+      setIsLive(false);
+      supabase.removeChannel(channel);
+    };
+  }, [shipment?.trackingNumber, refetchShipment]);
 
   const handleCopyTracking = () => {
     if (shipment) {
