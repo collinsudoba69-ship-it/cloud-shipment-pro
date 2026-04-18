@@ -345,16 +345,17 @@ const Track = () => {
                         { key: 'delivered', label: 'Delivered', description: 'Handed over to receiver', icon: Home, progress: 100 },
                       ];
 
-                      // Map admin status -> index of stage that is COMPLETED through this point
-                      // 'pending' (queued) => Label Created done, Picked Up current
-                      // 'in-transit' => first three completed (Label, Picked, In Transit), Out for Delivery current
-                      // 'out-for-delivery' => four completed, Delivered current
-                      // 'delivered' => all five completed
+                      // Map admin status -> index of the CURRENT (active) stage.
+                      // The matching stage shows the pulsing blue indicator; all stages BEFORE it are marked completed.
+                      // - 'pending' (queued)  => Label Created is current
+                      // - 'in-transit'        => In Transit is current (Label + Picked Up completed)
+                      // - 'out-for-delivery'  => Out for Delivery is current (first three completed)
+                      // - 'delivered'         => Delivered is current AND completed (all five done)
                       const statusToCurrentIdx: Record<string, number> = {
-                        'pending': 1,           // Picked Up is the next/current step
-                        'in-transit': 3,        // Out for Delivery is current
-                        'out-for-delivery': 4,  // Delivered is current
-                        'delivered': 5,         // All done
+                        'pending': 0,
+                        'in-transit': 2,
+                        'out-for-delivery': 3,
+                        'delivered': 4,
                         'exception': 2,
                       };
                       const currentIdx = statusToCurrentIdx[shipment.status] ?? 0;
