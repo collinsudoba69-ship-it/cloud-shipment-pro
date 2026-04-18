@@ -29,6 +29,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { progressForStatus, statusLabel } from '@/lib/shipment';
 import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
+import logo from '@/assets/cloud-shipment-logo.png';
 
 // Types for shipment data
 interface TrackingEvent {
