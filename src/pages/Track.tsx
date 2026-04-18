@@ -74,6 +74,7 @@ interface ShipmentData {
 }
 
 const Track = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const [trackingNumber, setTrackingNumber] = useState('');
