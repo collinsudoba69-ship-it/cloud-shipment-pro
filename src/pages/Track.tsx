@@ -855,7 +855,7 @@ const Track = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
-                        {shipment.description}
+                        {translatedDescription || shipment.description}
                       </p>
                     </CardContent>
                   </Card>
