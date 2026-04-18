@@ -27,6 +27,7 @@ export const SiteHeader = () => {
         </nav>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          <ThemeToggle />
           {user ? (
             <Button asChild size="sm">
               <Link to={isAdmin ? "/admin" : "/"}>{isAdmin ? t("nav.dashboard") : t("nav.account")}</Link>
