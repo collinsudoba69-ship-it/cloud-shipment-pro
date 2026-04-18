@@ -141,6 +141,16 @@ const Track = () => {
         weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
         service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
         events,
+        senderName: shipmentRow.sender_name,
+        senderEmail: shipmentRow.sender_email,
+        senderPhone: shipmentRow.sender_phone,
+        receiverName: shipmentRow.receiver_name,
+        receiverEmail: shipmentRow.receiver_email,
+        receiverPhone: shipmentRow.receiver_phone,
+        description: shipmentRow.description,
+        images: Array.isArray(shipmentRow.images) ? shipmentRow.images : [],
+        quantity: shipmentRow.quantity ?? 1,
+        isFragile: shipmentRow.is_fragile ?? false,
       };
 
       setShipment(real);
