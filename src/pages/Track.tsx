@@ -321,26 +321,43 @@ const Track = () => {
                 {/* Vertical Stepper - Shipment Journey */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Shipment Journey</CardTitle>
+                    <div className="flex items-center justify-between gap-3">
+                      <CardTitle>Shipment Journey</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500">Progress</span>
+                        <span className="text-sm font-bold text-blue-600 font-mono">{shipment.progress}%</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-700 ease-out"
+                        style={{ width: `${shipment.progress}%` }}
+                      />
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {(() => {
                       const stages = [
-                        { key: 'label_created', label: 'Label Created', description: 'Shipment registered in our system', icon: FileText },
-                        { key: 'picked_up', label: 'Picked Up', description: 'Courier has collected the item', icon: PackageCheck },
-                        { key: 'in_transit', label: 'In Transit', description: 'Package is moving between hubs', icon: Truck },
-                        { key: 'out_for_delivery', label: 'Out for Delivery', description: 'Final vehicle dispatched to receiver', icon: Send },
-                        { key: 'delivered', label: 'Delivered', description: 'Handed over to receiver', icon: Home },
+                        { key: 'label_created', label: 'Label Created', description: 'Shipment registered in our system', icon: FileText, progress: 1 },
+                        { key: 'picked_up', label: 'Picked Up', description: 'Courier has collected the item', icon: PackageCheck, progress: 25 },
+                        { key: 'in_transit', label: 'In Transit', description: 'Package is moving between hubs', icon: Truck, progress: 50 },
+                        { key: 'out_for_delivery', label: 'Out for Delivery', description: 'Final vehicle dispatched to receiver', icon: Send, progress: 85 },
+                        { key: 'delivered', label: 'Delivered', description: 'Handed over to receiver', icon: Home, progress: 100 },
                       ];
 
-                      const statusToIndex: Record<string, number> = {
-                        'pending': 0,
-                        'in-transit': 2,
-                        'out-for-delivery': 3,
-                        'delivered': 4,
+                      // Map admin status -> index of stage that is COMPLETED through this point
+                      // 'pending' (queued) => Label Created done, Picked Up current
+                      // 'in-transit' => first three completed (Label, Picked, In Transit), Out for Delivery current
+                      // 'out-for-delivery' => four completed, Delivered current
+                      // 'delivered' => all five completed
+                      const statusToCurrentIdx: Record<string, number> = {
+                        'pending': 1,           // Picked Up is the next/current step
+                        'in-transit': 3,        // Out for Delivery is current
+                        'out-for-delivery': 4,  // Delivered is current
+                        'delivered': 5,         // All done
                         'exception': 2,
                       };
-                      const currentIdx = statusToIndex[shipment.status] ?? 0;
+                      const currentIdx = statusToCurrentIdx[shipment.status] ?? 0;
 
                       return (
                         <div className="relative">
