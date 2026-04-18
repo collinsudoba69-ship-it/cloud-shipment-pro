@@ -80,6 +80,26 @@ const THEMES: Record<ReceiptTheme, { label: string; headerClass: string; chipCla
     headerClass: "bg-secondary text-secondary-foreground",
     chipClass: "bg-muted text-foreground",
   },
+  darkNavy: {
+    label: "Dark Navy",
+    headerClass: "bg-[hsl(220_60%_12%)] text-white",
+    chipClass: "bg-[hsl(220_60%_12%)]/12 text-[hsl(220_60%_12%)]",
+  },
+  navy: {
+    label: "Navy",
+    headerClass: "bg-[hsl(220_70%_22%)] text-white",
+    chipClass: "bg-[hsl(220_70%_22%)]/12 text-[hsl(220_70%_22%)]",
+  },
+  royalWhite: {
+    label: "Royal Blue & White",
+    headerClass: "bg-[hsl(225_75%_42%)] text-white",
+    chipClass: "bg-white text-[hsl(225_75%_42%)] border border-[hsl(225_75%_42%)]/30",
+  },
+  charcoal: {
+    label: "Charcoal Grey",
+    headerClass: "bg-[hsl(220_10%_22%)] text-white",
+    chipClass: "bg-[hsl(220_10%_22%)]/12 text-[hsl(220_10%_22%)]",
+  },
 };
 
 const formatDate = (value?: string | null) => {
