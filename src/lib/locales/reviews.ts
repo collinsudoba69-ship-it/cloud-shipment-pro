@@ -399,8 +399,46 @@ const no: ReviewStrings = {
   extras: ["Sterkt anbefalt!","10/10.","Vil definitivt bruke igjen.","Kunne ikke vært mer fornøyd.","En ekte spillveksler.","Pålitelig og konsekvent.","Min nye favorittkurer.","Fem stjerner over hele linja.","Overgikk forventningene mine.","Verdt hver krone.","Sømløst fra start til slutt.","Førsteklasses service.","Setter standarden.","Rett og slett strålende."],
 };
 
+const da: ReviewStrings = {
+  badge: "Verdensomspændende betroet · Opdateres dagligt",
+  heading: "Hvad vores kunder siger",
+  basedOn: (n) => `Baseret på ${n}+ verificerede kundeanmeldelser`,
+  footer: "Nye anmeldelser dukker op hver dag.",
+  trackCta: "Spor din forsendelse ovenfor ↑",
+  ratesOutOf: "/ 5,0",
+  todayLabels: ["I dag","I går","2 dage siden","3 dage siden","4 dage siden","5 dage siden","6 dage siden","1 uge siden","2 uger siden","3 uger siden","1 måned siden"],
+  templates: [
+    "Cloud Shipment leverede min pakke hurtigere end forventet. Live-kortet holdt mig informeret hele vejen. {extra}",
+    "Helt ærligt den mest pålidelige kurer, jeg har brugt. Selv i højsæsonen kom leverancerne til tiden. {extra}",
+    "Sporingsnotifikationerne er så glatte — jeg ved altid præcis, hvor min pakke er. {extra}",
+    "Kundeservice svarede inden for minutter og løste mit problem med det samme. Ægte 5-stjernet service. {extra}",
+    "Jeg sender internationalt hver uge, og Cloud Shipment har aldrig svigtet. Rimelige priser, hurtig transit. {extra}",
+    "Kvitterings- og fakturafunktionen ser så professionel ud. Mine kunder elsker gennemsigtigheden. {extra}",
+    "Smukt designet platform. Mørk tilstand og sprogvælger er en virkelig fin detalje. {extra}",
+    "Mine skrøbelige varer ankommer altid i perfekt stand. Førsteklasses håndtering. {extra}",
+    "Eksprestlevering var endnu hurtigere end lovet. Jeg fortsætter helt sikkert med Cloud Shipment. {extra}",
+    "Vi flyttede hele vores logistik til Cloud Shipment. Pålideligt, gennemsigtigt og nemt. {extra}",
+    "De animerede live-opdateringer giver mig følelsen af fuld kontrol over hver forsendelse. {extra}",
+    "Overkommelig, hurtig og pålidelig. Har allerede anbefalet Cloud Shipment til alle. {extra}",
+    "Flersproget støtte og rent interface — endelig en kurer til den moderne verden. {extra}",
+    "Fra booking til levering var hele processen sømløs. Bravo til Cloud Shipment-teamet! {extra}",
+    "Jeg elsker realtidskortet. At se min pakke krydse kontinenter er virkelig sjovt. {extra}",
+    "Bulkforsendelse er nu stressfrit. Admin-dashboardet er intuitivt og kraftfuldt. {extra}",
+    "God oplevelse generelt. Sporingsopdateringer er præcise, og teamet er venligt. {extra}",
+    "Cloud Shipment har løftet mit brand. Mine kunder kommenterer sporingssiden hver gang. {extra}",
+    "Temperaturfølsom forsendelse håndteret perfekt. Jeg er meget imponeret. {extra}",
+    "Dokumentation og levering var begge pletfrie. Sådan opmærksomhed på detaljer er sjælden i dag. {extra}",
+    "Mobiloplevelsen er silkeblød. Jeg kan styre alt fra min telefon. {extra}",
+    "Den mest gennemsigtige prissætning, jeg har set — aldrig skjulte gebyrer. Forfriskende! {extra}",
+    "Jeg havde et toldspørgsmål, og supporten guidede mig trin for trin. Meget hjælpsomt. {extra}",
+    "Hurtig onboarding, nem oprettelse af forsendelse og øjeblikkelige sporingslinks. Præcis hvad jeg havde brug for. {extra}",
+    "Cloud Shipment får mig til at se meget professionel ud over for mine købere. Hver krone værd. {extra}",
+  ],
+  extras: ["Stærkt anbefalet!","10/10.","Vil helt sikkert bruge igen.","Kunne ikke være mere tilfreds.","En ægte gamechanger.","Pålidelig og konsekvent.","Min nye yndlingskurer.","Fem stjerner hele vejen.","Overgik mine forventninger.","Hver krone værd.","Sømløst fra start til slut.","Førsteklasses service.","Sætter standarden.","Simpelthen brillant."],
+};
+
 export const REVIEW_STRINGS: Record<string, ReviewStrings> = {
-  en, "en-US": enUS, fr, es, de, pt, ar, zh, fi, sv, no,
+  en, "en-US": enUS, fr, es, de, pt, ar, zh, fi, sv, no, da,
 };
 
 export function getReviewStrings(lang: string): ReviewStrings {
