@@ -346,11 +346,14 @@ const Track = () => {
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Track Shipment</h1>
-              <p className="text-slate-500 mt-1">
-                Enter your tracking number to get real-time updates
-              </p>
+            <div className="flex items-center gap-4">
+              <img src={logo} alt="Cloud Shipment" className="h-12 w-auto" />
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Track Shipment</h1>
+                <p className="text-slate-500 mt-1 text-sm">
+                  Enter your tracking number to get real-time updates
+                </p>
+              </div>
             </div>
             {user && (
               <Button variant="outline" onClick={() => window.location.href = '/admin/shipments'}>
