@@ -1,8 +1,10 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Star, Quote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getDailyReviews, POOL_AVG_RATING, POOL_SIZE } from "@/lib/testimonials";
+import { getDailyReviews, getPoolStats } from "@/lib/testimonials";
+import { getReviewStrings } from "@/lib/locales/reviews";
 
 const Stars = ({ rating }: { rating: number }) => (
   <div className="flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
@@ -15,42 +17,37 @@ const Stars = ({ rating }: { rating: number }) => (
   </div>
 );
 
-const RELATIVE_DATES = [
-  "Today","Yesterday","2 days ago","3 days ago","4 days ago","5 days ago","6 days ago",
-  "1 week ago","1 week ago","2 weeks ago","2 weeks ago","3 weeks ago","1 month ago",
-];
-
 export const Testimonials = () => {
-  const { reviews, totalReviews, avgRating } = useMemo(() => {
-    const reviews = getDailyReviews(24);
+  const { i18n } = useTranslation();
+  const lang = i18n.language || "en";
+
+  const { reviews, stats, strings } = useMemo(() => {
     return {
-      reviews,
-      totalReviews: POOL_SIZE,
-      avgRating: POOL_AVG_RATING,
+      reviews: getDailyReviews(lang, 24),
+      stats: getPoolStats(lang),
+      strings: getReviewStrings(lang),
     };
-  }, []);
+  }, [lang]);
+
+  const isRTL = lang.startsWith("ar");
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="py-16 bg-muted/30" dir={isRTL ? "rtl" : "ltr"}>
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
             <Star className="h-4 w-4 fill-current" />
-            Trusted Worldwide · Updated Daily
+            {strings.badge}
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">What Our Customers Say</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">{strings.heading}</h2>
           <div className="flex items-center justify-center gap-3 mb-2">
             <Stars rating={5} />
-            <span className="text-2xl font-bold">{avgRating}</span>
-            <span className="text-muted-foreground">/ 5.0</span>
+            <span className="text-2xl font-bold">{stats.avg}</span>
+            <span className="text-muted-foreground">{strings.ratesOutOf}</span>
           </div>
           <p className="text-muted-foreground">
-            Based on{" "}
-            <span className="font-semibold text-foreground">
-              {totalReviews.toLocaleString()}+
-            </span>{" "}
-            verified customer reviews
+            {strings.basedOn(stats.size.toLocaleString())}
           </p>
         </div>
 
@@ -62,7 +59,7 @@ export const Testimonials = () => {
               className="relative hover:shadow-lg transition-shadow duration-300 border-border/50"
             >
               <CardContent className="p-6">
-                <Quote className="absolute top-4 right-4 h-8 w-8 text-primary/10" />
+                <Quote className={`absolute top-4 ${isRTL ? "left-4" : "right-4"} h-8 w-8 text-primary/10`} />
                 <Stars rating={r.rating} />
                 <p className="mt-3 text-sm leading-relaxed text-foreground/90">
                   "{r.text}"
@@ -80,7 +77,7 @@ export const Testimonials = () => {
                     </p>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {RELATIVE_DATES[idx % RELATIVE_DATES.length]}
+                    {strings.todayLabels[idx % strings.todayLabels.length]}
                   </span>
                 </div>
               </CardContent>
@@ -90,8 +87,8 @@ export const Testimonials = () => {
 
         {/* Trust footer */}
         <div className="mt-12 text-center text-sm text-muted-foreground">
-          New reviews surface every day.{" "}
-          <span className="text-primary font-medium">Track your shipment above ↑</span>
+          {strings.footer}{" "}
+          <span className="text-primary font-medium">{strings.trackCta}</span>
         </div>
       </div>
     </section>
