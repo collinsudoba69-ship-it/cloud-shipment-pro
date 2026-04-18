@@ -428,15 +428,16 @@ const Track = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className={getStatusColor(shipment.status)}>
                   {shipment.status === 'out-for-delivery' ? 'Out for Delivery' : 
                    shipment.status.charAt(0).toUpperCase() + shipment.status.slice(1)}
                 </Badge>
-                <Button variant="outline" size="icon" onClick={() => window.print()}>
+                <Button variant="outline" size="sm" onClick={handleDownloadReceipt} className="gap-2">
                   <Printer className="w-4 h-4" />
+                  Print Receipt
                 </Button>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" title="Share">
                   <Share2 className="w-4 h-4" />
                 </Button>
               </div>
