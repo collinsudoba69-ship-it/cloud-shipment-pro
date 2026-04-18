@@ -34,6 +34,7 @@ import { progressForStatus, statusLabel } from '@/lib/shipment';
 import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import logo from '@/assets/cloud-shipment-logo.png';
+import { translateText } from '@/lib/translate';
 
 // Types for shipment data
 interface TrackingEvent {
@@ -74,7 +75,8 @@ interface ShipmentData {
 }
 
 const Track = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [translatedDescription, setTranslatedDescription] = useState<string>('');
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const [trackingNumber, setTrackingNumber] = useState('');
@@ -88,7 +90,26 @@ const Track = () => {
   const prevStatusRef = useRef<string | null>(null);
   const prevEventCountRef = useRef<number>(0);
 
-  // Check for tracking number in URL on mount
+  // Translate the free-form package description whenever it or the language changes
+  useEffect(() => {
+    let cancelled = false;
+    const desc = shipment?.description;
+    if (!desc) {
+      setTranslatedDescription('');
+      return;
+    }
+    const lang = i18n.language || 'en';
+    if (lang.startsWith('en')) {
+      setTranslatedDescription(desc);
+      return;
+    }
+    setTranslatedDescription(desc); // show original immediately as fallback
+    translateText(desc, lang).then((res) => {
+      if (!cancelled) setTranslatedDescription(res);
+    });
+    return () => { cancelled = true; };
+  }, [shipment?.description, i18n.language]);
+
   useEffect(() => {
     const urlTrackingNumber = searchParams.get('n');
     if (urlTrackingNumber) {
@@ -834,7 +855,7 @@ const Track = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
-                        {shipment.description}
+                        {translatedDescription || shipment.description}
                       </p>
                     </CardContent>
                   </Card>
