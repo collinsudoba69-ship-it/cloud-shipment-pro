@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import ShipmentMap from "@/components/ShipmentMap";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -40,19 +41,23 @@ const Index = () => {
         </div>
       </section>
 
-      {/* LIVE MAP SECTION - DIRECT EMBED */}
+      {/* LIVE MAP SECTION */}
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <span className="h-3 w-3 bg-green-500 rounded-full animate-pulse" />
             Live Global Transit Map
           </h2>
-          <div className="rounded-2xl overflow-hidden border-4 border-slate-50 shadow-2xl h-[450px]">
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3106547.073408546!2d-76.0369!3d39.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1713345600000!5m2!1sen!2sus" 
-              width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" 
-            />
-          </div>
+          <ShipmentMap
+            shipment={{
+              origin: "Washington, DC",
+              destination: "New Jersey",
+              status: "in-transit",
+              progress: 64,
+              estimatedDelivery: "Today · 8:00 PM",
+              trackingNumber: "CS-DEMO-ROUTE",
+            }}
+          />
         </div>
       </section>
 

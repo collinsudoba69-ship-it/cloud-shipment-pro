@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { generateTrackingNumber, progressForStatus, ShipmentStatus, SHIPMENT_STATUSES, statusLabel } from "@/lib/shipment";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import ShipmentInvoiceDialog from "@/components/admin/ShipmentInvoiceDialog";
 
 const MAX_IMAGES = 5;
 const MAX_SIZE_BYTES = 1024 * 1024;
@@ -402,6 +403,28 @@ const ShipmentForm = () => {
 
           <div className="sticky bottom-4 flex gap-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => navigate("/admin/shipments")}>Cancel</Button>
+            {isEdit && (
+              <ShipmentInvoiceDialog
+                shipment={{
+                  trackingNumber: form.tracking_number,
+                  shipmentName: form.shipment_type || `${form.receiver_name || "Customer"} Shipment`,
+                  senderName: form.sender_name || "—",
+                  receiverName: form.receiver_name || "—",
+                  origin: form.origin || "—",
+                  destination: form.destination || "—",
+                  shipmentType: form.shipment_type || "Shipment",
+                  quantity: form.quantity || 1,
+                  weight: form.weight || null,
+                  courier: form.courier || null,
+                  registeredAt: form.shipped_at ? new Date(form.shipped_at).toISOString() : null,
+                  estimatedDelivery: form.estimated_delivery_date || null,
+                  paymentReason: form.payment_reason || null,
+                }}
+                triggerLabel="Receipt / Invoice"
+                triggerVariant="outline"
+                className="flex-1"
+              />
+            )}
             <Button type="submit" className="flex-1" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : isEdit ? "Save changes" : "Create"}
             </Button>
