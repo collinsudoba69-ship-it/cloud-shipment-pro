@@ -19,7 +19,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type ReceiptTheme = "ocean" | "midnight" | "emerald" | "slate";
+type ReceiptTheme =
+  | "ocean"
+  | "midnight"
+  | "emerald"
+  | "slate"
+  | "darkNavy"
+  | "navy"
+  | "royalWhite"
+  | "charcoal";
 
 interface ShipmentInvoiceData {
   trackingNumber: string;
