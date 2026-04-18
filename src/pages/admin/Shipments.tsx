@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import ShipmentInvoiceDialog from "@/components/admin/ShipmentInvoiceDialog";
 
 interface Row {
   id: string;
@@ -118,6 +119,21 @@ const Shipments = () => {
                       <td className="px-4 py-3 text-muted-foreground">{format(new Date(r.created_at), "MMM d, yyyy")}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="inline-flex gap-1">
+                          <ShipmentInvoiceDialog
+                            shipment={{
+                              trackingNumber: r.tracking_number,
+                              shipmentName: `${r.receiver_name} Delivery`,
+                              senderName: r.sender_name,
+                              receiverName: r.receiver_name,
+                              origin: r.origin,
+                              destination: r.destination,
+                              shipmentType: statusLabel(r.status),
+                              quantity: 1,
+                              registeredAt: r.created_at,
+                            }}
+                            triggerLabel="Invoice"
+                            className="hidden sm:inline-flex"
+                          />
                           <Button asChild size="icon" variant="ghost"><Link to={`/admin/shipments/${r.id}`}><Pencil className="h-4 w-4" /></Link></Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
