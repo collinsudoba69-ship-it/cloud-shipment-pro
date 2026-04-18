@@ -22,6 +22,9 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import ShipmentMap from '@/components/ShipmentMap';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { progressForStatus, statusLabel } from '@/lib/shipment';
+import { format } from 'date-fns';
 
 // Types for shipment data
 interface TrackingEvent {
