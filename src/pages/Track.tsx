@@ -994,9 +994,9 @@ const Track = () => {
                 {/* Need Help */}
                 <Card className="bg-slate-50">
                   <CardContent className="pt-6">
-                    <h4 className="font-semibold mb-2">Need Help?</h4>
+                    <h4 className="font-semibold mb-2">{t('trackPage.needHelp')}</h4>
                     <p className="text-sm text-slate-600 mb-4">
-                      Have questions about your delivery? Our support team is here to help.
+                      {t('trackPage.needHelpDesc')}
                     </p>
                     <Button asChild variant="outline" className="w-full">
                       <a
