@@ -711,22 +711,48 @@ const Track = () => {
 
                     {shipment.events.length > 0 && (
                       <div className="mt-6 pt-6 border-t border-slate-200">
-                        <h5 className="text-sm font-semibold text-slate-700 mb-3">Recent Updates</h5>
+                        <div className="flex items-center justify-between mb-3">
+                          <h5 className="text-sm font-semibold text-slate-700">Recent Updates</h5>
+                          {isLive && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-green-700">
+                              <Radio className="w-3 h-3 animate-pulse" />
+                              Live feed
+                            </span>
+                          )}
+                        </div>
                         <div className="space-y-2">
-                          {shipment.events.slice(-3).reverse().map((event) => (
-                            <div key={event.id} className="text-sm bg-slate-50 rounded-lg p-3">
-                              <div className="flex justify-between items-start gap-2">
-                                <span className="font-medium text-slate-900">{event.status}</span>
-                                <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{event.timestamp}</span>
+                          {shipment.events.slice(-3).reverse().map((event) => {
+                            const isNew = event.id === liveEventId;
+                            return (
+                              <div
+                                key={event.id}
+                                className={`text-sm rounded-lg p-3 transition-all duration-500 ${
+                                  isNew
+                                    ? 'bg-blue-50 ring-2 ring-blue-400 shadow-md animate-in fade-in slide-in-from-top-2'
+                                    : 'bg-slate-50'
+                                }`}
+                              >
+                                <div className="flex justify-between items-start gap-2">
+                                  <span className="font-medium text-slate-900 flex items-center gap-2">
+                                    {event.status}
+                                    {isNew && (
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[9px] font-bold uppercase">
+                                        <Bell className="w-2.5 h-2.5" />
+                                        New
+                                      </span>
+                                    )}
+                                  </span>
+                                  <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{event.timestamp}</span>
+                                </div>
+                                {event.description && <p className="text-slate-600 mt-1">{event.description}</p>}
+                                {event.location && (
+                                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                    <MapPin className="w-3 h-3" />{event.location}
+                                  </p>
+                                )}
                               </div>
-                              {event.description && <p className="text-slate-600 mt-1">{event.description}</p>}
-                              {event.location && (
-                                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                                  <MapPin className="w-3 h-3" />{event.location}
-                                </p>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
