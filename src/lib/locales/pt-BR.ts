@@ -1,0 +1,52 @@
+import type { TranslationSchema } from "./en";
+
+const ptBR: TranslationSchema = {
+  nav: { home: "Início", track: "Rastrear", services: "Serviços", contact: "Contato", dashboard: "Painel", account: "Conta", staffLogin: "Login da equipe" },
+  hero: {
+    badge: "Plataforma global de logística",
+    title1: "Envie para qualquer lugar.",
+    title2: "Rastreie em qualquer lugar.",
+    subtitle: "Visibilidade em tempo real por ar, mar e terra para empresas que movem o mundo.",
+    placeholder: "Digite o código de rastreio (ex. CS-2025-04-AB12CD)",
+    button: "Rastrear",
+  },
+  stats: { countries: "Países atendidos", shipments: "Envios rastreados", onTime: "Entregas no prazo", support: "Suporte ao vivo" },
+  services: {
+    heading: "Feito para a logística moderna",
+    sub: "Quatro linhas de serviço, uma plataforma — projetada para velocidade, escala e transparência.",
+    air: "Frete aéreo", airDesc: "Frete aéreo internacional rápido com visibilidade total.",
+    sea: "Frete marítimo", seaDesc: "Transporte de contêiner confiável para FCL e LCL.",
+    express: "Entrega expressa", expressDesc: "Entrega porta a porta em 1 a 3 dias.",
+    warehousing: "Armazenagem", warehousingDesc: "Armazenagem segura e fulfillment em mais de 40 hubs.",
+  },
+  trust: {
+    insured: "Seguro e protegido", insuredDesc: "Cada envio coberto por seguro global de até US$ 100 mil.",
+    network: "Rede mundial", networkDesc: "Parcerias diretas com transportadoras em mais de 120 países.",
+    realtime: "Rastreamento em tempo real", realtimeDesc: "Status ao vivo, ETA e comprovante de entrega em cada etapa.",
+  },
+  track: {
+    title: "Rastreie seu envio", subtitle: "Digite seu código de rastreio para ver o status ao vivo.",
+    placeholder: "CS-2025-04-XXXXXX", button: "Rastrear", looking: "Procurando seu envio…",
+    notFound: "Código de rastreio não encontrado", notFoundDesc: "Nenhum envio encontrado com esse código.",
+    prompt: "Digite um código de rastreio acima para começar.",
+    trackingNo: "Código", progress: "Progresso", from: "De", to: "Para", eta: "Entrega estimada",
+    registered: "Registrado em", type: "Tipo", express: "Expresso", fragile: "Frágil",
+    timeline: "Linha do tempo", noEvents: "Sem eventos ainda.", update: "Atualização",
+    images: "Imagens / Comprovantes", tbc: "A confirmar", language: "Idioma", badge: "Rastreamento Cloud Shipment",
+  },
+  status: { queued: "Na fila", in_transit: "Em trânsito", out_for_delivery: "Saiu para entrega", delivered: "Entregue" },
+  footer: {
+    tagline: "Logística global, transparente. Rastreie cada pacote da origem até a porta.",
+    services: "Serviços", company: "Empresa", contactUs: "Fale conosco", support: "Atendimento ao cliente",
+    supportDesc: "Dúvidas sobre um pacote? Envie um e-mail direto.", emailUs: "E-mail para o suporte",
+    legal: "Legal", privacy: "Política de privacidade", terms: "Termos de serviço",
+    rights: "Todos os direitos reservados.", trackShipment: "Rastrear envio", staffPortal: "Portal da equipe",
+  },
+  home: {
+    heroTitle: "Cloud Shipment", heroSubtitle: "Logística global rápida e confiável",
+    heroPlaceholder: "Digite o número de rastreamento...", heroButton: "Rastrear agora",
+    liveMap: "Mapa global de trânsito ao vivo", footerVersion: "Plataforma de logística · v1.1",
+  },
+};
+
+export default ptBR;
