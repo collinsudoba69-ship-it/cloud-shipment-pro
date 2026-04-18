@@ -51,6 +51,16 @@ interface ShipmentData {
   weight: string;
   service: string;
   events: TrackingEvent[];
+  senderName: string;
+  senderEmail: string | null;
+  senderPhone: string | null;
+  receiverName: string;
+  receiverEmail: string | null;
+  receiverPhone: string | null;
+  description: string | null;
+  images: string[];
+  quantity: number;
+  isFragile: boolean;
 }
 
 const Track = () => {
