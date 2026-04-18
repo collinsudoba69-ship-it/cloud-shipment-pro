@@ -51,6 +51,16 @@ interface ShipmentData {
   weight: string;
   service: string;
   events: TrackingEvent[];
+  senderName: string;
+  senderEmail: string | null;
+  senderPhone: string | null;
+  receiverName: string;
+  receiverEmail: string | null;
+  receiverPhone: string | null;
+  description: string | null;
+  images: string[];
+  quantity: number;
+  isFragile: boolean;
 }
 
 const Track = () => {
@@ -131,6 +141,16 @@ const Track = () => {
         weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
         service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
         events,
+        senderName: shipmentRow.sender_name,
+        senderEmail: shipmentRow.sender_email,
+        senderPhone: shipmentRow.sender_phone,
+        receiverName: shipmentRow.receiver_name,
+        receiverEmail: shipmentRow.receiver_email,
+        receiverPhone: shipmentRow.receiver_phone,
+        description: shipmentRow.description,
+        images: Array.isArray(shipmentRow.images) ? shipmentRow.images : [],
+        quantity: shipmentRow.quantity ?? 1,
+        isFragile: shipmentRow.is_fragile ?? false,
       };
 
       setShipment(real);
@@ -425,6 +445,103 @@ const Track = () => {
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Sender & Receiver */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Sender & Receiver</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Sender</h4>
+                      <p className="font-semibold text-slate-900">{shipment.senderName}</p>
+                      {shipment.senderEmail && (
+                        <p className="text-sm text-slate-600 break-all">
+                          <a href={`mailto:${shipment.senderEmail}`} className="hover:underline">
+                            {shipment.senderEmail}
+                          </a>
+                        </p>
+                      )}
+                      {shipment.senderPhone && (
+                        <p className="text-sm text-slate-600">
+                          <a href={`tel:${shipment.senderPhone}`} className="hover:underline">
+                            {shipment.senderPhone}
+                          </a>
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500 flex items-center gap-1 pt-1">
+                        <MapPin className="w-3 h-3" /> {shipment.origin}
+                      </p>
+                    </div>
+                    <div className="space-y-2 md:border-l md:pl-6 border-slate-200">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Receiver</h4>
+                      <p className="font-semibold text-slate-900">{shipment.receiverName}</p>
+                      {shipment.receiverEmail && (
+                        <p className="text-sm text-slate-600 break-all">
+                          <a href={`mailto:${shipment.receiverEmail}`} className="hover:underline">
+                            {shipment.receiverEmail}
+                          </a>
+                        </p>
+                      )}
+                      {shipment.receiverPhone && (
+                        <p className="text-sm text-slate-600">
+                          <a href={`tel:${shipment.receiverPhone}`} className="hover:underline">
+                            {shipment.receiverPhone}
+                          </a>
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500 flex items-center gap-1 pt-1">
+                        <MapPin className="w-3 h-3" /> {shipment.destination}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Package Description */}
+                {shipment.description && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Package className="w-4 h-4" />
+                        Package Description
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                        {shipment.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Package Images */}
+                {shipment.images.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Package Images ({shipment.images.length})</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {shipment.images.map((url, i) => (
+                          <a
+                            key={i}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
+                          >
+                            <img
+                              src={url}
+                              alt={`Package ${i + 1}`}
+                              loading="lazy"
+                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* Sidebar Info */}
@@ -463,6 +580,20 @@ const Track = () => {
                       <span className="text-slate-500">Weight</span>
                       <span className="font-medium">{shipment.weight}</span>
                     </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Quantity</span>
+                      <span className="font-medium">{shipment.quantity}</span>
+                    </div>
+                    {shipment.isFragile && (
+                      <>
+                        <Separator />
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500">Handling</span>
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Fragile</Badge>
+                        </div>
+                      </>
+                    )}
                     <Separator />
                     <div className="flex justify-between items-center">
                       <span className="text-slate-500">From</span>
