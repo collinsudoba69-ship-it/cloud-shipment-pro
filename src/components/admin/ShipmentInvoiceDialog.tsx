@@ -1,3 +1,4 @@
+import type { ChangeEvent } from "react";
 import { useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
@@ -53,22 +54,22 @@ interface ShipmentInvoiceDialogProps {
 const THEMES: Record<ReceiptTheme, { label: string; headerClass: string; chipClass: string }> = {
   ocean: {
     label: "Ocean Blue",
-    headerClass: "bg-[hsl(209_100%_52%)] text-[hsl(0_0%_100%)]",
+    headerClass: "bg-primary text-primary-foreground",
     chipClass: "bg-primary/12 text-primary",
   },
   midnight: {
     label: "Midnight Black",
-    headerClass: "bg-[hsl(217_47%_12%)] text-[hsl(0_0%_100%)]",
+    headerClass: "bg-foreground text-background",
     chipClass: "bg-foreground/10 text-foreground",
   },
   emerald: {
     label: "Emerald Green",
-    headerClass: "bg-[hsl(151_73%_34%)] text-[hsl(0_0%_100%)]",
+    headerClass: "bg-success text-success-foreground",
     chipClass: "bg-success/12 text-success",
   },
   slate: {
     label: "Steel Slate",
-    headerClass: "bg-[hsl(215_18%_42%)] text-[hsl(0_0%_100%)]",
+    headerClass: "bg-secondary text-secondary-foreground",
     chipClass: "bg-muted text-foreground",
   },
 };
@@ -125,7 +126,7 @@ export const ShipmentInvoiceDialog = ({
     setDynamicFields((current) => current.filter((field) => field.id !== id));
   };
 
-  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
