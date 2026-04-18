@@ -13,6 +13,7 @@ import pt from "./locales/pt";
 import fi from "./locales/fi";
 import sv from "./locales/sv";
 import no from "./locales/no";
+import da from "./locales/da";
 
 const resources = {
   en: { translation: en },
@@ -26,6 +27,7 @@ const resources = {
   fi: { translation: fi },
   sv: { translation: sv },
   no: { translation: no },
+  da: { translation: da },
 };
 
 i18n
@@ -34,7 +36,7 @@ i18n
   .init({
     resources,
     fallbackLng: "en",
-    supportedLngs: ["en", "en-US", "fr", "es", "de", "ar", "zh", "pt", "fi", "sv", "no"],
+    supportedLngs: ["en", "en-US", "fr", "es", "de", "ar", "zh", "pt", "fi", "sv", "no", "da"],
     nonExplicitSupportedLngs: false,
     load: "currentOnly",
     interpolation: { escapeValue: false },
@@ -54,6 +56,7 @@ export const LANGUAGES = [
   { code: "fi", label: "Suomi", flag: "🇫🇮" },
   { code: "sv", label: "Svenska", flag: "🇸🇪" },
   { code: "no", label: "Norsk", flag: "🇳🇴" },
+  { code: "da", label: "Dansk", flag: "🇩🇰" },
   { code: "zh", label: "中文", flag: "🇨🇳" },
   { code: "ar", label: "العربية", flag: "🇸🇦" },
 ];
