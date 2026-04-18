@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Search, 
   Package, 
@@ -73,6 +74,7 @@ interface ShipmentData {
 }
 
 const Track = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const [trackingNumber, setTrackingNumber] = useState('');
@@ -200,7 +202,7 @@ const Track = () => {
 
   const handleTrack = async (number: string = trackingNumber) => {
     if (!number.trim()) {
-      toast.error('Please enter a tracking number');
+      toast.error(t('trackPage.pleaseEnter'));
       return;
     }
 
@@ -220,8 +222,8 @@ const Track = () => {
 
       if (shipErr) throw shipErr;
       if (!shipmentRow) {
-        setError('No shipment found for this tracking number.');
-        toast.error('Shipment not found');
+        setError(t('trackPage.notFound'));
+        toast.error(t('trackPage.shipmentNotFound'));
         return;
       }
 
@@ -236,11 +238,11 @@ const Track = () => {
       shipmentIdRef.current = shipmentRow.id;
       prevStatusRef.current = real.status;
       prevEventCountRef.current = real.events.length;
-      toast.success('Tracking information found!');
+      toast.success(t('trackPage.found'));
     } catch (err) {
       console.error(err);
-      setError('Unable to find shipment. Please check your tracking number and try again.');
-      toast.error('Tracking failed');
+      setError(t('trackPage.unable'));
+      toast.error(t('trackPage.failed'));
     } finally {
       setIsLoading(false);
     }
@@ -275,7 +277,7 @@ const Track = () => {
   const handleCopyTracking = () => {
     if (shipment) {
       navigator.clipboard.writeText(shipment.trackingNumber);
-      toast.success('Tracking number copied!');
+      toast.success(t('trackPage.copied'));
     }
   };
 
@@ -413,10 +415,10 @@ const Track = () => {
       doc.text('Cloud Shipment • Official Receipt • This document is computer-generated.', pageW / 2, footerY, { align: 'center' });
 
       doc.save(`CloudShipment-Receipt-${shipment.trackingNumber}.pdf`);
-      toast.success('Receipt downloaded');
+      toast.success(t('trackPage.receiptDownloaded'));
     } catch (err) {
       console.error(err);
-      toast.error('Failed to generate receipt');
+      toast.error(t('trackPage.receiptFailed'));
     }
   };
 
@@ -455,15 +457,15 @@ const Track = () => {
             <div className="flex items-center gap-4">
               <img src={logo} alt="Cloud Shipment" className="h-12 w-auto" />
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Track Shipment</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{t('trackPage.headerTitle')}</h1>
                 <p className="text-slate-500 mt-1 text-sm">
-                  Enter your tracking number to get real-time updates
+                  {t('trackPage.headerSubtitle')}
                 </p>
               </div>
             </div>
             {user && (
               <Button variant="outline" onClick={() => window.location.href = '/admin/shipments'}>
-                View All Shipments
+                {t('trackPage.viewAllShipments')}
               </Button>
             )}
           </div>
@@ -478,11 +480,11 @@ const Track = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <Input
-                  placeholder="Enter tracking number (e.g., CLD-8291-5734)"
+                  placeholder={t('trackPage.inputPlaceholder')}
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
-                  className="pl-10 h-12 text-lg"
+                  className="pl-10 h-12 text-lg bg-white text-black placeholder:text-gray-500"
                 />
               </div>
               <Button 
@@ -494,12 +496,12 @@ const Track = () => {
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Tracking...
+                    {t('trackPage.tracking')}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <Truck className="w-4 h-4" />
-                    Track
+                    {t('trackPage.track')}
                   </div>
                 )}
               </Button>
@@ -526,14 +528,14 @@ const Track = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="text-sm text-slate-500">Tracking Number</p>
+                    <p className="text-sm text-slate-500">{t('trackPage.trackingNumber')}</p>
                     {isLive && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wide">
                         <span className="relative flex h-1.5 w-1.5">
                           <span className="absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75 animate-ping" />
                           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-600" />
                         </span>
-                        Live
+                        {t('trackPage.live')}
                       </span>
                     )}
                   </div>
@@ -549,14 +551,17 @@ const Track = () => {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className={getStatusColor(shipment.status)}>
-                  {shipment.status === 'out-for-delivery' ? 'Out for Delivery' : 
-                   shipment.status.charAt(0).toUpperCase() + shipment.status.slice(1)}
+                  {shipment.status === 'out-for-delivery' ? t('trackPage.statusOutForDelivery') :
+                   shipment.status === 'delivered' ? t('trackPage.statusDelivered') :
+                   shipment.status === 'in-transit' ? t('trackPage.statusInTransit') :
+                   shipment.status === 'exception' ? t('trackPage.statusException') :
+                   t('trackPage.statusPending')}
                 </Badge>
                 <Button variant="outline" size="sm" onClick={handleDownloadReceipt} className="gap-2">
                   <Printer className="w-4 h-4" />
-                  Print Receipt
+                  {t('trackPage.printReceipt')}
                 </Button>
-                <Button variant="outline" size="icon" title="Share">
+                <Button variant="outline" size="icon" title={t('trackPage.share')}>
                   <Share2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -569,7 +574,7 @@ const Track = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <MapPin className="w-5 h-5" />
-                      Live Route Map
+                      {t('trackPage.liveRouteMap')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -588,9 +593,9 @@ const Track = () => {
                 <Card>
                   <CardHeader>
                     <div className="flex items-center justify-between gap-3">
-                      <CardTitle>Shipment Journey</CardTitle>
+                      <CardTitle>{t('trackPage.shipmentJourney')}</CardTitle>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-500">Progress</span>
+                        <span className="text-xs text-slate-500">{t('trackPage.progress')}</span>
                         <span className="text-sm font-bold text-blue-600 font-mono">{shipment.progress}%</span>
                       </div>
                     </div>
@@ -604,11 +609,11 @@ const Track = () => {
                   <CardContent>
                     {(() => {
                       const stages = [
-                        { key: 'label_created', label: 'Label Created', description: 'Shipment registered in our system', icon: FileText, progress: 1 },
-                        { key: 'picked_up', label: 'Picked Up', description: 'Courier has collected the item', icon: PackageCheck, progress: 25 },
-                        { key: 'in_transit', label: 'In Transit', description: 'Package is moving between hubs', icon: Truck, progress: 50 },
-                        { key: 'out_for_delivery', label: 'Out for Delivery', description: 'Final vehicle dispatched to receiver', icon: Send, progress: 85 },
-                        { key: 'delivered', label: 'Delivered', description: 'Handed over to receiver', icon: Home, progress: 100 },
+                        { key: 'label_created', label: t('trackPage.stageLabelCreated'), description: t('trackPage.stageLabelCreatedDesc'), icon: FileText, progress: 1 },
+                        { key: 'picked_up', label: t('trackPage.stagePickedUp'), description: t('trackPage.stagePickedUpDesc'), icon: PackageCheck, progress: 25 },
+                        { key: 'in_transit', label: t('trackPage.stageInTransit'), description: t('trackPage.stageInTransitDesc'), icon: Truck, progress: 50 },
+                        { key: 'out_for_delivery', label: t('trackPage.stageOutForDelivery'), description: t('trackPage.stageOutForDeliveryDesc'), icon: Send, progress: 85 },
+                        { key: 'delivered', label: t('trackPage.stageDelivered'), description: t('trackPage.stageDeliveredDesc'), icon: Home, progress: 100 },
                       ];
 
                       // Map admin status -> index of the CURRENT (active) stage.
@@ -688,7 +693,7 @@ const Track = () => {
                                       {stage.label}
                                       {isCurrent && (
                                         <span className="ml-2 text-xs font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                                          Current
+                                          {t('trackPage.current')}
                                         </span>
                                       )}
                                     </h4>
@@ -720,11 +725,11 @@ const Track = () => {
                     {shipment.events.length > 0 && (
                       <div className="mt-6 pt-6 border-t border-slate-200">
                         <div className="flex items-center justify-between mb-3">
-                          <h5 className="text-sm font-semibold text-slate-700">Recent Updates</h5>
+                          <h5 className="text-sm font-semibold text-slate-700">{t('trackPage.recentUpdates')}</h5>
                           {isLive && (
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-green-700">
                               <Radio className="w-3 h-3 animate-pulse" />
-                              Live feed
+                              {t('trackPage.liveFeed')}
                             </span>
                           )}
                         </div>
@@ -746,7 +751,7 @@ const Track = () => {
                                     {isNew && (
                                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[9px] font-bold uppercase">
                                         <Bell className="w-2.5 h-2.5" />
-                                        New
+                                        {t('trackPage.new')}
                                       </span>
                                     )}
                                   </span>
@@ -770,11 +775,11 @@ const Track = () => {
                 {/* Sender & Receiver */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Sender & Receiver</CardTitle>
+                    <CardTitle className="text-base">{t('trackPage.senderReceiver')}</CardTitle>
                   </CardHeader>
                   <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Sender</h4>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('trackPage.sender')}</h4>
                       <p className="font-semibold text-slate-900">{shipment.senderName}</p>
                       {shipment.senderEmail && (
                         <p className="text-sm text-slate-600 break-all">
@@ -795,7 +800,7 @@ const Track = () => {
                       </p>
                     </div>
                     <div className="space-y-2 md:border-l md:pl-6 border-slate-200">
-                      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Receiver</h4>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('trackPage.receiver')}</h4>
                       <p className="font-semibold text-slate-900">{shipment.receiverName}</p>
                       {shipment.receiverEmail && (
                         <p className="text-sm text-slate-600 break-all">
@@ -824,7 +829,7 @@ const Track = () => {
                     <CardHeader>
                       <CardTitle className="text-base flex items-center gap-2">
                         <Package className="w-4 h-4" />
-                        Package Description
+                        {t('trackPage.packageDescription')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -839,7 +844,7 @@ const Track = () => {
                 {shipment.images.length > 0 && (
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Package Images ({shipment.images.length})</CardTitle>
+                      <CardTitle className="text-base">{t('trackPage.packageImages')} ({shipment.images.length})</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -871,7 +876,7 @@ const Track = () => {
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-base flex items-center gap-2">
                           <FileText className="w-4 h-4" />
-                          Payment Details
+                          {t('trackPage.paymentDetails')}
                         </CardTitle>
                         <Badge
                           variant="outline"
@@ -881,14 +886,14 @@ const Track = () => {
                               : 'bg-amber-100 text-amber-700 border-amber-200'
                           }
                         >
-                          {shipment.paymentStatus === 'paid' ? 'Paid' : 'Pending Payment'}
+                          {shipment.paymentStatus === 'paid' ? t('trackPage.paid') : t('trackPage.pendingPayment')}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {shipment.amountToPay !== null && (
                         <div className="flex justify-between items-center bg-slate-50 rounded-lg p-3">
-                          <span className="text-sm text-slate-500">Amount to Pay</span>
+                          <span className="text-sm text-slate-500">{t('trackPage.amountToPay')}</span>
                           <span className="text-xl font-bold text-slate-900">
                             ${Number(shipment.amountToPay).toFixed(2)}
                           </span>
@@ -898,7 +903,7 @@ const Track = () => {
                         {shipment.paymentMethod && (
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
-                              Payment Method
+                              {t('trackPage.paymentMethod')}
                             </p>
                             <p className="text-sm font-medium text-slate-900">{shipment.paymentMethod}</p>
                           </div>
@@ -906,7 +911,7 @@ const Track = () => {
                         {shipment.paymentReason && (
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
-                              Reason
+                              {t('trackPage.reason')}
                             </p>
                             <p className="text-sm text-slate-700">{shipment.paymentReason}</p>
                           </div>
@@ -915,7 +920,7 @@ const Track = () => {
                       {shipment.paymentStatus !== 'paid' && shipment.amountToPay !== null && (
                         <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
                           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                          <span>Payment is required before this shipment can be released to its final destination.</span>
+                          <span>{t('trackPage.paymentRequired')}</span>
                         </div>
                       )}
                     </CardContent>
@@ -930,11 +935,11 @@ const Track = () => {
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3 mb-3">
                       <Calendar className="w-5 h-5 text-blue-600" />
-                      <span className="font-semibold text-blue-900">Estimated Delivery</span>
+                      <span className="font-semibold text-blue-900">{t('trackPage.estimatedDelivery')}</span>
                     </div>
                     <p className="text-2xl font-bold text-blue-900">{shipment.estimatedDelivery}</p>
                     <p className="text-sm text-blue-700 mt-1">
-                      Your package is on schedule
+                      {t('trackPage.onSchedule')}
                     </p>
                   </CardContent>
                 </Card>
@@ -942,45 +947,45 @@ const Track = () => {
                 {/* Shipment Details */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Shipment Details</CardTitle>
+                    <CardTitle className="text-base">{t('trackPage.shipmentDetails')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500">Carrier</span>
+                      <span className="text-slate-500">{t('trackPage.carrier')}</span>
                       <span className="font-medium">{shipment.carrier}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500">Service</span>
+                      <span className="text-slate-500">{t('trackPage.service')}</span>
                       <span className="font-medium">{shipment.service}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500">Weight</span>
+                      <span className="text-slate-500">{t('trackPage.weight')}</span>
                       <span className="font-medium">{shipment.weight}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500">Quantity</span>
+                      <span className="text-slate-500">{t('trackPage.quantity')}</span>
                       <span className="font-medium">{shipment.quantity}</span>
                     </div>
                     {shipment.isFragile && (
                       <>
                         <Separator />
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-500">Handling</span>
-                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Fragile</Badge>
+                          <span className="text-slate-500">{t('trackPage.handling')}</span>
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">{t('trackPage.fragile')}</Badge>
                         </div>
                       </>
                     )}
                     <Separator />
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500">From</span>
+                      <span className="text-slate-500">{t('trackPage.from')}</span>
                       <span className="font-medium text-right">{shipment.origin}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500">To</span>
+                      <span className="text-slate-500">{t('trackPage.to')}</span>
                       <span className="font-medium text-right">{shipment.destination}</span>
                     </div>
                   </CardContent>
@@ -989,9 +994,9 @@ const Track = () => {
                 {/* Need Help */}
                 <Card className="bg-slate-50">
                   <CardContent className="pt-6">
-                    <h4 className="font-semibold mb-2">Need Help?</h4>
+                    <h4 className="font-semibold mb-2">{t('trackPage.needHelp')}</h4>
                     <p className="text-sm text-slate-600 mb-4">
-                      Have questions about your delivery? Our support team is here to help.
+                      {t('trackPage.needHelpDesc')}
                     </p>
                     <Button asChild variant="outline" className="w-full">
                       <a
@@ -1017,9 +1022,9 @@ const Track = () => {
             <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Package className="w-12 h-12 text-slate-400" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Ready to Track</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">{t('trackPage.readyToTrack')}</h3>
             <p className="text-slate-500 max-w-md mx-auto">
-              Enter your tracking number above to see real-time updates on your shipment location and estimated delivery time.
+              {t('trackPage.readyToTrackDesc')}
             </p>
           </div>
         )}
