@@ -40,7 +40,7 @@ export const LanguageSwitcher = ({ variant = "ghost", invert = false }: Props) =
           <span className="sm:hidden">{current.flag}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
+      <DropdownMenuContent align="end" className="w-48 max-h-80 overflow-y-auto">
         {LANGUAGES.map((lng) => (
           <DropdownMenuItem
             key={lng.code}
