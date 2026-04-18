@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import ShipmentMap from "@/components/ShipmentMap";
+import Testimonials from "@/components/Testimonials";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -60,6 +61,8 @@ const Index = () => {
           />
         </div>
       </section>
+
+      <Testimonials />
 
       <SiteFooter />
     </div>
