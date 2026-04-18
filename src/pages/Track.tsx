@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   Search, 
@@ -16,7 +16,9 @@ import {
   FileText,
   PackageCheck,
   Send,
-  Home
+  Home,
+  Radio,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,6 +75,12 @@ const Track = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [shipment, setShipment] = useState<ShipmentData | null>(null);
   const [error, setError] = useState('');
+  const [isLive, setIsLive] = useState(false);
+  const [liveEventId, setLiveEventId] = useState<string | null>(null);
+  const [liveStatusFlash, setLiveStatusFlash] = useState(false);
+  const shipmentIdRef = useRef<string | null>(null);
+  const prevStatusRef = useRef<string | null>(null);
+  const prevEventCountRef = useRef<number>(0);
 
   // Check for tracking number in URL on mount
   useEffect(() => {
@@ -83,6 +91,105 @@ const Track = () => {
     }
   }, []);
 
+  const buildShipmentData = useCallback((shipmentRow: any, eventsRows: any[]): ShipmentData => {
+    const statusMap: Record<string, ShipmentData['status']> = {
+      queued: 'pending',
+      in_transit: 'in-transit',
+      out_for_delivery: 'out-for-delivery',
+      delivered: 'delivered',
+    };
+
+    const events: TrackingEvent[] = (eventsRows ?? []).map((e) => ({
+      id: e.id,
+      status: e.status ? statusLabel(e.status) : 'Update',
+      rawStatus: e.status ?? null,
+      location: e.location ?? shipmentRow.origin,
+      timestamp: format(new Date(e.event_at), 'yyyy-MM-dd hh:mm a'),
+      description: e.note ?? '',
+      completed: true,
+    }));
+
+    const statusRank: Record<string, number> = {
+      queued: 0, in_transit: 1, out_for_delivery: 2, delivered: 3,
+    };
+    let effectiveRawStatus: string = shipmentRow.status;
+    for (const e of eventsRows ?? []) {
+      if (e.status && (statusRank[e.status] ?? -1) > (statusRank[effectiveRawStatus] ?? -1)) {
+        effectiveRawStatus = e.status;
+      }
+    }
+
+    return {
+      trackingNumber: shipmentRow.tracking_number,
+      status: statusMap[effectiveRawStatus] ?? 'pending',
+      origin: shipmentRow.origin,
+      destination: shipmentRow.destination,
+      estimatedDelivery: shipmentRow.estimated_delivery_date
+        ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
+        : 'TBD',
+      progress: Math.max(
+        shipmentRow.progress ?? 0,
+        progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'delivered')
+      ),
+      carrier: shipmentRow.courier ?? 'Cloud Shipment',
+      weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
+      service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
+      events,
+      senderName: shipmentRow.sender_name,
+      senderEmail: shipmentRow.sender_email,
+      senderPhone: shipmentRow.sender_phone,
+      receiverName: shipmentRow.receiver_name,
+      receiverEmail: shipmentRow.receiver_email,
+      receiverPhone: shipmentRow.receiver_phone,
+      description: shipmentRow.description,
+      images: Array.isArray(shipmentRow.images) ? shipmentRow.images : [],
+      quantity: shipmentRow.quantity ?? 1,
+      isFragile: shipmentRow.is_fragile ?? false,
+    };
+  }, []);
+
+  const refetchShipment = useCallback(async (shipmentId: string, opts?: { notifyNewEvent?: boolean; notifyStatusChange?: boolean }) => {
+    const { data: shipmentRow } = await supabase
+      .from('shipments')
+      .select('*')
+      .eq('id', shipmentId)
+      .maybeSingle();
+    if (!shipmentRow) return;
+
+    const { data: eventsRows } = await supabase
+      .from('shipment_events')
+      .select('*')
+      .eq('shipment_id', shipmentId)
+      .order('event_at', { ascending: true });
+
+    const next = buildShipmentData(shipmentRow, eventsRows ?? []);
+    setShipment(next);
+
+    if (opts?.notifyStatusChange && prevStatusRef.current && prevStatusRef.current !== next.status) {
+      const label = next.status === 'out-for-delivery'
+        ? 'Out for Delivery'
+        : next.status.charAt(0).toUpperCase() + next.status.slice(1);
+      toast.success(`Shipment update: ${label}`, {
+        description: `Your package is now ${label.toLowerCase()}.`,
+      });
+      setLiveStatusFlash(true);
+      setTimeout(() => setLiveStatusFlash(false), 2500);
+    }
+    prevStatusRef.current = next.status;
+
+    if (opts?.notifyNewEvent && next.events.length > prevEventCountRef.current) {
+      const latest = next.events[next.events.length - 1];
+      if (latest) {
+        setLiveEventId(latest.id);
+        toast(`New tracking update`, {
+          description: `${latest.status}${latest.location ? ` • ${latest.location}` : ''}`,
+        });
+        setTimeout(() => setLiveEventId(null), 4000);
+      }
+    }
+    prevEventCountRef.current = next.events.length;
+  }, [buildShipmentData]);
+
   const handleTrack = async (number: string = trackingNumber) => {
     if (!number.trim()) {
       toast.error('Please enter a tracking number');
@@ -92,6 +199,7 @@ const Track = () => {
     setIsLoading(true);
     setError('');
     setShipment(null);
+    setIsLive(false);
 
     try {
       setSearchParams({ n: number });
@@ -115,64 +223,11 @@ const Track = () => {
         .eq('shipment_id', shipmentRow.id)
         .order('event_at', { ascending: true });
 
-      const statusMap: Record<string, ShipmentData['status']> = {
-        queued: 'pending',
-        in_transit: 'in-transit',
-        out_for_delivery: 'out-for-delivery',
-        delivered: 'delivered',
-      };
-
-      const events: TrackingEvent[] = (eventsRows ?? []).map((e) => ({
-        id: e.id,
-        status: e.status ? statusLabel(e.status) : 'Update',
-        rawStatus: e.status ?? null,
-        location: e.location ?? shipmentRow.origin,
-        timestamp: format(new Date(e.event_at), 'yyyy-MM-dd hh:mm a'),
-        description: e.note ?? '',
-        completed: true,
-      }));
-
-      // Use the most advanced status between the row and the latest event with a known status.
-      // This keeps the Journey, badge, and progress bar in sync with the Recent Updates.
-      const statusRank: Record<string, number> = {
-        queued: 0, in_transit: 1, out_for_delivery: 2, delivered: 3,
-      };
-      let effectiveRawStatus: string = shipmentRow.status;
-      for (const e of eventsRows ?? []) {
-        if (e.status && (statusRank[e.status] ?? -1) > (statusRank[effectiveRawStatus] ?? -1)) {
-          effectiveRawStatus = e.status;
-        }
-      }
-
-      const real: ShipmentData = {
-        trackingNumber: shipmentRow.tracking_number,
-        status: statusMap[effectiveRawStatus] ?? 'pending',
-        origin: shipmentRow.origin,
-        destination: shipmentRow.destination,
-        estimatedDelivery: shipmentRow.estimated_delivery_date
-          ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
-          : 'TBD',
-        progress: Math.max(
-          shipmentRow.progress ?? 0,
-          progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'delivered')
-        ),
-        carrier: shipmentRow.courier ?? 'Cloud Shipment',
-        weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
-        service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
-        events,
-        senderName: shipmentRow.sender_name,
-        senderEmail: shipmentRow.sender_email,
-        senderPhone: shipmentRow.sender_phone,
-        receiverName: shipmentRow.receiver_name,
-        receiverEmail: shipmentRow.receiver_email,
-        receiverPhone: shipmentRow.receiver_phone,
-        description: shipmentRow.description,
-        images: Array.isArray(shipmentRow.images) ? shipmentRow.images : [],
-        quantity: shipmentRow.quantity ?? 1,
-        isFragile: shipmentRow.is_fragile ?? false,
-      };
-
+      const real = buildShipmentData(shipmentRow, eventsRows ?? []);
       setShipment(real);
+      shipmentIdRef.current = shipmentRow.id;
+      prevStatusRef.current = real.status;
+      prevEventCountRef.current = real.events.length;
       toast.success('Tracking information found!');
     } catch (err) {
       console.error(err);
@@ -182,6 +237,32 @@ const Track = () => {
       setIsLoading(false);
     }
   };
+
+  // Realtime: subscribe to live updates for the current shipment
+  useEffect(() => {
+    const sid = shipmentIdRef.current;
+    if (!shipment || !sid) return;
+
+    const channel = supabase
+      .channel(`track-${sid}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'shipments', filter: `id=eq.${sid}`,
+      }, () => refetchShipment(sid, { notifyStatusChange: true }))
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'shipment_events', filter: `shipment_id=eq.${sid}`,
+      }, () => refetchShipment(sid, { notifyNewEvent: true, notifyStatusChange: true }))
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'shipment_events', filter: `shipment_id=eq.${sid}`,
+      }, () => refetchShipment(sid, { notifyStatusChange: true }))
+      .subscribe((status) => {
+        setIsLive(status === 'SUBSCRIBED');
+      });
+
+    return () => {
+      setIsLive(false);
+      supabase.removeChannel(channel);
+    };
+  }, [shipment?.trackingNumber, refetchShipment]);
 
   const handleCopyTracking = () => {
     if (shipment) {
@@ -428,13 +509,26 @@ const Track = () => {
         {shipment && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Status Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border shadow-sm transition-all duration-500 ${
+              liveStatusFlash ? 'border-blue-400 shadow-lg ring-2 ring-blue-200 animate-pulse' : 'border-slate-200'
+            }`}>
               <div className="flex items-center gap-4">
                 <div className={`p-3 rounded-full ${getStatusColor(shipment.status)}`}>
                   {getStatusIcon(shipment.status)}
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Tracking Number</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-slate-500">Tracking Number</p>
+                    {isLive && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wide">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-600" />
+                        </span>
+                        Live
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-2xl font-bold text-slate-900 font-mono">
                       {shipment.trackingNumber}
@@ -617,22 +711,48 @@ const Track = () => {
 
                     {shipment.events.length > 0 && (
                       <div className="mt-6 pt-6 border-t border-slate-200">
-                        <h5 className="text-sm font-semibold text-slate-700 mb-3">Recent Updates</h5>
+                        <div className="flex items-center justify-between mb-3">
+                          <h5 className="text-sm font-semibold text-slate-700">Recent Updates</h5>
+                          {isLive && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-green-700">
+                              <Radio className="w-3 h-3 animate-pulse" />
+                              Live feed
+                            </span>
+                          )}
+                        </div>
                         <div className="space-y-2">
-                          {shipment.events.slice(-3).reverse().map((event) => (
-                            <div key={event.id} className="text-sm bg-slate-50 rounded-lg p-3">
-                              <div className="flex justify-between items-start gap-2">
-                                <span className="font-medium text-slate-900">{event.status}</span>
-                                <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{event.timestamp}</span>
+                          {shipment.events.slice(-3).reverse().map((event) => {
+                            const isNew = event.id === liveEventId;
+                            return (
+                              <div
+                                key={event.id}
+                                className={`text-sm rounded-lg p-3 transition-all duration-500 ${
+                                  isNew
+                                    ? 'bg-blue-50 ring-2 ring-blue-400 shadow-md animate-in fade-in slide-in-from-top-2'
+                                    : 'bg-slate-50'
+                                }`}
+                              >
+                                <div className="flex justify-between items-start gap-2">
+                                  <span className="font-medium text-slate-900 flex items-center gap-2">
+                                    {event.status}
+                                    {isNew && (
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[9px] font-bold uppercase">
+                                        <Bell className="w-2.5 h-2.5" />
+                                        New
+                                      </span>
+                                    )}
+                                  </span>
+                                  <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{event.timestamp}</span>
+                                </div>
+                                {event.description && <p className="text-slate-600 mt-1">{event.description}</p>}
+                                {event.location && (
+                                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                    <MapPin className="w-3 h-3" />{event.location}
+                                  </p>
+                                )}
                               </div>
-                              {event.description && <p className="text-slate-600 mt-1">{event.description}</p>}
-                              {event.location && (
-                                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                                  <MapPin className="w-3 h-3" />{event.location}
-                                </p>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
