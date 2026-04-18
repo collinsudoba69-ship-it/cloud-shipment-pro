@@ -35,7 +35,7 @@ const Index = () => {
               value={tracking}
               onChange={(e) => setTracking(e.target.value)}
               placeholder={t("home.heroPlaceholder")}
-              className="text-black border-0 focus-visible:ring-0"
+              className="bg-white text-black placeholder:text-gray-500 border-0 focus-visible:ring-0"
             />
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700">{t("home.heroButton")}</Button>
           </form>
