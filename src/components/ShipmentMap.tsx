@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Polyline, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
+import { geocode, lookupFallback, type LatLng } from "@/lib/geocode";
 
 type ShipmentMapStatus = "pending" | "in-transit" | "out-for-delivery" | "delivered" | "exception";
 
@@ -15,31 +16,7 @@ interface ShipmentMapProps {
   };
 }
 
-const COORDINATES: Record<string, [number, number]> = {
-  "Washington, DC": [38.9072, -77.0369],
-  "New Jersey": [40.0583, -74.4057],
-  "New York, NY": [40.7128, -74.006],
-  "Los Angeles, CA": [34.0522, -118.2437],
-  "Chicago, IL": [41.8781, -87.6298],
-  "Miami, FL": [25.7617, -80.1918],
-  "Seattle, WA": [47.6062, -122.3321],
-  London: [51.5072, -0.1276],
-  Paris: [48.8566, 2.3522],
-  Dubai: [25.2048, 55.2708],
-  Lagos: [6.5244, 3.3792],
-  Shanghai: [31.2304, 121.4737],
-};
-
-const getCoordinates = (location: string): [number, number] => {
-  const normalized = location.trim().toLowerCase();
-  const exact = Object.entries(COORDINATES).find(([key]) => key.toLowerCase() === normalized);
-  if (exact) return exact[1];
-
-  const partial = Object.entries(COORDINATES).find(([key]) => normalized.includes(key.toLowerCase().split(",")[0]));
-  return partial?.[1] ?? [39.5, -76.0];
-};
-
-const interpolatePosition = (start: [number, number], end: [number, number], progress: number): [number, number] => {
+const interpolatePosition = (start: LatLng, end: LatLng, progress: number): LatLng => {
   const safe = Math.max(0, Math.min(progress, 100)) / 100;
   return [start[0] + (end[0] - start[0]) * safe, start[1] + (end[1] - start[1]) * safe];
 };
@@ -55,14 +32,41 @@ const makeIcon = (className: string, html: string, size: [number, number] = [44,
 const FitBounds = ({ bounds }: { bounds: L.LatLngBoundsExpression }) => {
   const map = useMap();
   useEffect(() => {
-    map.fitBounds(bounds, { padding: [36, 36], maxZoom: 7 });
+    map.fitBounds(bounds, { padding: [36, 36] });
   }, [map, bounds]);
   return null;
 };
 
 const ShipmentMap = ({ shipment }: ShipmentMapProps) => {
-  const originCoords = useMemo(() => getCoordinates(shipment.origin), [shipment.origin]);
-  const destinationCoords = useMemo(() => getCoordinates(shipment.destination), [shipment.destination]);
+  const initialOrigin = useMemo<LatLng>(() => lookupFallback(shipment.origin) ?? [39.5, -76.0], [shipment.origin]);
+  const initialDestination = useMemo<LatLng>(
+    () => lookupFallback(shipment.destination) ?? [39.5, -76.0],
+    [shipment.destination],
+  );
+
+  const [originCoords, setOriginCoords] = useState<LatLng>(initialOrigin);
+  const [destinationCoords, setDestinationCoords] = useState<LatLng>(initialDestination);
+
+  useEffect(() => {
+    let cancelled = false;
+    geocode(shipment.origin).then((c) => {
+      if (!cancelled) setOriginCoords(c);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [shipment.origin]);
+
+  useEffect(() => {
+    let cancelled = false;
+    geocode(shipment.destination).then((c) => {
+      if (!cancelled) setDestinationCoords(c);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [shipment.destination]);
+
   const currentCoords = useMemo(
     () => interpolatePosition(originCoords, destinationCoords, shipment.progress),
     [destinationCoords, originCoords, shipment.progress],
@@ -114,7 +118,7 @@ const ShipmentMap = ({ shipment }: ShipmentMapProps) => {
         ETA {shipment.estimatedDelivery}
       </div>
 
-      <MapContainer center={currentCoords} zoom={5} scrollWheelZoom={false} className="shipment-map-canvas">
+      <MapContainer center={currentCoords} zoom={3} scrollWheelZoom={false} worldCopyJump className="shipment-map-canvas">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; CARTO'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
