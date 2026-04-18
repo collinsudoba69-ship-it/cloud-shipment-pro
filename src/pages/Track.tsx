@@ -1027,7 +1027,7 @@ const Track = () => {
                           `Hello Cloud Shipment Support Team,\n\nI need assistance with my shipment.\n\nTracking Number: ${shipment.trackingNumber}\nStatus: ${shipment.status}\nFrom: ${shipment.origin}\nTo: ${shipment.destination}\n\nMy question:\n`
                         )}`}
                       >
-                        Contact Support
+                        {t('trackPage.contactSupport')}
                       </a>
                     </Button>
                   </CardContent>
