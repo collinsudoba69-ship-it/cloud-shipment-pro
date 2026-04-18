@@ -90,7 +90,26 @@ const Track = () => {
   const prevStatusRef = useRef<string | null>(null);
   const prevEventCountRef = useRef<number>(0);
 
-  // Check for tracking number in URL on mount
+  // Translate the free-form package description whenever it or the language changes
+  useEffect(() => {
+    let cancelled = false;
+    const desc = shipment?.description;
+    if (!desc) {
+      setTranslatedDescription('');
+      return;
+    }
+    const lang = i18n.language || 'en';
+    if (lang.startsWith('en')) {
+      setTranslatedDescription(desc);
+      return;
+    }
+    setTranslatedDescription(desc); // show original immediately as fallback
+    translateText(desc, lang).then((res) => {
+      if (!cancelled) setTranslatedDescription(res);
+    });
+    return () => { cancelled = true; };
+  }, [shipment?.description, i18n.language]);
+
   useEffect(() => {
     const urlTrackingNumber = searchParams.get('n');
     if (urlTrackingNumber) {
