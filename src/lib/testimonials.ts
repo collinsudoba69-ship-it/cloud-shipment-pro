@@ -1,11 +1,11 @@
-// Large pool of testimonials. Each day a deterministic subset is shown,
-// so reviews "refresh" automatically every 24 hours.
+// Localized testimonial pool with daily rotation.
+import { getReviewStrings, type ReviewStrings } from "./locales/reviews";
 
 export interface Review {
   name: string;
-  role: string;
-  location: string;
-  rating: number; // 4 or 5
+  role: string;        // already plain text — kept neutral
+  location: string;    // proper nouns — kept as-is across languages
+  rating: number;
   text: string;
   initials: string;
 }
@@ -25,13 +25,16 @@ const FIRST_NAMES = [
 
 const LAST_INITIALS = ["M","O","B","C","G","T","S","P","K","R","L","D","N","H","F","A","W","Q","V","Z"];
 
-const ROLES = [
-  "Small Business Owner","E-commerce Seller","Online Retailer","Importer","Exporter","Frequent Sender","Logistics Manager",
-  "Boutique Owner","Etsy Seller","Antique Dealer","Wine Exporter","Coffee Exporter","Beauty Brand Founder","Fashion Designer",
-  "Subscription Box Owner","Tech Reseller","Wholesaler","Crafts Seller","Fine Art Dealer","Drop-shipper","Marketplace Seller",
-  "Auto Parts Trader","Jewelry Designer","Vintage Collector","Frequent Buyer","Bookseller","Pharmacy Owner","Toy Importer",
-  "Sneaker Reseller","Home Decor Seller","Spice Trader","Textile Trader","Skincare Founder","Streetwear Brand","Print-on-demand Seller",
-];
+// Roles per language so they translate too
+const ROLES_BY_LANG: Record<string, string[]> = {
+  en: ["Small Business Owner","E-commerce Seller","Online Retailer","Importer","Exporter","Frequent Sender","Logistics Manager","Boutique Owner","Etsy Seller","Antique Dealer","Wine Exporter","Coffee Exporter","Beauty Brand Founder","Fashion Designer","Subscription Box Owner","Tech Reseller","Wholesaler","Crafts Seller","Fine Art Dealer","Drop-shipper","Marketplace Seller","Auto Parts Trader","Jewelry Designer","Vintage Collector","Frequent Buyer","Bookseller","Pharmacy Owner","Toy Importer","Sneaker Reseller","Home Decor Seller","Spice Trader","Textile Trader","Skincare Founder","Streetwear Brand","Print-on-demand Seller"],
+  de: ["Kleinunternehmer","E-Commerce-Verkäufer","Online-Händler","Importeur","Exporteur","Stammkunde","Logistikleiter","Boutique-Besitzer","Etsy-Verkäufer","Antiquitätenhändler","Weinexporteur","Kaffeeexporteur","Beauty-Gründer","Modedesigner","Abo-Box-Inhaber","Tech-Wiederverkäufer","Großhändler","Handwerksverkäufer","Kunsthändler","Dropshipper","Marktplatz-Verkäufer","Autoteilehändler","Schmuckdesigner","Vintage-Sammler","Stammkäufer","Buchhändler","Apothekenbesitzer","Spielzeugimporteur","Sneaker-Wiederverkäufer","Wohndeko-Verkäufer","Gewürzhändler","Textilhändler","Hautpflege-Gründer","Streetwear-Marke","Print-on-Demand-Verkäufer"],
+  fr: ["Petit entrepreneur","Vendeur e-commerce","Détaillant en ligne","Importateur","Exportateur","Expéditeur fréquent","Responsable logistique","Propriétaire de boutique","Vendeur Etsy","Antiquaire","Exportateur de vin","Exportateur de café","Fondatrice beauté","Créateur de mode","Propriétaire de box","Revendeur tech","Grossiste","Vendeur d'artisanat","Marchand d'art","Drop-shipper","Vendeur marketplace","Marchand d'auto-pièces","Créateur de bijoux","Collectionneur vintage","Acheteur fréquent","Libraire","Propriétaire de pharmacie","Importateur de jouets","Revendeur sneakers","Vendeur déco maison","Marchand d'épices","Marchand de textiles","Fondateur skincare","Marque streetwear","Vendeur print-on-demand"],
+  es: ["Pequeño empresario","Vendedor e-commerce","Minorista online","Importador","Exportador","Remitente frecuente","Gerente de logística","Dueño de boutique","Vendedor Etsy","Anticuario","Exportador de vino","Exportador de café","Fundadora de belleza","Diseñador de moda","Dueño de subscription box","Revendedor tech","Mayorista","Vendedor de artesanía","Marchante de arte","Drop-shipper","Vendedor de marketplace","Comerciante de autopartes","Diseñador de joyas","Coleccionista vintage","Comprador frecuente","Librero","Dueño de farmacia","Importador de juguetes","Revendedor de sneakers","Vendedor de decoración","Comerciante de especias","Comerciante textil","Fundador skincare","Marca streetwear","Vendedor print-on-demand"],
+  pt: ["Pequeno empresário","Vendedor e-commerce","Retalhista online","Importador","Exportador","Remetente frequente","Gestor de logística","Dono de boutique","Vendedor Etsy","Antiquário","Exportador de vinho","Exportador de café","Fundadora de beleza","Designer de moda","Dono de subscription box","Revendedor de tecnologia","Grossista","Vendedor de artesanato","Marchand de arte","Drop-shipper","Vendedor de marketplace","Comerciante de autopeças","Designer de joias","Colecionador vintage","Comprador frequente","Livreiro","Dono de farmácia","Importador de brinquedos","Revendedor de sneakers","Vendedor de decoração","Comerciante de especiarias","Comerciante têxtil","Fundador skincare","Marca streetwear","Vendedor print-on-demand"],
+  ar: ["صاحب عمل صغير","بائع تجارة إلكترونية","تاجر تجزئة عبر الإنترنت","مستورد","مصدّر","مرسل دائم","مدير لوجستيات","صاحب بوتيك","بائع Etsy","تاجر تحف","مصدّر نبيذ","مصدّر قهوة","مؤسسة علامة جمال","مصمم أزياء","صاحب صندوق اشتراك","موزّع تقنية","تاجر جملة","بائع حرف يدوية","تاجر فنون","دروبشيبر","بائع في الأسواق الإلكترونية","تاجر قطع غيار سيارات","مصمم مجوهرات","جامع قطع كلاسيكية","مشتري دائم","بائع كتب","صاحب صيدلية","مستورد ألعاب","موزّع أحذية رياضية","بائع ديكور منزلي","تاجر بهارات","تاجر منسوجات","مؤسس علامة عناية بالبشرة","علامة ستريت وير","بائع طباعة عند الطلب"],
+  zh: ["小企业主","电商卖家","线上零售商","进口商","出口商","常用寄件人","物流经理","精品店店主","Etsy 卖家","古董商","葡萄酒出口商","咖啡出口商","美妆品牌创始人","时装设计师","订阅盒主理人","科技产品分销商","批发商","手工艺品卖家","艺术品经销商","代发货商","市场卖家","汽车配件商","珠宝设计师","复古收藏家","常客","书商","药店店主","玩具进口商","球鞋分销商","家居装饰卖家","香料商","纺织品商","护肤品创始人","街头服饰品牌","按需印刷卖家"],
+};
 
 const LOCATIONS = [
   "New York, USA","Los Angeles, USA","Houston, USA","Chicago, USA","Miami, USA","Atlanta, USA","Austin, USA","Seattle, USA","Boston, USA",
@@ -50,40 +53,6 @@ const LOCATIONS = [
   "Mexico City, MX","São Paulo, Brazil","Rio, Brazil","Buenos Aires, AR","Bogotá, Colombia","Lima, Peru","Santiago, Chile",
 ];
 
-const TEMPLATES = [
-  "Cloud Shipment delivered my package faster than I expected. The live tracking map kept me informed the whole way. {extra}",
-  "Honestly the most reliable courier I've ever used. Even during peak season my deliveries arrived on schedule. {extra}",
-  "The tracking notifications are so smooth — I always know exactly where my parcel is. {extra}",
-  "Customer support replied within minutes and resolved my issue immediately. Truly 5-star service. {extra}",
-  "I ship internationally every week and Cloud Shipment has never let me down. Pricing is fair and transit is fast. {extra}",
-  "The receipt and invoice feature looks so professional. My customers love the transparency. {extra}",
-  "Beautifully designed platform. The dark mode and language switcher are a really nice touch. {extra}",
-  "My fragile items always arrive in perfect condition. Their handling is top-tier. {extra}",
-  "Express delivery was even faster than promised. I'll definitely keep using Cloud Shipment. {extra}",
-  "We switched our entire fulfillment to Cloud Shipment. Reliable, transparent, and easy to use. {extra}",
-  "The animated live updates make me feel completely in control of every shipment. {extra}",
-  "Affordable, fast and trustworthy. Already recommended Cloud Shipment to everyone in my circle. {extra}",
-  "Multi-language support and a clean interface — finally a courier built for the modern world. {extra}",
-  "From booking to delivery the entire process was seamless. Bravo to the Cloud Shipment team! {extra}",
-  "I love the real-time map. Watching my package move across continents is genuinely fun. {extra}",
-  "Bulk shipping is now stress-free. The admin dashboard is intuitive and powerful. {extra}",
-  "Great experience overall. Tracking updates are accurate and the team is friendly. {extra}",
-  "Cloud Shipment has elevated my brand. My customers comment on the tracking page every time. {extra}",
-  "Temperature-sensitive shipping handled perfectly. I'm very impressed with the care taken. {extra}",
-  "Documentation and delivery were both spotless. The attention to detail is rare these days. {extra}",
-  "The mobile experience is buttery smooth. I can manage everything from my phone. {extra}",
-  "Pricing is the most transparent I've seen — no hidden fees, ever. Refreshing! {extra}",
-  "I had a customs question and support walked me through it step-by-step. So helpful. {extra}",
-  "Fast onboarding, easy shipment creation, and instant tracking links. Exactly what I needed. {extra}",
-  "Cloud Shipment makes me look so professional to my buyers. Worth every penny. {extra}",
-];
-
-const EXTRAS = [
-  "Highly recommended!","10/10.","Will definitely use again.","Couldn't be happier.","A true game-changer.",
-  "Trustworthy and consistent.","My new go-to courier.","Five stars all around.","Exceeded my expectations.",
-  "Worth every cent.","Smooth from start to finish.","Top-tier service.","Setting the standard.","Just brilliant.",
-];
-
 // Mulberry32 — deterministic PRNG
 function mulberry32(seed: number) {
   return function () {
@@ -98,8 +67,8 @@ function pick<T>(arr: T[], rand: () => number): T {
   return arr[Math.floor(rand() * arr.length)];
 }
 
-function buildPool(): Review[] {
-  const rand = mulberry32(20260101); // stable seed → identical pool every build
+function buildPool(strings: ReviewStrings, roles: string[]): Review[] {
+  const rand = mulberry32(20260101); // stable seed → identical pool composition
   const pool: Review[] = [];
   const seen = new Set<string>();
   let attempts = 0;
@@ -109,14 +78,14 @@ function buildPool(): Review[] {
     const lastI = pick(LAST_INITIALS, rand);
     const name = `${first} ${lastI}.`;
     const location = pick(LOCATIONS, rand);
-    const role = pick(ROLES, rand);
+    const role = pick(roles, rand);
     const key = `${name}|${location}|${role}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    const tpl = pick(TEMPLATES, rand);
-    const extra = pick(EXTRAS, rand);
+    const tpl = pick(strings.templates, rand);
+    const extra = pick(strings.extras, rand);
     const text = tpl.replace("{extra}", extra);
-    const rating = rand() < 0.88 ? 5 : 4; // mostly 5★
+    const rating = rand() < 0.88 ? 5 : 4;
     pool.push({
       name,
       role,
@@ -129,16 +98,11 @@ function buildPool(): Review[] {
   return pool;
 }
 
-export const TESTIMONIAL_POOL: Review[] = buildPool();
-
-/** Day-of-year index (UTC) so the rotation flips at midnight UTC. */
 function dayIndex(date = new Date()): number {
   const start = Date.UTC(date.getUTCFullYear(), 0, 0);
-  const diff = date.getTime() - start;
-  return Math.floor(diff / 86_400_000);
+  return Math.floor((date.getTime() - start) / 86_400_000);
 }
 
-/** Shuffle deterministically with a Fisher–Yates seeded by `seed`. */
 function seededShuffle<T>(arr: T[], seed: number): T[] {
   const rand = mulberry32(seed);
   const out = arr.slice();
@@ -149,20 +113,28 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
   return out;
 }
 
-/**
- * Returns a daily-rotating slice of the testimonial pool.
- * Same set for everyone on the same UTC day; flips at midnight UTC.
- */
-export function getDailyReviews(count = 24, date = new Date()): Review[] {
-  const day = dayIndex(date);
-  const seed = day * 2654435761; // hash-ish multiplier
-  const shuffled = seededShuffle(TESTIMONIAL_POOL, seed);
-  return shuffled.slice(0, count);
+// Cache pools per language
+const poolCache = new Map<string, Review[]>();
+function getPool(lang: string): Review[] {
+  const baseLang = lang.split("-")[0];
+  const cached = poolCache.get(lang) ?? poolCache.get(baseLang);
+  if (cached) return cached;
+  const strings = getReviewStrings(lang);
+  const roles = ROLES_BY_LANG[lang] ?? ROLES_BY_LANG[baseLang] ?? ROLES_BY_LANG.en;
+  const pool = buildPool(strings, roles);
+  poolCache.set(lang, pool);
+  return pool;
 }
 
-/** Average rating across the entire pool — stable, used in the header. */
-export const POOL_AVG_RATING = (
-  TESTIMONIAL_POOL.reduce((s, r) => s + r.rating, 0) / TESTIMONIAL_POOL.length
-).toFixed(1);
+/** Daily-rotating slice of the testimonial pool, in the given language. */
+export function getDailyReviews(lang: string, count = 24, date = new Date()): Review[] {
+  const pool = getPool(lang);
+  const seed = dayIndex(date) * 2654435761;
+  return seededShuffle(pool, seed).slice(0, count);
+}
 
-export const POOL_SIZE = TESTIMONIAL_POOL.length;
+export function getPoolStats(lang: string) {
+  const pool = getPool(lang);
+  const avg = (pool.reduce((s, r) => s + r.rating, 0) / pool.length).toFixed(1);
+  return { size: pool.length, avg };
+}
