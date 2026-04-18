@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import logo from "@/assets/cloud-shipment-logo.png";
 
 export const SiteHeader = () => {
@@ -26,6 +27,7 @@ export const SiteHeader = () => {
         </nav>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          <ThemeToggle />
           {user ? (
             <Button asChild size="sm">
               <Link to={isAdmin ? "/admin" : "/"}>{isAdmin ? t("nav.dashboard") : t("nav.account")}</Link>
