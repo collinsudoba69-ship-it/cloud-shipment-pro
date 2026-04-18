@@ -509,13 +509,26 @@ const Track = () => {
         {shipment && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Status Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border shadow-sm transition-all duration-500 ${
+              liveStatusFlash ? 'border-blue-400 shadow-lg ring-2 ring-blue-200 animate-pulse' : 'border-slate-200'
+            }`}>
               <div className="flex items-center gap-4">
                 <div className={`p-3 rounded-full ${getStatusColor(shipment.status)}`}>
                   {getStatusIcon(shipment.status)}
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Tracking Number</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-slate-500">Tracking Number</p>
+                    {isLive && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wide">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-600" />
+                        </span>
+                        Live
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-2xl font-bold text-slate-900 font-mono">
                       {shipment.trackingNumber}
