@@ -36,6 +36,7 @@ import logo from '@/assets/cloud-shipment-logo.png';
 interface TrackingEvent {
   id: string;
   status: string;
+  rawStatus: string | null;
   location: string;
   timestamp: string;
   description: string;
