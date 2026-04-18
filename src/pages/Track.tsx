@@ -582,6 +582,20 @@ const Track = () => {
                     </div>
                     <Separator />
                     <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Quantity</span>
+                      <span className="font-medium">{shipment.quantity}</span>
+                    </div>
+                    {shipment.isFragile && (
+                      <>
+                        <Separator />
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500">Handling</span>
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Fragile</Badge>
+                        </div>
+                      </>
+                    )}
+                    <Separator />
+                    <div className="flex justify-between items-center">
                       <span className="text-slate-500">From</span>
                       <span className="font-medium text-right">{shipment.origin}</span>
                     </div>
