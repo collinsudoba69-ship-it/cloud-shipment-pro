@@ -125,6 +125,7 @@ const Track = () => {
       const events: TrackingEvent[] = (eventsRows ?? []).map((e) => ({
         id: e.id,
         status: e.status ? statusLabel(e.status) : 'Update',
+        rawStatus: e.status ?? null,
         location: e.location ?? shipmentRow.origin,
         timestamp: format(new Date(e.event_at), 'yyyy-MM-dd hh:mm a'),
         description: e.note ?? '',
