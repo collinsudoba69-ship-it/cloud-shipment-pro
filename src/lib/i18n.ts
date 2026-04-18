@@ -67,13 +67,15 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: "en",
+    lng: typeof window !== "undefined" && localStorage.getItem("i18nextLng") ? undefined : "en-US",
+    fallbackLng: "en-US",
     supportedLngs: SUPPORTED,
     nonExplicitSupportedLngs: false,
     load: "currentOnly",
     interpolation: { escapeValue: false },
     detection: {
-      order: ["localStorage", "navigator"],
+      // Only use the user's saved choice; do not auto-detect from the browser.
+      order: ["localStorage"],
       caches: ["localStorage"],
     },
   });
