@@ -22,6 +22,9 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import ShipmentMap from '@/components/ShipmentMap';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { progressForStatus, statusLabel } from '@/lib/shipment';
+import { format } from 'date-fns';
 
 // Types for shipment data
 interface TrackingEvent {
@@ -74,73 +77,62 @@ const Track = () => {
     setShipment(null);
 
     try {
-      // Update URL with tracking number
       setSearchParams({ n: number });
 
-      // Simulate API call - Replace with your actual API endpoint
-      // const response = await fetch(`/api/shipments/track/${number}`);
-      // const data = await response.json();
-      
-      // Simulated response for demo purposes
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const mockShipment: ShipmentData = {
-        trackingNumber: number.toUpperCase(),
-        status: 'in-transit',
-        origin: 'Washington, DC',
-        destination: 'New Jersey',
-        estimatedDelivery: 'Today by 8:00 PM',
-        progress: 65,
-        carrier: 'CloudShip Express',
-        weight: '2.4 lbs',
-        service: 'Standard Ground',
-        events: [
-          {
-            id: '1',
-            status: 'Order Placed',
-            location: 'Washington, DC',
-            timestamp: '2024-04-15 09:30 AM',
-            description: 'Shipment information received',
-            completed: true
-          },
-          {
-            id: '2',
-            status: 'Picked Up',
-            location: 'Washington, DC',
-            timestamp: '2024-04-15 02:45 PM',
-            description: 'Courier picked up the package',
-            completed: true
-          },
-          {
-            id: '3',
-            status: 'In Transit',
-            location: 'Baltimore, MD',
-            timestamp: '2024-04-16 08:15 AM',
-            description: 'Package arrived at sorting facility',
-            completed: true
-          },
-          {
-            id: '4',
-            status: 'Out for Delivery',
-            location: 'Newark, NJ',
-            timestamp: '2024-04-17 06:30 AM',
-            description: 'Package out for delivery',
-            completed: false
-          },
-          {
-            id: '5',
-            status: 'Delivered',
-            location: 'New Jersey',
-            timestamp: 'Expected by 8:00 PM',
-            description: 'Estimated delivery',
-            completed: false
-          }
-        ]
+      const { data: shipmentRow, error: shipErr } = await supabase
+        .from('shipments')
+        .select('*')
+        .ilike('tracking_number', number.trim())
+        .maybeSingle();
+
+      if (shipErr) throw shipErr;
+      if (!shipmentRow) {
+        setError('No shipment found for this tracking number.');
+        toast.error('Shipment not found');
+        return;
+      }
+
+      const { data: eventsRows } = await supabase
+        .from('shipment_events')
+        .select('*')
+        .eq('shipment_id', shipmentRow.id)
+        .order('event_at', { ascending: true });
+
+      const statusMap: Record<string, ShipmentData['status']> = {
+        queued: 'pending',
+        in_transit: 'in-transit',
+        out_for_delivery: 'out-for-delivery',
+        delivered: 'delivered',
       };
 
-      setShipment(mockShipment);
+      const events: TrackingEvent[] = (eventsRows ?? []).map((e) => ({
+        id: e.id,
+        status: e.status ? statusLabel(e.status) : 'Update',
+        location: e.location ?? shipmentRow.origin,
+        timestamp: format(new Date(e.event_at), 'yyyy-MM-dd hh:mm a'),
+        description: e.note ?? '',
+        completed: true,
+      }));
+
+      const real: ShipmentData = {
+        trackingNumber: shipmentRow.tracking_number,
+        status: statusMap[shipmentRow.status] ?? 'pending',
+        origin: shipmentRow.origin,
+        destination: shipmentRow.destination,
+        estimatedDelivery: shipmentRow.estimated_delivery_date
+          ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
+          : 'TBD',
+        progress: shipmentRow.progress ?? progressForStatus(shipmentRow.status),
+        carrier: shipmentRow.courier ?? 'Cloud Shipment',
+        weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
+        service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
+        events,
+      };
+
+      setShipment(real);
       toast.success('Tracking information found!');
     } catch (err) {
+      console.error(err);
       setError('Unable to find shipment. Please check your tracking number and try again.');
       toast.error('Tracking failed');
     } finally {
