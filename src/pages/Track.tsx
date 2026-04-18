@@ -12,7 +12,11 @@ import {
   ArrowRight,
   Copy,
   Share2,
-  Printer
+  Printer,
+  FileText,
+  PackageCheck,
+  Send,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
