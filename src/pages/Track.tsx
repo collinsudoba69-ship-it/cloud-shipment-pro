@@ -29,6 +29,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { progressForStatus, statusLabel } from '@/lib/shipment';
 import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
+import logo from '@/assets/cloud-shipment-logo.png';
 
 // Types for shipment data
 interface TrackingEvent {
@@ -171,6 +173,147 @@ const Track = () => {
     }
   };
 
+  const handleDownloadReceipt = async () => {
+    if (!shipment) return;
+    try {
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const pageW = doc.internal.pageSize.getWidth();
+      const margin = 40;
+      let y = 40;
+
+      // Header band with logo
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, pageW, 90, 'F');
+      try {
+        doc.addImage(logo, 'PNG', margin, 18, 54, 54);
+      } catch { /* ignore image errors */ }
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text('Cloud Shipment', margin + 70, 45);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text('Official Shipment Receipt', margin + 70, 62);
+      doc.setFontSize(9);
+      doc.text(`Generated: ${format(new Date(), 'PPP p')}`, pageW - margin, 45, { align: 'right' });
+      doc.text(`Tracking #: ${shipment.trackingNumber}`, pageW - margin, 62, { align: 'right' });
+
+      y = 120;
+      doc.setTextColor(15, 23, 42);
+
+      // Status banner
+      doc.setFillColor(239, 246, 255);
+      doc.roundedRect(margin, y, pageW - margin * 2, 50, 6, 6, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('Status', margin + 14, y + 20);
+      doc.setFontSize(14);
+      doc.setTextColor(37, 99, 235);
+      const statusText = shipment.status === 'out-for-delivery'
+        ? 'Out for Delivery'
+        : shipment.status.charAt(0).toUpperCase() + shipment.status.slice(1);
+      doc.text(`${statusText}  •  ${shipment.progress}%`, margin + 14, y + 38);
+      doc.setTextColor(100, 116, 139);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`ETA: ${shipment.estimatedDelivery}`, pageW - margin - 14, y + 30, { align: 'right' });
+      y += 70;
+
+      // Two-column section helper
+      const sectionTitle = (title: string) => {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(15, 23, 42);
+        doc.text(title.toUpperCase(), margin, y);
+        doc.setDrawColor(226, 232, 240);
+        doc.line(margin, y + 4, pageW - margin, y + 4);
+        y += 18;
+      };
+
+      const row = (label: string, value: string) => {
+        if (!value) return;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(label, margin, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(15, 23, 42);
+        const lines = doc.splitTextToSize(value, pageW - margin * 2 - 110);
+        doc.text(lines, margin + 110, y);
+        y += Math.max(14, lines.length * 12);
+      };
+
+      sectionTitle('Sender');
+      row('Name', shipment.senderName);
+      if (shipment.senderEmail) row('Email', shipment.senderEmail);
+      if (shipment.senderPhone) row('Phone', shipment.senderPhone);
+      row('Origin', shipment.origin);
+      y += 8;
+
+      sectionTitle('Receiver');
+      row('Name', shipment.receiverName);
+      if (shipment.receiverEmail) row('Email', shipment.receiverEmail);
+      if (shipment.receiverPhone) row('Phone', shipment.receiverPhone);
+      row('Destination', shipment.destination);
+      y += 8;
+
+      sectionTitle('Package');
+      row('Carrier', shipment.carrier);
+      row('Service', shipment.service);
+      row('Weight', shipment.weight);
+      row('Quantity', String(shipment.quantity));
+      if (shipment.isFragile) row('Handling', 'Fragile');
+      if (shipment.description) row('Description', shipment.description);
+      y += 8;
+
+      // Journey timeline
+      if (shipment.events.length > 0) {
+        if (y > 700) { doc.addPage(); y = 60; }
+        sectionTitle('Journey');
+        shipment.events.slice(-6).forEach((ev) => {
+          if (y > 760) { doc.addPage(); y = 60; }
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(9);
+          doc.setTextColor(15, 23, 42);
+          doc.text(`• ${ev.status}`, margin, y);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(100, 116, 139);
+          doc.text(ev.timestamp, pageW - margin, y, { align: 'right' });
+          y += 12;
+          if (ev.description) {
+            const desc = doc.splitTextToSize(ev.description, pageW - margin * 2 - 12);
+            doc.text(desc, margin + 12, y);
+            y += desc.length * 11;
+          }
+          if (ev.location) {
+            doc.setTextColor(148, 163, 184);
+            doc.setFontSize(8);
+            doc.text(`@ ${ev.location}`, margin + 12, y);
+            doc.setFontSize(9);
+            y += 12;
+          }
+          y += 4;
+        });
+      }
+
+      // Footer
+      const footerY = doc.internal.pageSize.getHeight() - 30;
+      doc.setDrawColor(226, 232, 240);
+      doc.line(margin, footerY - 12, pageW - margin, footerY - 12);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Cloud Shipment • Official Receipt • This document is computer-generated.', pageW / 2, footerY, { align: 'center' });
+
+      doc.save(`CloudShipment-Receipt-${shipment.trackingNumber}.pdf`);
+      toast.success('Receipt downloaded');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to generate receipt');
+    }
+  };
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       'delivered': 'bg-green-100 text-green-700 border-green-200',
@@ -203,11 +346,14 @@ const Track = () => {
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Track Shipment</h1>
-              <p className="text-slate-500 mt-1">
-                Enter your tracking number to get real-time updates
-              </p>
+            <div className="flex items-center gap-4">
+              <img src={logo} alt="Cloud Shipment" className="h-12 w-auto" />
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Track Shipment</h1>
+                <p className="text-slate-500 mt-1 text-sm">
+                  Enter your tracking number to get real-time updates
+                </p>
+              </div>
             </div>
             {user && (
               <Button variant="outline" onClick={() => window.location.href = '/admin/shipments'}>
@@ -282,15 +428,16 @@ const Track = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className={getStatusColor(shipment.status)}>
                   {shipment.status === 'out-for-delivery' ? 'Out for Delivery' : 
                    shipment.status.charAt(0).toUpperCase() + shipment.status.slice(1)}
                 </Badge>
-                <Button variant="outline" size="icon" onClick={() => window.print()}>
+                <Button variant="outline" size="sm" onClick={handleDownloadReceipt} className="gap-2">
                   <Printer className="w-4 h-4" />
+                  Print Receipt
                 </Button>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" title="Share">
                   <Share2 className="w-4 h-4" />
                 </Button>
               </div>
