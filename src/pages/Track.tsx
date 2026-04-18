@@ -993,8 +993,16 @@ const Track = () => {
                     <p className="text-sm text-slate-600 mb-4">
                       Have questions about your delivery? Our support team is here to help.
                     </p>
-                    <Button variant="outline" className="w-full" onClick={() => toast.info('Support chat coming soon!')}>
-                      Contact Support
+                    <Button asChild variant="outline" className="w-full">
+                      <a
+                        href={`mailto:cloudshipmentcontact@gmail.com?subject=${encodeURIComponent(
+                          `Support Request – Tracking ${shipment.trackingNumber}`
+                        )}&body=${encodeURIComponent(
+                          `Hello Cloud Shipment Support Team,\n\nI need assistance with my shipment.\n\nTracking Number: ${shipment.trackingNumber}\nStatus: ${shipment.status}\nFrom: ${shipment.origin}\nTo: ${shipment.destination}\n\nMy question:\n`
+                        )}`}
+                      >
+                        Contact Support
+                      </a>
                     </Button>
                   </CardContent>
                 </Card>
