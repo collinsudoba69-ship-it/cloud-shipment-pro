@@ -66,6 +66,10 @@ interface ShipmentData {
   images: string[];
   quantity: number;
   isFragile: boolean;
+  paymentStatus: 'pending' | 'paid';
+  amountToPay: number | null;
+  paymentMethod: string | null;
+  paymentReason: string | null;
 }
 
 const Track = () => {
