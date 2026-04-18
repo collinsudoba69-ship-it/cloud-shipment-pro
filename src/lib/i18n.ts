@@ -13,6 +13,7 @@ import pt from "./locales/pt";
 import fi from "./locales/fi";
 import sv from "./locales/sv";
 import no from "./locales/no";
+import da from "./locales/da";
 
 const resources = {
   en: { translation: en },
