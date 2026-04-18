@@ -863,6 +863,64 @@ const Track = () => {
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Payment Details */}
+                {(shipment.amountToPay !== null || shipment.paymentMethod || shipment.paymentReason || shipment.paymentStatus) && (
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Payment Details
+                        </CardTitle>
+                        <Badge
+                          variant="outline"
+                          className={
+                            shipment.paymentStatus === 'paid'
+                              ? 'bg-green-100 text-green-700 border-green-200'
+                              : 'bg-amber-100 text-amber-700 border-amber-200'
+                          }
+                        >
+                          {shipment.paymentStatus === 'paid' ? 'Paid' : 'Pending Payment'}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {shipment.amountToPay !== null && (
+                        <div className="flex justify-between items-center bg-slate-50 rounded-lg p-3">
+                          <span className="text-sm text-slate-500">Amount to Pay</span>
+                          <span className="text-xl font-bold text-slate-900">
+                            ${Number(shipment.amountToPay).toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {shipment.paymentMethod && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                              Payment Method
+                            </p>
+                            <p className="text-sm font-medium text-slate-900">{shipment.paymentMethod}</p>
+                          </div>
+                        )}
+                        {shipment.paymentReason && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                              Reason
+                            </p>
+                            <p className="text-sm text-slate-700">{shipment.paymentReason}</p>
+                          </div>
+                        )}
+                      </div>
+                      {shipment.paymentStatus !== 'paid' && shipment.amountToPay !== null && (
+                        <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+                          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                          <span>Payment is required before this shipment can be released to its final destination.</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* Sidebar Info */}
