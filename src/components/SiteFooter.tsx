@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Mail } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import { SUPPORT_EMAIL } from "@/lib/i18n";
 import logo from "@/assets/cloud-shipment-logo.png";
 
@@ -9,6 +9,46 @@ export const SiteFooter = () => {
   return (
     <footer className="border-t border-border/60 bg-secondary/40">
       <div className="container py-12">
+        {/* Global offices */}
+        <div className="mb-10 rounded-2xl border border-border/60 bg-background/60 p-6 shadow-sm">
+          <div className="mb-5 flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-primary" />
+            <h3 className="text-base font-semibold">{t("footer.globalOffices")}</h3>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {t("footer.usHqTitle")}
+              </p>
+              <address className="mt-1 not-italic text-sm leading-relaxed text-muted-foreground">
+                1201 Orange Street, Suite 700<br />
+                Wilmington, DE 19801<br />
+                United States
+              </address>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {t("footer.usHubTitle")}
+              </p>
+              <address className="mt-1 not-italic text-sm leading-relaxed text-muted-foreground">
+                1321 Upland Dr, Suite 500<br />
+                Houston, TX 77043<br />
+                United States
+              </address>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {t("footer.euUkTitle")}
+              </p>
+              <address className="mt-1 not-italic text-sm leading-relaxed text-muted-foreground">
+                27 Old Gloucester Street<br />
+                London, WC1N 3AX<br />
+                United Kingdom
+              </address>
+            </div>
+          </div>
+        </div>
+
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-3">
             <Link to="/" className="flex items-center gap-2 font-semibold">

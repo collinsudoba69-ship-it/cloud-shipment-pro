@@ -41,6 +41,10 @@ const tr: TranslationSchema = {
     supportDesc: "Bir paket hakkında sorularınız mı var? Doğrudan e-posta gönderin.", emailUs: "E-posta desteği",
     legal: "Yasal", privacy: "Gizlilik Politikası", terms: "Hizmet Şartları",
     rights: "Tüm hakları saklıdır.", trackShipment: "Gönderi Takip", staffPortal: "Personel Portalı",
+    globalOffices: "Küresel ofislerimizle iletişime geçin",
+    usHqTitle: "Amerika Birleşik Devletleri Genel Merkezi (Kurumsal)",
+    usHubTitle: "ABD Lojistik Merkezi (Operasyonlar)",
+    euUkTitle: "Avrupa ve Birleşik Krallık Operasyonları",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "Hızlı, güvenilir, küresel lojistik",

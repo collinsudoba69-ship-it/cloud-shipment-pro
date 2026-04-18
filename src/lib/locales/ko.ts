@@ -41,6 +41,10 @@ const ko: TranslationSchema = {
     supportDesc: "패키지에 대한 질문이 있으신가요? 직접 이메일을 보내주세요.", emailUs: "이메일 지원",
     legal: "법적", privacy: "개인정보 처리방침", terms: "서비스 약관",
     rights: "모든 권리 보유.", trackShipment: "배송 추적", staffPortal: "직원 포털",
+    globalOffices: "글로벌 사무소에 문의하기",
+    usHqTitle: "미국 본사 (법인)",
+    usHubTitle: "미국 물류 허브 (운영)",
+    euUkTitle: "유럽 및 영국 운영",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "빠르고 안정적인 글로벌 물류",

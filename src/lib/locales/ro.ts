@@ -41,6 +41,10 @@ const ro: TranslationSchema = {
     supportDesc: "Întrebări despre un colet? Trimite-ne un e-mail direct.", emailUs: "Asistență prin e-mail",
     legal: "Juridic", privacy: "Politica de confidențialitate", terms: "Termeni de utilizare",
     rights: "Toate drepturile rezervate.", trackShipment: "Urmărește expediere", staffPortal: "Portal personal",
+    globalOffices: "Contactați birourile noastre globale",
+    usHqTitle: "Sediul central din Statele Unite (Corporativ)",
+    usHubTitle: "Centrul logistic din SUA (Operațiuni)",
+    euUkTitle: "Operațiuni Europa și Marea Britanie",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "Logistică globală rapidă și fiabilă",

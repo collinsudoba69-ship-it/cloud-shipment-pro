@@ -90,6 +90,10 @@ const ar: TranslationSchema = {
     rights: "جميع الحقوق محفوظة.",
     trackShipment: "تتبع الشحنة",
     staffPortal: "بوابة الموظفين",
+    globalOffices: "تواصل مع مكاتبنا العالمية",
+    usHqTitle: "المقر الرئيسي في الولايات المتحدة (الشركة)",
+    usHubTitle: "مركز الخدمات اللوجستية في الولايات المتحدة (العمليات)",
+    euUkTitle: "عمليات أوروبا والمملكة المتحدة",
   },
   home: {
     heroTitle: "Cloud Shipment",

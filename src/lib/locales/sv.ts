@@ -94,6 +94,10 @@ const sv: TranslationSchema = {
     rights: "Alla rättigheter förbehållna.",
     trackShipment: "Spåra försändelse",
     staffPortal: "Personalportal",
+    globalOffices: "Kontakta våra globala kontor",
+    usHqTitle: "USA:s huvudkontor (Bolag)",
+    usHubTitle: "USA:s logistiknav (Drift)",
+    euUkTitle: "Europa & Storbritannien drift",
   },
   home: {
     heroTitle: "Cloud Shipment",

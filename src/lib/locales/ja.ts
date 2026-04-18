@@ -41,6 +41,10 @@ const ja: TranslationSchema = {
     supportDesc: "荷物について質問は？直接メールでお問い合わせください。", emailUs: "メールサポート",
     legal: "法的", privacy: "プライバシーポリシー", terms: "利用規約",
     rights: "All rights reserved.", trackShipment: "貨物を追跡", staffPortal: "スタッフポータル",
+    globalOffices: "グローバルオフィスにお問い合わせ",
+    usHqTitle: "米国本社（コーポレート）",
+    usHubTitle: "米国物流ハブ（オペレーション）",
+    euUkTitle: "欧州および英国オペレーション",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "高速で信頼性の高いグローバル物流",

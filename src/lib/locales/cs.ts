@@ -41,6 +41,10 @@ const cs: TranslationSchema = {
     supportDesc: "Otázky k balíku? Napište nám přímo.", emailUs: "E-mailová podpora",
     legal: "Právní", privacy: "Zásady ochrany soukromí", terms: "Podmínky služby",
     rights: "Všechna práva vyhrazena.", trackShipment: "Sledovat zásilku", staffPortal: "Portál personálu",
+    globalOffices: "Kontaktujte naše globální kanceláře",
+    usHqTitle: "Centrála v USA (Korporátní)",
+    usHubTitle: "Logistické centrum v USA (Provoz)",
+    euUkTitle: "Provoz Evropa a Velká Británie",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "Rychlá, spolehlivá, globální logistika",

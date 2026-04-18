@@ -94,6 +94,10 @@ const fi: TranslationSchema = {
     rights: "Kaikki oikeudet pidätetään.",
     trackShipment: "Seuraa lähetystä",
     staffPortal: "Henkilökunnan portaali",
+    globalOffices: "Ota yhteyttä globaaleihin toimistoihimme",
+    usHqTitle: "Yhdysvaltain pääkonttori (Yritys)",
+    usHubTitle: "Yhdysvaltain logistiikkakeskus (Toiminta)",
+    euUkTitle: "Euroopan ja Britannian toiminta",
   },
   home: {
     heroTitle: "Cloud Shipment",

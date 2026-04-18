@@ -41,6 +41,10 @@ const ru: TranslationSchema = {
     supportDesc: "Вопросы о посылке? Напишите нам напрямую.", emailUs: "Поддержка по email",
     legal: "Юридическое", privacy: "Политика конфиденциальности", terms: "Условия обслуживания",
     rights: "Все права защищены.", trackShipment: "Отследить посылку", staffPortal: "Портал персонала",
+    globalOffices: "Свяжитесь с нашими глобальными офисами",
+    usHqTitle: "Штаб-квартира в США (Корпоративная)",
+    usHubTitle: "Логистический центр в США (Операции)",
+    euUkTitle: "Операции в Европе и Великобритании",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "Быстрая, надёжная, глобальная логистика",

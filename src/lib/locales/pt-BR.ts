@@ -41,6 +41,10 @@ const ptBR: TranslationSchema = {
     supportDesc: "Dúvidas sobre um pacote? Envie um e-mail direto.", emailUs: "E-mail para o suporte",
     legal: "Legal", privacy: "Política de privacidade", terms: "Termos de serviço",
     rights: "Todos os direitos reservados.", trackShipment: "Rastrear envio", staffPortal: "Portal da equipe",
+    globalOffices: "Contate nossos escritórios globais",
+    usHqTitle: "Sede nos Estados Unidos (Corporativa)",
+    usHubTitle: "Centro Logístico nos EUA (Operações)",
+    euUkTitle: "Operações Europa e Reino Unido",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "Logística global rápida e confiável",

@@ -41,6 +41,10 @@ const hi: TranslationSchema = {
     supportDesc: "किसी पैकेज के बारे में प्रश्न? सीधे ईमेल करें।", emailUs: "ईमेल सहायता",
     legal: "कानूनी", privacy: "गोपनीयता नीति", terms: "सेवा की शर्तें",
     rights: "सर्वाधिकार सुरक्षित।", trackShipment: "शिपमेंट ट्रैक करें", staffPortal: "स्टाफ पोर्टल",
+    globalOffices: "हमारे वैश्विक कार्यालयों से संपर्क करें",
+    usHqTitle: "संयुक्त राज्य मुख्यालय (कॉर्पोरेट)",
+    usHubTitle: "संयुक्त राज्य लॉजिस्टिक्स हब (परिचालन)",
+    euUkTitle: "यूरोप और यूके परिचालन",
   },
   home: {
     heroTitle: "Cloud Shipment", heroSubtitle: "तेज़, विश्वसनीय, वैश्विक लॉजिस्टिक्स",
