@@ -588,6 +588,20 @@ const Track = () => {
               </div>
             </div>
 
+            {/* Delivery Estimate - moved above the map */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  <span className="font-semibold text-blue-900">{t('trackPage.estimatedDelivery')}</span>
+                </div>
+                <p className="text-2xl font-bold text-blue-900">{shipment.estimatedDelivery}</p>
+                <p className="text-sm text-blue-700 mt-1">
+                  {t('trackPage.onSchedule')}
+                </p>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Map Section */}
               <div className="lg:col-span-2 space-y-6">
