@@ -34,6 +34,7 @@ import { progressForStatus, statusLabel } from '@/lib/shipment';
 import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import logo from '@/assets/cloud-shipment-logo.png';
+import { translateText } from '@/lib/translate';
 
 // Types for shipment data
 interface TrackingEvent {
