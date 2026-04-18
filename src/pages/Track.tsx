@@ -496,10 +496,6 @@ const Track = () => {
 
                       // Map admin status -> index of the CURRENT (active) stage.
                       // The matching stage shows the pulsing blue indicator; all stages BEFORE it are marked completed.
-                      // - 'pending' (queued)  => Label Created is current
-                      // - 'in-transit'        => In Transit is current (Label + Picked Up completed)
-                      // - 'out-for-delivery'  => Out for Delivery is current (first three completed)
-                      // - 'delivered'         => Delivered is current AND completed (all five done)
                       const statusToCurrentIdx: Record<string, number> = {
                         'pending': 0,
                         'in-transit': 2,
@@ -507,7 +503,22 @@ const Track = () => {
                         'delivered': 4,
                         'exception': 2,
                       };
-                      const currentIdx = statusToCurrentIdx[shipment.status] ?? 0;
+                      // Raw DB enum -> stage index (events use raw enum values like 'in_transit')
+                      const rawStatusToIdx: Record<string, number> = {
+                        'queued': 0,
+                        'in_transit': 2,
+                        'out_for_delivery': 3,
+                        'delivered': 4,
+                      };
+
+                      // Use the HIGHEST stage from either the row status or the latest event status.
+                      // This keeps the Journey in sync with Recent Updates even if the row wasn't synced.
+                      let currentIdx = statusToCurrentIdx[shipment.status] ?? 0;
+                      for (const ev of shipment.events) {
+                        if (ev.rawStatus && rawStatusToIdx[ev.rawStatus] !== undefined) {
+                          currentIdx = Math.max(currentIdx, rawStatusToIdx[ev.rawStatus]);
+                        }
+                      }
 
                       return (
                         <div className="relative">
