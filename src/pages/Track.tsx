@@ -12,7 +12,11 @@ import {
   ArrowRight,
   Copy,
   Share2,
-  Printer
+  Printer,
+  FileText,
+  PackageCheck,
+  Send,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -294,53 +298,131 @@ const Track = () => {
                   </CardContent>
                 </Card>
 
-                {/* Timeline */}
+                {/* Vertical Stepper - Shipment Journey */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Shipment Progress</CardTitle>
+                    <CardTitle>Shipment Journey</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="relative">
-                      {shipment.events.map((event, index) => (
-                        <div key={event.id} className="flex gap-4 pb-8 last:pb-0">
-                          <div className="flex flex-col items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                              event.completed 
-                                ? 'bg-green-600 border-green-600 text-white' 
-                                : 'bg-white border-slate-300 text-slate-400'
-                            }`}>
-                              {event.completed ? (
-                                <CheckCircle2 className="w-4 h-4" />
-                              ) : (
-                                <div className="w-2 h-2 rounded-full bg-current" />
+                    {(() => {
+                      const stages = [
+                        { key: 'label_created', label: 'Label Created', description: 'Shipment registered in our system', icon: FileText },
+                        { key: 'picked_up', label: 'Picked Up', description: 'Courier has collected the item', icon: PackageCheck },
+                        { key: 'in_transit', label: 'In Transit', description: 'Package is moving between hubs', icon: Truck },
+                        { key: 'out_for_delivery', label: 'Out for Delivery', description: 'Final vehicle dispatched to receiver', icon: Send },
+                        { key: 'delivered', label: 'Delivered', description: 'Handed over to receiver', icon: Home },
+                      ];
+
+                      const statusToIndex: Record<string, number> = {
+                        'pending': 0,
+                        'in-transit': 2,
+                        'out-for-delivery': 3,
+                        'delivered': 4,
+                        'exception': 2,
+                      };
+                      const currentIdx = statusToIndex[shipment.status] ?? 0;
+
+                      return (
+                        <div className="relative">
+                          {stages.map((stage, index) => {
+                            const isDelivered = shipment.status === 'delivered';
+                            const isCompleted = isDelivered || index < currentIdx;
+                            const isCurrent = !isDelivered && index === currentIdx;
+                            const isUpcoming = !isCompleted && !isCurrent;
+                            const StageIcon = stage.icon;
+
+                            const matchedEvent = shipment.events.find(e =>
+                              e.status.toLowerCase().includes(stage.label.toLowerCase().split(' ')[0])
+                            );
+
+                            return (
+                              <div key={stage.key} className="flex gap-4 pb-8 last:pb-0">
+                                <div className="flex flex-col items-center">
+                                  <div className={`relative w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                                    isCompleted
+                                      ? 'bg-green-600 border-green-600 text-white'
+                                      : isCurrent
+                                      ? 'border-blue-600 text-white'
+                                      : 'bg-white border-slate-300 text-slate-400'
+                                  }`}>
+                                    {isCurrent && (
+                                      <>
+                                        <span className="absolute inset-0 rounded-full bg-blue-500 opacity-75 animate-ping" />
+                                        <span className="absolute inset-0 rounded-full bg-blue-600" />
+                                      </>
+                                    )}
+                                    <span className="relative z-10">
+                                      {isCompleted ? (
+                                        <CheckCircle2 className="w-5 h-5" />
+                                      ) : (
+                                        <StageIcon className="w-5 h-5" />
+                                      )}
+                                    </span>
+                                  </div>
+                                  {index !== stages.length - 1 && (
+                                    <div className={`w-0.5 flex-1 mt-2 min-h-[40px] ${
+                                      isCompleted ? 'bg-green-600' : 'bg-slate-200'
+                                    }`} />
+                                  )}
+                                </div>
+                                <div className="flex-1 pt-1.5">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                    <h4 className={`font-semibold ${
+                                      isCompleted ? 'text-slate-900' : isCurrent ? 'text-blue-700' : 'text-slate-400'
+                                    }`}>
+                                      {stage.label}
+                                      {isCurrent && (
+                                        <span className="ml-2 text-xs font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                          Current
+                                        </span>
+                                      )}
+                                    </h4>
+                                    {matchedEvent && (
+                                      <span className="text-xs text-slate-500 font-mono">
+                                        {matchedEvent.timestamp}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className={`text-sm mt-1 ${
+                                    isUpcoming ? 'text-slate-400' : 'text-slate-600'
+                                  }`}>
+                                    {matchedEvent?.description || stage.description}
+                                  </p>
+                                  {matchedEvent?.location && (
+                                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                      <MapPin className="w-3 h-3" />
+                                      {matchedEvent.location}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+
+                    {shipment.events.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-slate-200">
+                        <h5 className="text-sm font-semibold text-slate-700 mb-3">Recent Updates</h5>
+                        <div className="space-y-2">
+                          {shipment.events.slice(-3).reverse().map((event) => (
+                            <div key={event.id} className="text-sm bg-slate-50 rounded-lg p-3">
+                              <div className="flex justify-between items-start gap-2">
+                                <span className="font-medium text-slate-900">{event.status}</span>
+                                <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{event.timestamp}</span>
+                              </div>
+                              {event.description && <p className="text-slate-600 mt-1">{event.description}</p>}
+                              {event.location && (
+                                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />{event.location}
+                                </p>
                               )}
                             </div>
-                            {index !== shipment.events.length - 1 && (
-                              <div className={`w-0.5 flex-1 mt-2 ${
-                                event.completed ? 'bg-green-600' : 'bg-slate-200'
-                              }`} />
-                            )}
-                          </div>
-                          <div className="flex-1 pt-1">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                              <h4 className={`font-semibold ${
-                                event.completed ? 'text-slate-900' : 'text-slate-500'
-                              }`}>
-                                {event.status}
-                              </h4>
-                              <span className="text-sm text-slate-500 font-mono">
-                                {event.timestamp}
-                              </span>
-                            </div>
-                            <p className="text-slate-600 mt-1">{event.description}</p>
-                            <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {event.location}
-                            </p>
-                          </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
