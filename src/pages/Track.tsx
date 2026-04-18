@@ -36,6 +36,7 @@ import logo from '@/assets/cloud-shipment-logo.png';
 interface TrackingEvent {
   id: string;
   status: string;
+  rawStatus: string | null;
   location: string;
   timestamp: string;
   description: string;
@@ -124,21 +125,37 @@ const Track = () => {
       const events: TrackingEvent[] = (eventsRows ?? []).map((e) => ({
         id: e.id,
         status: e.status ? statusLabel(e.status) : 'Update',
+        rawStatus: e.status ?? null,
         location: e.location ?? shipmentRow.origin,
         timestamp: format(new Date(e.event_at), 'yyyy-MM-dd hh:mm a'),
         description: e.note ?? '',
         completed: true,
       }));
 
+      // Use the most advanced status between the row and the latest event with a known status.
+      // This keeps the Journey, badge, and progress bar in sync with the Recent Updates.
+      const statusRank: Record<string, number> = {
+        queued: 0, in_transit: 1, out_for_delivery: 2, delivered: 3,
+      };
+      let effectiveRawStatus: string = shipmentRow.status;
+      for (const e of eventsRows ?? []) {
+        if (e.status && (statusRank[e.status] ?? -1) > (statusRank[effectiveRawStatus] ?? -1)) {
+          effectiveRawStatus = e.status;
+        }
+      }
+
       const real: ShipmentData = {
         trackingNumber: shipmentRow.tracking_number,
-        status: statusMap[shipmentRow.status] ?? 'pending',
+        status: statusMap[effectiveRawStatus] ?? 'pending',
         origin: shipmentRow.origin,
         destination: shipmentRow.destination,
         estimatedDelivery: shipmentRow.estimated_delivery_date
           ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
           : 'TBD',
-        progress: shipmentRow.progress ?? progressForStatus(shipmentRow.status),
+        progress: Math.max(
+          shipmentRow.progress ?? 0,
+          progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'delivered')
+        ),
         carrier: shipmentRow.courier ?? 'Cloud Shipment',
         weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
         service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
@@ -494,10 +511,6 @@ const Track = () => {
 
                       // Map admin status -> index of the CURRENT (active) stage.
                       // The matching stage shows the pulsing blue indicator; all stages BEFORE it are marked completed.
-                      // - 'pending' (queued)  => Label Created is current
-                      // - 'in-transit'        => In Transit is current (Label + Picked Up completed)
-                      // - 'out-for-delivery'  => Out for Delivery is current (first three completed)
-                      // - 'delivered'         => Delivered is current AND completed (all five done)
                       const statusToCurrentIdx: Record<string, number> = {
                         'pending': 0,
                         'in-transit': 2,
@@ -505,7 +518,22 @@ const Track = () => {
                         'delivered': 4,
                         'exception': 2,
                       };
-                      const currentIdx = statusToCurrentIdx[shipment.status] ?? 0;
+                      // Raw DB enum -> stage index (events use raw enum values like 'in_transit')
+                      const rawStatusToIdx: Record<string, number> = {
+                        'queued': 0,
+                        'in_transit': 2,
+                        'out_for_delivery': 3,
+                        'delivered': 4,
+                      };
+
+                      // Use the HIGHEST stage from either the row status or the latest event status.
+                      // This keeps the Journey in sync with Recent Updates even if the row wasn't synced.
+                      let currentIdx = statusToCurrentIdx[shipment.status] ?? 0;
+                      for (const ev of shipment.events) {
+                        if (ev.rawStatus && rawStatusToIdx[ev.rawStatus] !== undefined) {
+                          currentIdx = Math.max(currentIdx, rawStatusToIdx[ev.rawStatus]);
+                        }
+                      }
 
                       return (
                         <div className="relative">
