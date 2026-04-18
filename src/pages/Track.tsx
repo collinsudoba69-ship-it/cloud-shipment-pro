@@ -149,6 +149,10 @@ const Track = () => {
       images: Array.isArray(shipmentRow.images) ? shipmentRow.images : [],
       quantity: shipmentRow.quantity ?? 1,
       isFragile: shipmentRow.is_fragile ?? false,
+      paymentStatus: shipmentRow.payment_status ?? 'pending',
+      amountToPay: shipmentRow.amount_to_pay ?? null,
+      paymentMethod: shipmentRow.payment_method ?? null,
+      paymentReason: shipmentRow.payment_reason ?? null,
     };
   }, []);
 
