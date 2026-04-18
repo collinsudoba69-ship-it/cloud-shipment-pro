@@ -1,8 +1,6 @@
 import { useEffect, useMemo } from "react";
-import { MapContainer, Marker, Polyline, TileLayer, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, Marker, Polyline, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
-import { MapPin, Truck } from "lucide-react";
-import { renderToStaticMarkup } from "react-dom/server";
 
 type ShipmentMapStatus = "pending" | "in-transit" | "out-for-delivery" | "delivered" | "exception";
 
@@ -46,12 +44,12 @@ const interpolatePosition = (start: [number, number], end: [number, number], pro
   return [start[0] + (end[0] - start[0]) * safe, start[1] + (end[1] - start[1]) * safe];
 };
 
-const makeIcon = (className: string, node: React.ReactNode) =>
+const makeIcon = (className: string, html: string, size: [number, number] = [44, 44]) =>
   L.divIcon({
     className,
-    html: renderToStaticMarkup(node),
-    iconSize: [44, 44],
-    iconAnchor: [22, 22],
+    html,
+    iconSize: size,
+    iconAnchor: [size[0] / 2, size[1] / 2],
   });
 
 const FitBounds = ({ bounds }: { bounds: L.LatLngBoundsExpression }) => {
@@ -78,9 +76,7 @@ const ShipmentMap = ({ shipment }: ShipmentMapProps) => {
     () =>
       makeIcon(
         "shipment-map-icon",
-        <div className="shipment-map-marker shipment-map-marker--origin">
-          <MapPin size={18} strokeWidth={2.2} />
-        </div>,
+        `<div class="shipment-map-marker shipment-map-marker--origin"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>`,
       ),
     [],
   );
@@ -89,9 +85,7 @@ const ShipmentMap = ({ shipment }: ShipmentMapProps) => {
     () =>
       makeIcon(
         "shipment-map-icon",
-        <div className="shipment-map-marker shipment-map-marker--destination">
-          <MapPin size={18} strokeWidth={2.2} />
-        </div>,
+        `<div class="shipment-map-marker shipment-map-marker--destination"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>`,
       ),
     [],
   );
@@ -100,12 +94,8 @@ const ShipmentMap = ({ shipment }: ShipmentMapProps) => {
     () =>
       makeIcon(
         "shipment-map-icon shipment-map-icon--live",
-        <div className="shipment-map-live-marker">
-          <div className="shipment-map-live-ping" />
-          <div className="shipment-map-live-core">
-            <Truck size={16} strokeWidth={2.4} />
-          </div>
-        </div>,
+        `<div class="shipment-map-live-marker"><div class="shipment-map-live-ping"></div><div class="shipment-map-live-core"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></div></div>`,
+        [52, 52],
       ),
     [],
   );
@@ -139,19 +129,9 @@ const ShipmentMap = ({ shipment }: ShipmentMapProps) => {
           pathOptions={{ className: "shipment-map-route", color: "hsl(208 100% 58%)", weight: 5, opacity: 0.95, dashArray: "12 14" }}
         />
 
-        <Marker position={originCoords} icon={originIcon}>
-          <Tooltip>{shipment.origin}</Tooltip>
-        </Marker>
-
-        <Marker position={destinationCoords} icon={destinationIcon}>
-          <Tooltip>{shipment.destination}</Tooltip>
-        </Marker>
-
-        {showLiveMarker && (
-          <Marker position={currentCoords} icon={liveIcon}>
-            <Tooltip>Shipment in motion</Tooltip>
-          </Marker>
-        )}
+        <Marker position={originCoords} icon={originIcon} title={shipment.origin} />
+        <Marker position={destinationCoords} icon={destinationIcon} title={shipment.destination} />
+        {showLiveMarker && <Marker position={currentCoords} icon={liveIcon} title="Shipment in motion" />}
       </MapContainer>
     </div>
   );
