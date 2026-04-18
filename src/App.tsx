@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "next-themes";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -20,51 +21,54 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/track" element={<Track />} />
-            <Route path="/auth" element={<Auth />} />
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/index" element={<Index />} />
+              <Route path="/track" element={<Track />} />
+              <Route path="/auth" element={<Auth />} />
 
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Overview />} />
-              <Route path="shipments" element={<Shipments />} />
-              <Route path="shipments/new" element={<ShipmentForm />} />
-              <Route path="shipments/:id" element={<ShipmentForm />} />
               <Route
-                path="users"
+                path="/admin"
                 element={
-                  <ProtectedRoute requireSuperAdmin>
-                    <Users />
+                  <ProtectedRoute requireAdmin>
+                    <AdminLayout />
                   </ProtectedRoute>
                 }
-              />
-              <Route
-                path="logs"
-                element={
-                  <ProtectedRoute requireSuperAdmin>
-                    <Logs />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
+              >
+                <Route index element={<Overview />} />
+                <Route path="shipments" element={<Shipments />} />
+                <Route path="shipments/new" element={<ShipmentForm />} />
+                <Route path="shipments/:id" element={<ShipmentForm />} />
+                <Route
+                  path="users"
+                  element={
+                    <ProtectedRoute requireSuperAdmin>
+                      <Users />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="logs"
+                  element={
+                    <ProtectedRoute requireSuperAdmin>
+                      <Logs />
+                    </ProtectedRoute>
+                  }
+                />
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
