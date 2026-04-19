@@ -113,6 +113,16 @@ const Auth = () => {
                   <Button className="w-full" disabled={loading}>
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
                   </Button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotEmail(loginEmail);
+                      setShowForgot(true);
+                    }}
+                    className="block w-full text-center text-sm text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </button>
                 </form>
               </TabsContent>
 
