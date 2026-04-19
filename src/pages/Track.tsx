@@ -606,7 +606,7 @@ const Track = () => {
                   <Printer className="w-4 h-4" />
                   {t('trackPage.printReceipt')}
                 </Button>
-                <Button variant="outline" size="icon" title={t('trackPage.share')}>
+                <Button variant="outline" size="icon" title={t('trackPage.share')} onClick={handleShareTracking}>
                   <Share2 className="w-4 h-4" />
                 </Button>
               </div>
