@@ -262,6 +262,16 @@ export const ShipmentInvoiceDialog = ({
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="invoice-number">Invoice Number</Label>
+                <Input id="invoice-number" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="e.g. INV-2026-001" />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="insurance-value">Package Insurance Value</Label>
+                <Input id="insurance-value" value={insuranceValue} onChange={(e) => setInsuranceValue(e.target.value)} placeholder="e.g. $1,000" />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="receipt-logo">Upload Logo</Label>
                 <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed border-border bg-background px-3 py-3 text-sm text-muted-foreground hover:bg-accent/50">
                   <span className="truncate">{logoName || "Choose file"}</span>
