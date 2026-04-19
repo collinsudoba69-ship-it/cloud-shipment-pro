@@ -18,6 +18,7 @@ import Users from "./pages/admin/Users";
 import Logs from "./pages/admin/Logs";
 import Settings from "./pages/admin/Settings";
 import BuyCredits from "./pages/BuyCredits";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
