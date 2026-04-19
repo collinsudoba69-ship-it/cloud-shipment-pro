@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Infinity as InfIcon, Plus, Minus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import BackButton from "@/components/BackButton";
 
 interface UserRow {
   id: string;
@@ -72,6 +73,7 @@ const Users = () => {
 
   return (
     <div className="space-y-6">
+      <BackButton />
       <div>
         <h1 className="text-2xl font-bold">Users & roles</h1>
         <p className="text-muted-foreground">Manage staff access and credits.</p>

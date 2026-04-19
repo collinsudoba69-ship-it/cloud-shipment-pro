@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { statusColorClass, statusLabel, ShipmentStatus } from "@/lib/shipment";
 import { format } from "date-fns";
+import BackButton from "@/components/BackButton";
 
 interface RecentShipment {
   id: string;
@@ -45,6 +46,7 @@ const Overview = () => {
 
   return (
     <div className="space-y-6">
+      <BackButton />
       <div>
         <h1 className="text-2xl font-bold">Dashboard overview</h1>
         <p className="text-muted-foreground">Live snapshot of every shipment in the network.</p>

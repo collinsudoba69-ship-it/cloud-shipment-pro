@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import BackButton from "@/components/BackButton";
 
 interface Log {
   id: string;
@@ -25,6 +26,7 @@ const Logs = () => {
 
   return (
     <div className="space-y-6">
+      <BackButton />
       <div>
         <h1 className="text-2xl font-bold">Activity logs</h1>
         <p className="text-muted-foreground">Audit trail of admin actions.</p>
