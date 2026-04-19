@@ -20,7 +20,8 @@ import {
   Home,
   Radio,
   Bell,
-  MessageCircle
+  MessageCircle,
+  Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1070,6 +1071,7 @@ const Track = () => {
                           `Hello Cloud Shipment Support Team,\n\nI need assistance with my shipment.\n\nTracking Number: ${shipment.trackingNumber}\nStatus: ${shipment.status}\nFrom: ${shipment.origin}\nTo: ${shipment.destination}\n\nMy question:\n`
                         )}`}
                       >
+                        <Mail className="h-4 w-4 mr-2" />
                         {t('trackPage.contactSupport')}
                       </a>
                     </Button>
