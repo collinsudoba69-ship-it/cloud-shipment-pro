@@ -353,6 +353,34 @@ const ShipmentForm = () => {
                 {form.estimated_delivery_date === "1900-01-01" && (
                   <p className="mt-1 text-xs text-warning">Customers will see "On Hold" instead of a date.</p>
                 )}
+                {(() => {
+                  if (form.estimated_delivery_date === "1900-01-01") return null;
+                  if (!form.estimated_delivery_date) return null;
+                  if (form.payment_status !== "pending") return null;
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const eta = new Date(form.estimated_delivery_date);
+                  if (isNaN(eta.getTime()) || eta >= today) return null;
+                  return (
+                    <div className="mt-2 flex items-start justify-between gap-2 rounded-md border border-warning/40 bg-warning/10 p-3">
+                      <div className="text-xs">
+                        <p className="font-medium text-warning">Payment is pending and the delivery date is in the past.</p>
+                        <p className="text-muted-foreground">Switch to "On Hold" so customers don't see an overdue date.</p>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          set("estimated_delivery_date", "1900-01-01");
+                          toast.success("Estimated delivery set to On Hold");
+                        }}
+                      >
+                        Switch to On Hold
+                      </Button>
+                    </div>
+                  );
+                })()}
               </div>
               <div className="md:col-span-2">
                 <Label>Registration date (when entered facility)</Label>
