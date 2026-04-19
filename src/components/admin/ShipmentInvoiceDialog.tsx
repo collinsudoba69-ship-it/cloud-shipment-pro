@@ -119,6 +119,10 @@ export const ShipmentInvoiceDialog = ({
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<ReceiptTheme>("ocean");
   const [shipmentName, setShipmentName] = useState(shipment.shipmentName || `${shipment.shipmentType} Shipment`);
+  const [invoiceNumber, setInvoiceNumber] = useState(
+    `INV-${shipment.trackingNumber}-${new Date().getFullYear()}`,
+  );
+  const [insuranceValue, setInsuranceValue] = useState("");
   const [displayFee, setDisplayFee] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [note, setNote] = useState("");
@@ -258,6 +262,16 @@ export const ShipmentInvoiceDialog = ({
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="invoice-number">Invoice Number</Label>
+                <Input id="invoice-number" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="e.g. INV-2026-001" />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="insurance-value">Package Insurance Value</Label>
+                <Input id="insurance-value" value={insuranceValue} onChange={(e) => setInsuranceValue(e.target.value)} placeholder="e.g. $1,000" />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="receipt-logo">Upload Logo</Label>
                 <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed border-border bg-background px-3 py-3 text-sm text-muted-foreground hover:bg-accent/50">
                   <span className="truncate">{logoName || "Choose file"}</span>
@@ -334,6 +348,12 @@ export const ShipmentInvoiceDialog = ({
                   <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur">
                     <p className="text-white/70">Tracking Number</p>
                     <p className="mt-1 text-lg font-semibold">{shipment.trackingNumber}</p>
+                    {invoiceNumber && (
+                      <>
+                        <p className="mt-3 text-white/70">Invoice Number</p>
+                        <p className="mt-1 text-base font-semibold">{invoiceNumber}</p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -369,6 +389,10 @@ export const ShipmentInvoiceDialog = ({
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Payment Method</span>
                       <span className="font-semibold text-foreground">{paymentMethod || shipment.paymentReason || "—"}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">Insurance Value</span>
+                      <span className="font-semibold text-foreground">{insuranceValue || "—"}</span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Shipment Type</span>
