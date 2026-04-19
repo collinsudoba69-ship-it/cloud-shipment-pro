@@ -302,6 +302,30 @@ const Track = () => {
     }
   };
 
+  const handleShareTracking = async () => {
+    if (!shipment) return;
+    const shareUrl = `${window.location.origin}/track?n=${encodeURIComponent(shipment.trackingNumber)}`;
+    const shareData = {
+      title: `Cloud Shipment ${shipment.trackingNumber}`,
+      text: `Track shipment ${shipment.trackingNumber}`,
+      url: shareUrl,
+    };
+    try {
+      if (typeof navigator !== 'undefined' && (navigator as any).share) {
+        await (navigator as any).share(shareData);
+        return;
+      }
+    } catch (err: any) {
+      if (err?.name === 'AbortError') return;
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success(t('trackPage.linkCopied') || 'Tracking link copied');
+    } catch {
+      toast.error('Unable to share');
+    }
+  };
+
   const handleDownloadReceipt = async () => {
     if (!shipment) return;
     try {
@@ -582,7 +606,7 @@ const Track = () => {
                   <Printer className="w-4 h-4" />
                   {t('trackPage.printReceipt')}
                 </Button>
-                <Button variant="outline" size="icon" title={t('trackPage.share')}>
+                <Button variant="outline" size="icon" title={t('trackPage.share')} onClick={handleShareTracking}>
                   <Share2 className="w-4 h-4" />
                 </Button>
               </div>
