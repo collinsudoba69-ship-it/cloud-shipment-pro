@@ -91,6 +91,15 @@ export const SiteFooter = () => {
               <Mail className="h-4 w-4" />
               {SUPPORT_EMAIL}
             </a>
+            <a
+              href={`https://wa.me/${waDigits}?text=${encodeURIComponent("Hello Cloud Shipment, I need support with my shipment.")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            >
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp: {whatsapp}
+            </a>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li><Link to="/track" className="hover:text-foreground">{t("footer.trackShipment")}</Link></li>
               <li><Link to="/auth" className="hover:text-foreground">{t("footer.staffPortal")}</Link></li>
