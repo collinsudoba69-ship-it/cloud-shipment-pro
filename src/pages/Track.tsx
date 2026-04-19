@@ -1062,7 +1062,7 @@ const Track = () => {
                     <p className="text-sm text-slate-600 mb-4">
                       {t('trackPage.needHelpDesc')}
                     </p>
-                    <Button asChild variant="outline" className="w-full">
+                    <Button asChild className="w-full bg-slate-900 text-white hover:bg-slate-800">
                       <a
                         href={`mailto:cloudshipmentcontact@gmail.com?subject=${encodeURIComponent(
                           `Support Request – Tracking ${shipment.trackingNumber}`
