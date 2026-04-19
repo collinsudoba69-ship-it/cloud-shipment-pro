@@ -152,9 +152,11 @@ const Track = () => {
       status: statusMap[effectiveRawStatus] ?? 'pending',
       origin: shipmentRow.origin,
       destination: shipmentRow.destination,
-      estimatedDelivery: shipmentRow.estimated_delivery_date
-        ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
-        : 'TBD',
+      estimatedDelivery: shipmentRow.estimated_delivery_date === '1900-01-01'
+        ? 'On Hold'
+        : shipmentRow.estimated_delivery_date
+          ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
+          : 'TBD',
       progress: Math.max(
         shipmentRow.progress ?? 0,
         progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'delivered')
