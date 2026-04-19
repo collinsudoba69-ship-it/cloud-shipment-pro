@@ -19,7 +19,8 @@ import {
   Send,
   Home,
   Radio,
-  Bell
+  Bell,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -85,6 +86,18 @@ const Track = () => {
   const [shipment, setShipment] = useState<ShipmentData | null>(null);
   const [error, setError] = useState('');
   const [isLive, setIsLive] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState('+16833182000');
+
+  useEffect(() => {
+    supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'whatsapp_support_number')
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) setWhatsappNumber(data.value);
+      });
+  }, []);
   const [liveEventId, setLiveEventId] = useState<string | null>(null);
   const [liveStatusFlash, setLiveStatusFlash] = useState(false);
   const shipmentIdRef = useRef<string | null>(null);
@@ -1058,6 +1071,18 @@ const Track = () => {
                         )}`}
                       >
                         {t('trackPage.contactSupport')}
+                      </a>
+                    </Button>
+                    <Button asChild className="w-full mt-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white">
+                      <a
+                        href={`https://wa.me/${whatsappNumber.replace(/[^\d]/g, '')}?text=${encodeURIComponent(
+                          `Hello Cloud Shipment, I need help with my shipment.\n\nTracking Number: ${shipment.trackingNumber}\nStatus: ${shipment.status}\nFrom: ${shipment.origin}\nTo: ${shipment.destination}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        WhatsApp Support
                       </a>
                     </Button>
                   </CardContent>
