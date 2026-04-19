@@ -1,8 +1,9 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Package2, LayoutDashboard, Package, Users, FileText, LogOut, Plus, Home, Settings as SettingsIcon } from "lucide-react";
+import { Package2, LayoutDashboard, Package, Users, FileText, LogOut, Plus, Home, Settings as SettingsIcon, Menu } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -13,9 +14,10 @@ const navItems = [
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon, end: false },
 ];
 
-const NavItem = ({ to, label, icon: Icon, active }: { to: string; label: string; icon: typeof Package; active: boolean }) => (
+const NavItem = ({ to, label, icon: Icon, active, onClick }: { to: string; label: string; icon: typeof Package; active: boolean; onClick?: () => void }) => (
   <Link
     to={to}
+    onClick={onClick}
     className={cn(
       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
       active
@@ -32,6 +34,7 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
   const { profile, signOut, isSuperAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -40,6 +43,31 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
 
   const isActive = (to: string, end: boolean) =>
     end ? location.pathname === to : location.pathname.startsWith(to);
+
+  const renderNav = (onItemClick?: () => void) => (
+    <>
+      <nav className="flex-1 space-y-1 p-3">
+        {navItems
+          .filter((i) => !i.superOnly || isSuperAdmin)
+          .map((i) => (
+            <NavItem key={i.to} to={i.to} label={i.label} icon={i.icon} active={isActive(i.to, i.end)} onClick={onItemClick} />
+          ))}
+        <div className="my-3 h-px bg-sidebar-border" />
+        <NavItem to="/" label="Public site" icon={Home} active={false} onClick={onItemClick} />
+      </nav>
+      <div className="border-t border-sidebar-border p-3">
+        <div className="mb-2 px-2 text-xs">
+          <p className="font-medium text-sidebar-foreground">{profile?.display_name ?? profile?.email}</p>
+          <p className="text-sidebar-foreground/60">
+            {isSuperAdmin ? "Super Admin · ∞ credits" : `${profile?.credits ?? 0} credits`}
+          </p>
+        </div>
+        <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" /> Sign out
+        </Button>
+      </div>
+    </>
+  );
 
   return (
     <div className="flex min-h-screen bg-secondary/40">
@@ -50,31 +78,28 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
           </span>
           <span className="font-semibold">Cloud Shipment</span>
         </div>
-        <nav className="flex-1 space-y-1 p-3">
-          {navItems
-            .filter((i) => !i.superOnly || isSuperAdmin)
-            .map((i) => (
-              <NavItem key={i.to} to={i.to} label={i.label} icon={i.icon} active={isActive(i.to, i.end)} />
-            ))}
-          <div className="my-3 h-px bg-sidebar-border" />
-          <NavItem to="/" label="Public site" icon={Home} active={false} />
-        </nav>
-        <div className="border-t border-sidebar-border p-3">
-          <div className="mb-2 px-2 text-xs">
-            <p className="font-medium text-sidebar-foreground">{profile?.display_name ?? profile?.email}</p>
-            <p className="text-sidebar-foreground/60">
-              {isSuperAdmin ? "Super Admin · ∞ credits" : `${profile?.credits ?? 0} credits`}
-            </p>
-          </div>
-          <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" /> Sign out
-          </Button>
-        </div>
+        {renderNav()}
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between border-b border-border bg-background px-6">
-          <div className="md:hidden">
+        <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 md:px-6">
+          <div className="flex items-center gap-2 md:hidden">
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Open menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="flex w-72 flex-col bg-sidebar p-0 text-sidebar-foreground">
+                <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-primary text-primary-foreground">
+                    <Package2 className="h-4 w-4" />
+                  </span>
+                  <span className="font-semibold">Cloud Shipment</span>
+                </div>
+                {renderNav(() => setMobileOpen(false))}
+              </SheetContent>
+            </Sheet>
             <span className="font-semibold">Cloud Shipment</span>
           </div>
           <div className="ml-auto flex items-center gap-2">
@@ -83,7 +108,7 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
             </Button>
           </div>
         </header>
-        <main className="flex-1 p-6">{children ?? <Outlet />}</main>
+        <main className="flex-1 p-4 md:p-6">{children ?? <Outlet />}</main>
       </div>
     </div>
   );
