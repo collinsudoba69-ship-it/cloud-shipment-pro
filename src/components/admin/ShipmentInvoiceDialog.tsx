@@ -391,6 +391,10 @@ export const ShipmentInvoiceDialog = ({
                       <span className="font-semibold text-foreground">{paymentMethod || shipment.paymentReason || "—"}</span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">Insurance Value</span>
+                      <span className="font-semibold text-foreground">{insuranceValue || "—"}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Shipment Type</span>
                       <span className={cn("rounded-full px-3 py-1 text-xs font-semibold", activeTheme.chipClass)}>{shipment.shipmentType}</span>
                     </div>
