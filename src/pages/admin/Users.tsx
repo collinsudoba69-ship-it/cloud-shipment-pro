@@ -4,8 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Infinity as InfIcon, Plus, Minus } from "lucide-react";
+import { Infinity as InfIcon, Plus, Minus, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import BackButton from "@/components/BackButton";
 
@@ -24,6 +35,7 @@ const Users = () => {
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [adjust, setAdjust] = useState<Record<string, string>>({});
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -41,6 +53,7 @@ const Users = () => {
 
   const updateCredits = async (row: UserRow, delta: number) => {
     if (row.unlimited_credits) return toast.info("This user has unlimited credits.");
+    if (!delta) return;
     const newAmount = Math.max(0, row.credits + delta);
     const { error } = await supabase.from("profiles").update({ credits: newAmount }).eq("user_id", row.user_id);
     if (error) return toast.error(error.message);
@@ -51,7 +64,7 @@ const Users = () => {
         details: { from: row.credits, to: newAmount, delta },
       });
     }
-    toast.success("Credits updated");
+    toast.success(`Credits ${delta > 0 ? "added" : "removed"}: ${Math.abs(delta).toLocaleString()}`);
     load();
   };
 
@@ -71,12 +84,25 @@ const Users = () => {
     load();
   };
 
+  const deleteUser = async (row: UserRow) => {
+    setDeletingId(row.user_id);
+    const { data, error } = await supabase.functions.invoke("delete-user", {
+      body: { user_id: row.user_id },
+    });
+    setDeletingId(null);
+    if (error || (data && data.error)) {
+      return toast.error(error?.message || data?.error || "Failed to delete user");
+    }
+    toast.success(`Deleted ${row.email}`);
+    load();
+  };
+
   return (
     <div className="space-y-6">
       <BackButton />
       <div>
         <h1 className="text-2xl font-bold">Users & roles</h1>
-        <p className="text-muted-foreground">Manage staff access and credits.</p>
+        <p className="text-muted-foreground">Manage staff access, credits, and accounts. 1,000 credits = $1 USD · 2,000 credits per shipment.</p>
       </div>
 
       <Card>
@@ -92,7 +118,8 @@ const Users = () => {
                     <th className="px-4 py-3">User</th>
                     <th className="px-4 py-3">Roles</th>
                     <th className="px-4 py-3">Credits</th>
-                    <th className="px-4 py-3 text-right">Adjust</th>
+                    <th className="px-4 py-3 text-right">Adjust credits</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -122,7 +149,7 @@ const Users = () => {
                           {r.unlimited_credits ? (
                             <Badge className="gap-1 border-0 bg-primary/10 text-primary"><InfIcon className="h-3 w-3" />Unlimited</Badge>
                           ) : (
-                            <span className="font-medium">{r.credits}</span>
+                            <span className="font-medium">{r.credits.toLocaleString()}</span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-right">
@@ -130,14 +157,50 @@ const Users = () => {
                             <div className="inline-flex items-center gap-1">
                               <Input
                                 type="number"
-                                className="w-20"
-                                placeholder="0"
+                                min="0"
+                                step="100"
+                                className="w-24"
+                                placeholder="e.g. 2000"
                                 value={adjust[r.user_id] ?? ""}
                                 onChange={(e) => setAdjust({ ...adjust, [r.user_id]: e.target.value })}
                               />
-                              <Button size="icon" variant="outline" onClick={() => { updateCredits(r, Number(adjust[r.user_id] || 0)); setAdjust({ ...adjust, [r.user_id]: "" }); }}><Plus className="h-4 w-4" /></Button>
-                              <Button size="icon" variant="outline" onClick={() => { updateCredits(r, -Number(adjust[r.user_id] || 0)); setAdjust({ ...adjust, [r.user_id]: "" }); }}><Minus className="h-4 w-4" /></Button>
+                              <Button size="icon" variant="outline" title="Add credits" onClick={() => { updateCredits(r, Number(adjust[r.user_id] || 0)); setAdjust({ ...adjust, [r.user_id]: "" }); }}><Plus className="h-4 w-4" /></Button>
+                              <Button size="icon" variant="outline" title="Remove credits" onClick={() => { updateCredits(r, -Number(adjust[r.user_id] || 0)); setAdjust({ ...adjust, [r.user_id]: "" }); }}><Minus className="h-4 w-4" /></Button>
                             </div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {!isSuper && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                  disabled={deletingId === r.user_id}
+                                  title="Delete user"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete this user?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This permanently deletes <span className="font-semibold">{r.email}</span> from your website, including their account, profile, and roles. This cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    onClick={() => deleteUser(r)}
+                                  >
+                                    Delete user
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           )}
                         </td>
                       </tr>
