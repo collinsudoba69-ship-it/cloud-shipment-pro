@@ -14,6 +14,7 @@ import { generateTrackingNumber, progressForStatus, ShipmentStatus, SHIPMENT_STA
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import ShipmentInvoiceDialog from "@/components/admin/ShipmentInvoiceDialog";
+import { SHIPMENT_CREDIT_COST } from "@/lib/credits";
 
 const MAX_IMAGES = 5;
 const MAX_SIZE_BYTES = 1024 * 1024;
@@ -67,7 +68,7 @@ const ShipmentForm = () => {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile, refresh } = useAuth();
   const [form, setForm] = useState<FormState>(empty);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -138,6 +139,15 @@ const ShipmentForm = () => {
     if (!form.sender_name.trim() || !form.receiver_name.trim()) return toast.error("Sender and receiver names are required");
     if (!form.origin.trim() || !form.destination.trim()) return toast.error("Origin and destination are required");
 
+    // Credit check on creation only
+    if (!isEdit && profile && !profile.unlimited_credits) {
+      if (profile.credits < SHIPMENT_CREDIT_COST) {
+        toast.error(`You need ${SHIPMENT_CREDIT_COST.toLocaleString()} credits to create a shipment. Buy more to continue.`);
+        navigate("/buy-credits");
+        return;
+      }
+    }
+
     setLoading(true);
     const payload = {
       tracking_number: form.tracking_number.trim(),
@@ -172,6 +182,18 @@ const ShipmentForm = () => {
         note: "Shipment registered", created_by: user?.id ?? null,
         event_at: payload.shipped_at,
       });
+
+      // Deduct credits (only on creation, only for non-unlimited users)
+      if (profile && !profile.unlimited_credits && user) {
+        const newBalance = Math.max(0, profile.credits - SHIPMENT_CREDIT_COST);
+        await supabase.from("profiles").update({ credits: newBalance }).eq("user_id", user.id);
+        await supabase.from("activity_logs").insert({
+          actor_id: user.id, actor_email: user.email,
+          action: "deduct_credits", entity_type: "profile", entity_id: user.id,
+          details: { from: profile.credits, to: newBalance, delta: -SHIPMENT_CREDIT_COST, reason: "shipment_create", shipment_id: shipmentId },
+        });
+        await refresh();
+      }
     }
 
     // Activity log
