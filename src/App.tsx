@@ -17,6 +17,7 @@ import ShipmentForm from "./pages/admin/ShipmentForm";
 import Users from "./pages/admin/Users";
 import Logs from "./pages/admin/Logs";
 import Settings from "./pages/admin/Settings";
+import BuyCredits from "./pages/BuyCredits";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,14 @@ const App = () => (
               <Route path="/index" element={<Index />} />
               <Route path="/track" element={<Track />} />
               <Route path="/auth" element={<Auth />} />
+              <Route
+                path="/buy-credits"
+                element={
+                  <ProtectedRoute>
+                    <BuyCredits />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route
                 path="/admin"
