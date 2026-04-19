@@ -348,6 +348,12 @@ export const ShipmentInvoiceDialog = ({
                   <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur">
                     <p className="text-white/70">Tracking Number</p>
                     <p className="mt-1 text-lg font-semibold">{shipment.trackingNumber}</p>
+                    {invoiceNumber && (
+                      <>
+                        <p className="mt-3 text-white/70">Invoice Number</p>
+                        <p className="mt-1 text-base font-semibold">{invoiceNumber}</p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
