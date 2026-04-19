@@ -104,6 +104,7 @@ const THEMES: Record<ReceiptTheme, { label: string; headerClass: string; chipCla
 
 const formatDate = (value?: string | null) => {
   if (!value) return "—";
+  if (value === "1900-01-01" || value.startsWith("1900-01-01")) return "On Hold";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString();
