@@ -334,7 +334,26 @@ const ShipmentForm = () => {
                 </Select>
               </div>
               <div><Label>Progress (%)</Label><Input type="number" min={0} max={100} value={form.progress} onChange={(e) => set("progress", Number(e.target.value))} /></div>
-              <div><Label>Estimated delivery</Label><Input type="date" value={form.estimated_delivery_date} onChange={(e) => set("estimated_delivery_date", e.target.value)} /></div>
+              <div>
+                <Label>Estimated delivery</Label>
+                <div className="flex items-center justify-between rounded-md border border-border p-2 mb-2">
+                  <Label htmlFor="on-hold" className="cursor-pointer text-sm">On Hold (outstanding payment / overdue)</Label>
+                  <Switch
+                    id="on-hold"
+                    checked={form.estimated_delivery_date === "1900-01-01"}
+                    onCheckedChange={(v) => set("estimated_delivery_date", v ? "1900-01-01" : "")}
+                  />
+                </div>
+                <Input
+                  type="date"
+                  value={form.estimated_delivery_date === "1900-01-01" ? "" : form.estimated_delivery_date}
+                  onChange={(e) => set("estimated_delivery_date", e.target.value)}
+                  disabled={form.estimated_delivery_date === "1900-01-01"}
+                />
+                {form.estimated_delivery_date === "1900-01-01" && (
+                  <p className="mt-1 text-xs text-warning">Customers will see "On Hold" instead of a date.</p>
+                )}
+              </div>
               <div className="md:col-span-2">
                 <Label>Registration date (when entered facility)</Label>
                 <Input type="datetime-local" value={form.shipped_at} onChange={(e) => set("shipped_at", e.target.value)} />
