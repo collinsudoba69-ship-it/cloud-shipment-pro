@@ -28,6 +28,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import ShipmentMap from '@/components/ShipmentMap';
+import BackButton from '@/components/BackButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { progressForStatus, statusLabel } from '@/lib/shipment';
@@ -498,6 +499,9 @@ const Track = () => {
       {/* Header */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="mb-4">
+            <BackButton to="/" label="Back to home" className="text-slate-600 hover:text-slate-900" />
+          </div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <img src={logo} alt="Cloud Shipment" className="h-12 w-auto" />

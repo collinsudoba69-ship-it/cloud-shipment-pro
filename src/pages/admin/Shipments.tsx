@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import ShipmentInvoiceDialog from "@/components/admin/ShipmentInvoiceDialog";
+import BackButton from "@/components/BackButton";
 
 interface Row {
   id: string;
@@ -69,6 +70,7 @@ const Shipments = () => {
 
   return (
     <div className="space-y-6">
+      <BackButton />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Shipments</h1>
