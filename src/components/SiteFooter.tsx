@@ -1,11 +1,27 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, MessageCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { SUPPORT_EMAIL } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/cloud-shipment-logo.png";
 
 export const SiteFooter = () => {
   const { t } = useTranslation();
+  const [whatsapp, setWhatsapp] = useState("+16833182000");
+
+  useEffect(() => {
+    supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "whatsapp_support_number")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) setWhatsapp(data.value);
+      });
+  }, []);
+
+  const waDigits = whatsapp.replace(/[^\d]/g, "");
   return (
     <footer className="border-t border-border/60 bg-secondary/40">
       <div className="container py-12">
