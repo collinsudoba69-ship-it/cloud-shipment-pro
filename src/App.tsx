@@ -62,6 +62,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route path="settings" element={<Settings />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
