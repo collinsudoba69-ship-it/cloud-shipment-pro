@@ -119,6 +119,10 @@ export const ShipmentInvoiceDialog = ({
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<ReceiptTheme>("ocean");
   const [shipmentName, setShipmentName] = useState(shipment.shipmentName || `${shipment.shipmentType} Shipment`);
+  const [invoiceNumber, setInvoiceNumber] = useState(
+    `INV-${shipment.trackingNumber}-${new Date().getFullYear()}`,
+  );
+  const [insuranceValue, setInsuranceValue] = useState("");
   const [displayFee, setDisplayFee] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [note, setNote] = useState("");
