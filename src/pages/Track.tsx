@@ -86,6 +86,18 @@ const Track = () => {
   const [shipment, setShipment] = useState<ShipmentData | null>(null);
   const [error, setError] = useState('');
   const [isLive, setIsLive] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState('+16833182000');
+
+  useEffect(() => {
+    supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'whatsapp_support_number')
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) setWhatsappNumber(data.value);
+      });
+  }, []);
   const [liveEventId, setLiveEventId] = useState<string | null>(null);
   const [liveStatusFlash, setLiveStatusFlash] = useState(false);
   const shipmentIdRef = useRef<string | null>(null);
