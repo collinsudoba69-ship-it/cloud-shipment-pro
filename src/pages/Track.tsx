@@ -1073,6 +1073,18 @@ const Track = () => {
                         {t('trackPage.contactSupport')}
                       </a>
                     </Button>
+                    <Button asChild className="w-full mt-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white">
+                      <a
+                        href={`https://wa.me/${whatsappNumber.replace(/[^\d]/g, '')}?text=${encodeURIComponent(
+                          `Hello Cloud Shipment, I need help with my shipment.\n\nTracking Number: ${shipment.trackingNumber}\nStatus: ${shipment.status}\nFrom: ${shipment.origin}\nTo: ${shipment.destination}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        WhatsApp Support
+                      </a>
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
