@@ -16,6 +16,7 @@ import Shipments from "./pages/admin/Shipments";
 import ShipmentForm from "./pages/admin/ShipmentForm";
 import Users from "./pages/admin/Users";
 import Logs from "./pages/admin/Logs";
+import Settings from "./pages/admin/Settings";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route path="settings" element={<Settings />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

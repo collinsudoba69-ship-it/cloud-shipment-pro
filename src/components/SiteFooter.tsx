@@ -1,11 +1,27 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, MessageCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { SUPPORT_EMAIL } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/cloud-shipment-logo.png";
 
 export const SiteFooter = () => {
   const { t } = useTranslation();
+  const [whatsapp, setWhatsapp] = useState("+16833182000");
+
+  useEffect(() => {
+    supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "whatsapp_support_number")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) setWhatsapp(data.value);
+      });
+  }, []);
+
+  const waDigits = whatsapp.replace(/[^\d]/g, "");
   return (
     <footer className="border-t border-border/60 bg-secondary/40">
       <div className="container py-12">
@@ -74,6 +90,15 @@ export const SiteFooter = () => {
             >
               <Mail className="h-4 w-4" />
               {SUPPORT_EMAIL}
+            </a>
+            <a
+              href={`https://wa.me/${waDigits}?text=${encodeURIComponent("Hello Cloud Shipment, I need support with my shipment.")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            >
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp: {whatsapp}
             </a>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li><Link to="/track" className="hover:text-foreground">{t("footer.trackShipment")}</Link></li>

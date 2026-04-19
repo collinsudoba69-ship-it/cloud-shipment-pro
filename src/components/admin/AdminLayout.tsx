@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Package2, LayoutDashboard, Package, Users, FileText, LogOut, Plus, Home } from "lucide-react";
+import { Package2, LayoutDashboard, Package, Users, FileText, LogOut, Plus, Home, Settings as SettingsIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ const navItems = [
   { to: "/admin/shipments", label: "Shipments", icon: Package, end: false },
   { to: "/admin/users", label: "Users", icon: Users, superOnly: true, end: false },
   { to: "/admin/logs", label: "Activity Logs", icon: FileText, superOnly: true, end: false },
+  { to: "/admin/settings", label: "Settings", icon: SettingsIcon, end: false },
 ];
 
 const NavItem = ({ to, label, icon: Icon, active }: { to: string; label: string; icon: typeof Package; active: boolean }) => (
