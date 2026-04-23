@@ -74,7 +74,34 @@ const ShipmentForm = () => {
   const [uploading, setUploading] = useState(false);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [newEvent, setNewEvent] = useState({ status: "" as ShipmentStatus | "", location: "", note: "", event_at: toLocalInput() });
+// --- START AUTO-SAVE DRAFT LOGIC ---
+  // 1. Load the draft from browser memory when the page opens
+  useEffect(() => {
+    if (!isEdit) {
+      const savedDraft = localStorage.getItem("cloud_shipment_form_draft");
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          setForm(parsed);
+        } catch (e) {
+          console.error("Failed to load draft", e);
+        }
+      }
+    }
+  }, [isEdit]);
 
+  // 2. Save the form data every time you type something
+  useEffect(() => {
+    if (!isEdit && form !== empty) {
+      localStorage.setItem("cloud_shipment_form_draft", JSON.stringify(form));
+    }
+  }, [form, isEdit]);
+
+  // 3. Clear the draft after a successful submission
+  const clearDraft = () => {
+    localStorage.removeItem("cloud_shipment_form_draft");
+  };
+  // --- END AUTO-SAVE DRAFT LOGIC ---
   useEffect(() => {
     if (!isEdit) {
       setForm({ ...empty, tracking_number: generateTrackingNumber() });
@@ -236,6 +263,7 @@ const ShipmentForm = () => {
     }
 
     setLoading(false);
+    if (!isEdit) localStorage.removeItem("cloud_shipment_form_draft");
     toast.success(isEdit ? "Shipment updated" : "Shipment created");
     navigate(`/admin/shipments/${shipmentId}`);
   };
