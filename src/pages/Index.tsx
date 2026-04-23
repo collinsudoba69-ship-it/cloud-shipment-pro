@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Plane, Ship, Zap, Warehouse, Search, ShieldCheck, Globe2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,14 @@ const Index = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [tracking, setTracking] = useState("");
+useEffect(() => {
+  const saved = localStorage.getItem("temp_tracking");
+  if (saved) setTracking(saved);
+}, []);
 
+useEffect(() => {
+  localStorage.setItem("temp_tracking", tracking);
+}, [tracking]);
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault();
     if (tracking.trim()) navigate(`/track?n=${encodeURIComponent(tracking.trim())}`);
