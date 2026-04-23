@@ -70,6 +70,23 @@ const ShipmentForm = () => {
   const navigate = useNavigate();
   const { user, profile, refresh } = useAuth();
   const [form, setForm] = useState<FormState>(empty);
+  // THIS CODE LOADS YOUR SAVED INFO ON REFRESH
+  useEffect(() => {
+    // Only load if we are creating a NEW shipment (not editing an old one)
+    if (!isEdit) {
+      const savedData = localStorage.getItem("cloud_shipment_form_draft");
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          setForm(parsedData);
+          // This tells you it worked on your phone screen
+          toast.info("Draft restored");
+        } catch (e) {
+          console.error("Error loading draft", e);
+        }
+      }
+    }
+  }, [isEdit]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
