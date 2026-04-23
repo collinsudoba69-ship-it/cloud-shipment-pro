@@ -500,6 +500,17 @@ const ShipmentForm = () => {
 
           <div className="sticky bottom-4 flex gap-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => navigate("/admin/shipments")}>Cancel</Button>
+            <Button 
+  type="button" 
+  variant="secondary" 
+  className="flex-1 bg-blue-600 text-white hover:bg-blue-700" 
+  onClick={() => {
+    localStorage.setItem("cloud_shipment_form_draft", JSON.stringify(form));
+    toast.success("Draft saved to your device memory!");
+  }}
+>
+  Save Draft
+</Button>
             {isEdit && (
               <ShipmentInvoiceDialog
                 shipment={{
