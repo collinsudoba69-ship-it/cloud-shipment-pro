@@ -96,6 +96,7 @@ const ja: TranslationSchema = {
     paymentDetails: "支払い詳細",
     paid: "支払済み",
     pendingPayment: "支払い待ち",
+    successful: "成功",
     amountToPay: "支払い金額",
     paymentMethod: "支払い方法",
     reason: "理由",

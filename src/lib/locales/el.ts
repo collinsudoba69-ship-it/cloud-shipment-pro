@@ -96,6 +96,7 @@ const el: TranslationSchema = {
     paymentDetails: "Στοιχεία πληρωμής",
     paid: "Πληρωμένο",
     pendingPayment: "Εκκρεμεί πληρωμή",
+    successful: "Επιτυχές",
     amountToPay: "Ποσό προς πληρωμή",
     paymentMethod: "Μέθοδος πληρωμής",
     reason: "Λόγος",

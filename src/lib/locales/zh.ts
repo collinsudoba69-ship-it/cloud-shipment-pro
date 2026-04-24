@@ -148,6 +148,7 @@ const zh: TranslationSchema = {
     paymentDetails: "付款详情",
     paid: "已付款",
     pendingPayment: "待付款",
+    successful: "成功",
     amountToPay: "应付金额",
     paymentMethod: "付款方式",
     reason: "原因",

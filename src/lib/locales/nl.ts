@@ -96,6 +96,7 @@ const nl: TranslationSchema = {
     paymentDetails: "Betalingsgegevens",
     paid: "Betaald",
     pendingPayment: "Betaling in behandeling",
+    successful: "Succesvol",
     amountToPay: "Te betalen bedrag",
     paymentMethod: "Betaalmethode",
     reason: "Reden",

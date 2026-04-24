@@ -152,6 +152,7 @@ const sv: TranslationSchema = {
     paymentDetails: "Betalningsuppgifter",
     paid: "Betald",
     pendingPayment: "Väntar på betalning",
+    successful: "Lyckad",
     amountToPay: "Belopp att betala",
     paymentMethod: "Betalningsmetod",
     reason: "Anledning",

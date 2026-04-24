@@ -96,6 +96,7 @@ const uk: TranslationSchema = {
     paymentDetails: "Деталі оплати",
     paid: "Оплачено",
     pendingPayment: "Очікує оплати",
+    successful: "Успішно",
     amountToPay: "Сума до оплати",
     paymentMethod: "Спосіб оплати",
     reason: "Причина",

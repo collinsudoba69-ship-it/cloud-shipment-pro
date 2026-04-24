@@ -148,6 +148,7 @@ const ar: TranslationSchema = {
     paymentDetails: "تفاصيل الدفع",
     paid: "مدفوع",
     pendingPayment: "في انتظار الدفع",
+    successful: "ناجح",
     amountToPay: "المبلغ المستحق",
     paymentMethod: "طريقة الدفع",
     reason: "السبب",

@@ -152,6 +152,7 @@ const fi: TranslationSchema = {
     paymentDetails: "Maksutiedot",
     paid: "Maksettu",
     pendingPayment: "Maksu odottaa",
+    successful: "Onnistui",
     amountToPay: "Maksettava summa",
     paymentMethod: "Maksutapa",
     reason: "Syy",

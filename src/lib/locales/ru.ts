@@ -96,6 +96,7 @@ const ru: TranslationSchema = {
     paymentDetails: "Платёжные данные",
     paid: "Оплачено",
     pendingPayment: "Ожидает оплаты",
+    successful: "Успешно",
     amountToPay: "Сумма к оплате",
     paymentMethod: "Способ оплаты",
     reason: "Причина",

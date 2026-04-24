@@ -96,6 +96,7 @@ const cs: TranslationSchema = {
     paymentDetails: "Platební údaje",
     paid: "Zaplaceno",
     pendingPayment: "Čeká na platbu",
+    successful: "Úspěšné",
     amountToPay: "Částka k zaplacení",
     paymentMethod: "Způsob platby",
     reason: "Důvod",

@@ -152,6 +152,7 @@ const da: TranslationSchema = {
     paymentDetails: "Betalingsoplysninger",
     paid: "Betalt",
     pendingPayment: "Afventer betaling",
+    successful: "Vellykket",
     amountToPay: "Beløb at betale",
     paymentMethod: "Betalingsmetode",
     reason: "Årsag",
