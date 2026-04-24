@@ -80,6 +80,7 @@ interface ShipmentData {
 const Track = () => {
   const { t, i18n } = useTranslation();
   const [translatedDescription, setTranslatedDescription] = useState<string>('');
+  const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const [trackingNumber, setTrackingNumber] = useState('');
@@ -124,6 +125,36 @@ const Track = () => {
     });
     return () => { cancelled = true; };
   }, [shipment?.description, i18n.language]);
+
+  // Translate dynamic free-form fields (event notes/locations, payment method, payment reason)
+  useEffect(() => {
+    const lang = i18n.language || 'en';
+    if (!shipment) return;
+    const strings = new Set<string>();
+    if (shipment.paymentMethod) strings.add(shipment.paymentMethod);
+    if (shipment.paymentReason) strings.add(shipment.paymentReason);
+    for (const ev of shipment.events) {
+      if (ev.description) strings.add(ev.description);
+      if (ev.location) strings.add(ev.location);
+    }
+    if (lang.startsWith('en')) {
+      // Identity map so render can always look up via translatedMap
+      const ident: Record<string, string> = {};
+      strings.forEach((s) => { ident[s] = s; });
+      setTranslatedMap(ident);
+      return;
+    }
+    let cancelled = false;
+    Promise.all(
+      Array.from(strings).map(async (s) => [s, await translateText(s, lang)] as const)
+    ).then((pairs) => {
+      if (cancelled) return;
+      const next: Record<string, string> = {};
+      for (const [k, v] of pairs) next[k] = v;
+      setTranslatedMap(next);
+    });
+    return () => { cancelled = true; };
+  }, [shipment, i18n.language]);
 
   useEffect(() => {
     const urlTrackingNumber = searchParams.get('n');
