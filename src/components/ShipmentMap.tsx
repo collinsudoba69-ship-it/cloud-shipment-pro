@@ -3,7 +3,7 @@ import { MapContainer, Marker, Polyline, TileLayer, useMap } from "react-leaflet
 import L from "leaflet";
 import { geocode, lookupFallback, type LatLng } from "@/lib/geocode";
 
-type ShipmentMapStatus = "pending" | "in-transit" | "out-for-delivery" | "delivered" | "exception";
+type ShipmentMapStatus = "pending" | "in-transit" | "out-for-delivery" | "arrived" | "delivered" | "exception";
 
 interface ShipmentMapProps {
   shipment: {
