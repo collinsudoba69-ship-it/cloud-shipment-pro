@@ -96,6 +96,7 @@ const hu: TranslationSchema = {
     paymentDetails: "Fizetési részletek",
     paid: "Fizetve",
     pendingPayment: "Fizetésre vár",
+    successful: "Sikeres",
     amountToPay: "Fizetendő összeg",
     paymentMethod: "Fizetési mód",
     reason: "Indok",

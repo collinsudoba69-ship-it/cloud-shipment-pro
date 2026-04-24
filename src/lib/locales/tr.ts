@@ -96,6 +96,7 @@ const tr: TranslationSchema = {
     paymentDetails: "Ödeme detayları",
     paid: "Ödendi",
     pendingPayment: "Ödeme bekleniyor",
+    successful: "Başarılı",
     amountToPay: "Ödenecek tutar",
     paymentMethod: "Ödeme yöntemi",
     reason: "Sebep",

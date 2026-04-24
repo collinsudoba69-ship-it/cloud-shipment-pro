@@ -96,6 +96,7 @@ const ptBR: TranslationSchema = {
     paymentDetails: "Detalhes de pagamento",
     paid: "Pago",
     pendingPayment: "Pagamento pendente",
+    successful: "Bem-sucedido",
     amountToPay: "Valor a pagar",
     paymentMethod: "Método de pagamento",
     reason: "Motivo",

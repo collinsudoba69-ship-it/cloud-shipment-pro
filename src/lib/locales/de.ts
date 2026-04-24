@@ -151,6 +151,7 @@ const de: TranslationSchema = {
     paymentDetails: "Zahlungsdetails",
     paid: "Bezahlt",
     pendingPayment: "Zahlung ausstehend",
+    successful: "Erfolgreich",
     amountToPay: "Zu zahlender Betrag",
     paymentMethod: "Zahlungsmethode",
     reason: "Grund",

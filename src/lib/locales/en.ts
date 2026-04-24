@@ -150,6 +150,7 @@ const en = {
     paymentDetails: "Payment Details",
     paid: "Paid",
     pendingPayment: "Pending Payment",
+    successful: "Successful",
     amountToPay: "Amount to Pay",
     paymentMethod: "Payment Method",
     reason: "Reason",

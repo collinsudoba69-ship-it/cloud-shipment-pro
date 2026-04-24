@@ -150,6 +150,7 @@ const es: TranslationSchema = {
     paymentDetails: "Detalles de pago",
     paid: "Pagado",
     pendingPayment: "Pago pendiente",
+    successful: "Exitoso",
     amountToPay: "Monto a pagar",
     paymentMethod: "Método de pago",
     reason: "Motivo",

@@ -96,6 +96,7 @@ const hi: TranslationSchema = {
     paymentDetails: "भुगतान विवरण",
     paid: "भुगतान किया गया",
     pendingPayment: "भुगतान लंबित",
+    successful: "सफल",
     amountToPay: "देय राशि",
     paymentMethod: "भुगतान विधि",
     reason: "कारण",

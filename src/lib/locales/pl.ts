@@ -96,6 +96,7 @@ const pl: TranslationSchema = {
     paymentDetails: "Szczegóły płatności",
     paid: "Opłacone",
     pendingPayment: "Oczekuje płatności",
+    successful: "Pomyślne",
     amountToPay: "Kwota do zapłaty",
     paymentMethod: "Metoda płatności",
     reason: "Powód",

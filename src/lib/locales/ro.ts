@@ -96,6 +96,7 @@ const ro: TranslationSchema = {
     paymentDetails: "Detalii plată",
     paid: "Plătit",
     pendingPayment: "Plată în așteptare",
+    successful: "Reușit",
     amountToPay: "Sumă de plată",
     paymentMethod: "Metodă de plată",
     reason: "Motiv",

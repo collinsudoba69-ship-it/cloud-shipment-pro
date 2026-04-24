@@ -152,6 +152,7 @@ const no: TranslationSchema = {
     paymentDetails: "Betalingsdetaljer",
     paid: "Betalt",
     pendingPayment: "Venter på betaling",
+    successful: "Vellykket",
     amountToPay: "Beløp å betale",
     paymentMethod: "Betalingsmåte",
     reason: "Årsak",

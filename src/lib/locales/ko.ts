@@ -96,6 +96,7 @@ const ko: TranslationSchema = {
     paymentDetails: "결제 정보",
     paid: "결제됨",
     pendingPayment: "결제 대기 중",
+    successful: "성공",
     amountToPay: "결제 금액",
     paymentMethod: "결제 방법",
     reason: "사유",
