@@ -177,6 +177,10 @@ const da: TranslationSchema = {
     statusOutForDelivery: "Ude til levering",
     statusPending: "Afventer",
     statusException: "Undtagelse",
+    stageArrived: "Ankommet",
+    stageArrivedDesc: "Pakken er ankommet til destinationen",
+    statusArrived: "Ankommet",
+    onHold: "På hold",
   },
 };
 

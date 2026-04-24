@@ -173,6 +173,10 @@ const zh: TranslationSchema = {
     statusOutForDelivery: "派送中",
     statusPending: "待处理",
     statusException: "异常",
+    stageArrived: "已抵达",
+    stageArrivedDesc: "包裹已抵达目的地",
+    statusArrived: "已抵达",
+    onHold: "暂缓",
   },
 };
 

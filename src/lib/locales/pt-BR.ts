@@ -121,6 +121,10 @@ const ptBR: TranslationSchema = {
     statusOutForDelivery: "Em entrega",
     statusPending: "Pendente",
     statusException: "Exceção",
+    stageArrived: "Chegou",
+    stageArrivedDesc: "Pacote chegou ao destino",
+    statusArrived: "Chegou",
+    onHold: "Em espera",
   },
 };
 

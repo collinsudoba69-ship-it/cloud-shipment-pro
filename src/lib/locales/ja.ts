@@ -121,6 +121,10 @@ const ja: TranslationSchema = {
     statusOutForDelivery: "配達中",
     statusPending: "保留中",
     statusException: "例外",
+    stageArrived: "到着",
+    stageArrivedDesc: "荷物が目的地に到着しました",
+    statusArrived: "到着",
+    onHold: "保留中",
   },
 };
 

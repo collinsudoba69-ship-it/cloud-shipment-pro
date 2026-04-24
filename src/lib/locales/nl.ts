@@ -121,6 +121,10 @@ const nl: TranslationSchema = {
     statusOutForDelivery: "Wordt bezorgd",
     statusPending: "In behandeling",
     statusException: "Uitzondering",
+    stageArrived: "Aangekomen",
+    stageArrivedDesc: "Pakket aangekomen op bestemming",
+    statusArrived: "Aangekomen",
+    onHold: "In de wacht",
   },
 };
 

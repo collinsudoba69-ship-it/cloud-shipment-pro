@@ -121,6 +121,10 @@ const tr: TranslationSchema = {
     statusOutForDelivery: "Dağıtımda",
     statusPending: "Beklemede",
     statusException: "İstisna",
+    stageArrived: "Vardı",
+    stageArrivedDesc: "Paket varış noktasına ulaştı",
+    statusArrived: "Vardı",
+    onHold: "Beklemede",
   },
 };
 

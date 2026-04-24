@@ -121,6 +121,10 @@ const hi: TranslationSchema = {
     statusOutForDelivery: "डिलीवरी के लिए निकला",
     statusPending: "लंबित",
     statusException: "अपवाद",
+    stageArrived: "पहुँच गया",
+    stageArrivedDesc: "पैकेज गंतव्य पर पहुँच गया",
+    statusArrived: "पहुँच गया",
+    onHold: "रोका गया",
   },
 };
 
