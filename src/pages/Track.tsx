@@ -875,10 +875,10 @@ const Track = () => {
                                   </span>
                                   <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{event.timestamp}</span>
                                 </div>
-                                {event.description && <p className="text-slate-600 mt-1">{event.description}</p>}
+                                {event.description && <p className="text-slate-600 mt-1">{translatedMap[event.description] ?? event.description}</p>}
                                 {event.location && (
                                   <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" />{event.location}
+                                    <MapPin className="w-3 h-3" />{translatedMap[event.location] ?? event.location}
                                   </p>
                                 )}
                               </div>
@@ -1051,7 +1051,7 @@ const Track = () => {
                               : 'bg-amber-100 text-amber-700 border-amber-200'
                           }
                         >
-                          {shipment.paymentStatus === 'paid' ? 'Successful' : t('trackPage.pendingPayment')}
+                          {shipment.paymentStatus === 'paid' ? t('trackPage.successful') : t('trackPage.pendingPayment')}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -1070,7 +1070,7 @@ const Track = () => {
                             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
                               {t('trackPage.paymentMethod')}
                             </p>
-                            <p className="text-sm font-medium text-slate-900">{shipment.paymentMethod}</p>
+                            <p className="text-sm font-medium text-slate-900">{translatedMap[shipment.paymentMethod] ?? shipment.paymentMethod}</p>
                           </div>
                         )}
                         {shipment.paymentReason && (
@@ -1078,7 +1078,7 @@ const Track = () => {
                             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
                               {t('trackPage.reason')}
                             </p>
-                            <p className="text-sm text-slate-700">{shipment.paymentReason}</p>
+                            <p className="text-sm text-slate-700">{translatedMap[shipment.paymentReason] ?? shipment.paymentReason}</p>
                           </div>
                         )}
                       </div>
