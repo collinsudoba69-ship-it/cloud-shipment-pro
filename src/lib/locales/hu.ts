@@ -121,6 +121,10 @@ const hu: TranslationSchema = {
     statusOutForDelivery: "Kézbesítés alatt",
     statusPending: "Függőben",
     statusException: "Kivétel",
+    stageArrived: "Megérkezett",
+    stageArrivedDesc: "A csomag megérkezett a célállomásra",
+    statusArrived: "Megérkezett",
+    onHold: "Felfüggesztve",
   },
 };
 

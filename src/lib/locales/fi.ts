@@ -177,6 +177,10 @@ const fi: TranslationSchema = {
     statusOutForDelivery: "Toimituksessa",
     statusPending: "Odottaa",
     statusException: "Poikkeus",
+    stageArrived: "Saapunut",
+    stageArrivedDesc: "Paketti saapui määränpäähän",
+    statusArrived: "Saapunut",
+    onHold: "Pidossa",
   },
 };
 

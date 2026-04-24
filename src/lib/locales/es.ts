@@ -175,6 +175,10 @@ const es: TranslationSchema = {
     statusOutForDelivery: "En reparto",
     statusPending: "Pendiente",
     statusException: "Excepción",
+    stageArrived: "Llegado",
+    stageArrivedDesc: "El paquete llegó al destino",
+    statusArrived: "Llegado",
+    onHold: "En espera",
   },
 };
 

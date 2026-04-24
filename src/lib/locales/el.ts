@@ -121,6 +121,10 @@ const el: TranslationSchema = {
     statusOutForDelivery: "Προς παράδοση",
     statusPending: "Σε εκκρεμότητα",
     statusException: "Εξαίρεση",
+    stageArrived: "Έφτασε",
+    stageArrivedDesc: "Το δέμα έφτασε στον προορισμό",
+    statusArrived: "Έφτασε",
+    onHold: "Σε αναμονή",
   },
 };
 

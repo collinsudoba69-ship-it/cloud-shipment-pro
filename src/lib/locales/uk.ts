@@ -121,6 +121,10 @@ const uk: TranslationSchema = {
     statusOutForDelivery: "Доставляється",
     statusPending: "Очікує",
     statusException: "Виняток",
+    stageArrived: "Прибуло",
+    stageArrivedDesc: "Посилка прибула до пункту призначення",
+    statusArrived: "Прибуло",
+    onHold: "На утриманні",
   },
 };
 

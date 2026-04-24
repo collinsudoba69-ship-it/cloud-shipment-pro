@@ -177,6 +177,10 @@ const sv: TranslationSchema = {
     statusOutForDelivery: "Ute för leverans",
     statusPending: "Väntande",
     statusException: "Avvikelse",
+    stageArrived: "Anlänt",
+    stageArrivedDesc: "Paketet har anlänt till destinationen",
+    statusArrived: "Anlänt",
+    onHold: "Pausad",
   },
 };
 

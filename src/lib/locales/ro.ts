@@ -121,6 +121,10 @@ const ro: TranslationSchema = {
     statusOutForDelivery: "În livrare",
     statusPending: "În așteptare",
     statusException: "Excepție",
+    stageArrived: "Sosit",
+    stageArrivedDesc: "Coletul a sosit la destinație",
+    statusArrived: "Sosit",
+    onHold: "În așteptare",
   },
 };
 

@@ -121,6 +121,10 @@ const cs: TranslationSchema = {
     statusOutForDelivery: "Doručuje se",
     statusPending: "Čeká",
     statusException: "Výjimka",
+    stageArrived: "Doručeno do cíle",
+    stageArrivedDesc: "Zásilka dorazila do cíle",
+    statusArrived: "Doručeno do cíle",
+    onHold: "Pozastaveno",
   },
 };
 

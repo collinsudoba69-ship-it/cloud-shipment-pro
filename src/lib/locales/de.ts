@@ -176,6 +176,10 @@ const de: TranslationSchema = {
     statusOutForDelivery: "In Zustellung",
     statusPending: "Ausstehend",
     statusException: "Ausnahme",
+    stageArrived: "Angekommen",
+    stageArrivedDesc: "Paket am Zielort angekommen",
+    statusArrived: "Angekommen",
+    onHold: "Wartend",
   },
 };
 

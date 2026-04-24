@@ -173,6 +173,10 @@ const ar: TranslationSchema = {
     statusOutForDelivery: "في طريق التسليم",
     statusPending: "قيد الانتظار",
     statusException: "استثناء",
+    stageArrived: "وصل",
+    stageArrivedDesc: "وصل الطرد إلى الوجهة",
+    statusArrived: "وصل",
+    onHold: "قيد الانتظار",
   },
 };
 

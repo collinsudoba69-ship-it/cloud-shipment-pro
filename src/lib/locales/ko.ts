@@ -121,6 +121,10 @@ const ko: TranslationSchema = {
     statusOutForDelivery: "배송 중",
     statusPending: "대기 중",
     statusException: "예외",
+    stageArrived: "도착",
+    stageArrivedDesc: "패키지가 목적지에 도착했습니다",
+    statusArrived: "도착",
+    onHold: "보류 중",
   },
 };
 

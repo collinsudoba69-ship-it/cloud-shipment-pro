@@ -121,6 +121,10 @@ const ru: TranslationSchema = {
     statusOutForDelivery: "Доставляется",
     statusPending: "Ожидание",
     statusException: "Исключение",
+    stageArrived: "Прибыло",
+    stageArrivedDesc: "Посылка прибыла в пункт назначения",
+    statusArrived: "Прибыло",
+    onHold: "На удержании",
   },
 };
 

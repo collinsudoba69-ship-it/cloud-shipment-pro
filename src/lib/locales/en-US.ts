@@ -177,6 +177,10 @@ const enUS: TranslationSchema = {
     statusOutForDelivery: "Out for Delivery",
     statusPending: "Pending",
     statusException: "Exception",
+    stageArrived: "Arrived",
+    stageArrivedDesc: "Package arrived at destination",
+    statusArrived: "Arrived",
+    onHold: "On Hold",
   },
 };
 

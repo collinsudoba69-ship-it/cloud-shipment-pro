@@ -121,6 +121,10 @@ const pl: TranslationSchema = {
     statusOutForDelivery: "W doręczeniu",
     statusPending: "Oczekujące",
     statusException: "Wyjątek",
+    stageArrived: "Dotarło",
+    stageArrivedDesc: "Paczka dotarła do celu",
+    statusArrived: "Dotarło",
+    onHold: "Wstrzymano",
   },
 };
 
