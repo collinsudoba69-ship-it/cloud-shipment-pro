@@ -168,7 +168,7 @@ const Track = () => {
       origin: shipmentRow.origin,
       destination: shipmentRow.destination,
       estimatedDelivery: shipmentRow.estimated_delivery_date === '1900-01-01'
-        ? 'On Hold'
+        ? t('trackPage.onHold')
         : shipmentRow.estimated_delivery_date
           ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
           : 'TBD',
@@ -622,7 +622,7 @@ const Track = () => {
                 <Badge variant="outline" className={getStatusColor(shipment.status)}>
                   {shipment.status === 'out-for-delivery' ? t('trackPage.statusOutForDelivery') :
                    shipment.status === 'delivered' ? t('trackPage.statusDelivered') :
-                   shipment.status === 'arrived' ? 'Arrived' :
+                   shipment.status === 'arrived' ? t('trackPage.statusArrived') :
                    shipment.status === 'in-transit' ? t('trackPage.statusInTransit') :
                    shipment.status === 'exception' ? t('trackPage.statusException') :
                    'Awaiting Customs Payment'}
@@ -697,7 +697,7 @@ const Track = () => {
                         { key: 'picked_up', label: t('trackPage.stagePickedUp'), description: t('trackPage.stagePickedUpDesc'), icon: PackageCheck, progress: 25 },
                         { key: 'in_transit', label: t('trackPage.stageInTransit'), description: t('trackPage.stageInTransitDesc'), icon: Truck, progress: 50 },
                         { key: 'out_for_delivery', label: t('trackPage.stageOutForDelivery'), description: t('trackPage.stageOutForDeliveryDesc'), icon: Send, progress: 80 },
-                        { key: 'arrived', label: 'Arrived', description: 'Package arrived at destination', icon: PackageCheck, progress: 95 },
+                        { key: 'arrived', label: t('trackPage.stageArrived'), description: t('trackPage.stageArrivedDesc'), icon: PackageCheck, progress: 95 },
                         { key: 'delivered', label: t('trackPage.stageDelivered'), description: t('trackPage.stageDeliveredDesc'), icon: Home, progress: 100 },
                       ];
 
