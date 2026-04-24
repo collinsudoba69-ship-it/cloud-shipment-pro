@@ -52,7 +52,7 @@ interface TrackingEvent {
 
 interface ShipmentData {
   trackingNumber: string;
-  status: 'pending' | 'in-transit' | 'out-for-delivery' | 'delivered' | 'exception';
+  status: 'pending' | 'in-transit' | 'out-for-delivery' | 'arrived' | 'delivered' | 'exception';
   origin: string;
   destination: string;
   estimatedDelivery: string;
@@ -138,6 +138,7 @@ const Track = () => {
       queued: 'pending',
       in_transit: 'in-transit',
       out_for_delivery: 'out-for-delivery',
+      arrived: 'arrived',
       delivered: 'delivered',
     };
 
@@ -152,7 +153,7 @@ const Track = () => {
     }));
 
     const statusRank: Record<string, number> = {
-      queued: 0, in_transit: 1, out_for_delivery: 2, delivered: 3,
+      queued: 0, in_transit: 1, out_for_delivery: 2, arrived: 3, delivered: 4,
     };
     let effectiveRawStatus: string = shipmentRow.status;
     for (const e of eventsRows ?? []) {
@@ -173,7 +174,7 @@ const Track = () => {
           : 'TBD',
       progress: Math.max(
         shipmentRow.progress ?? 0,
-        progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'delivered')
+        progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'arrived' | 'delivered')
       ),
       carrier: shipmentRow.courier ?? 'Cloud Shipment',
       weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
@@ -487,6 +488,7 @@ const Track = () => {
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       'delivered': 'bg-green-100 text-green-700 border-green-200',
+      'arrived': 'bg-emerald-100 text-emerald-700 border-emerald-200',
       'in-transit': 'bg-blue-100 text-blue-700 border-blue-200',
       'out-for-delivery': 'bg-purple-100 text-purple-700 border-purple-200',
       'pending': 'bg-amber-100 text-amber-700 border-amber-200',
@@ -499,6 +501,8 @@ const Track = () => {
     switch (status) {
       case 'delivered':
         return <CheckCircle2 className="w-5 h-5 text-green-600" />;
+      case 'arrived':
+        return <PackageCheck className="w-5 h-5 text-emerald-600" />;
       case 'in-transit':
         return <Truck className="w-5 h-5 text-blue-600" />;
       case 'out-for-delivery':
@@ -618,9 +622,10 @@ const Track = () => {
                 <Badge variant="outline" className={getStatusColor(shipment.status)}>
                   {shipment.status === 'out-for-delivery' ? t('trackPage.statusOutForDelivery') :
                    shipment.status === 'delivered' ? t('trackPage.statusDelivered') :
+                   shipment.status === 'arrived' ? 'Arrived' :
                    shipment.status === 'in-transit' ? t('trackPage.statusInTransit') :
                    shipment.status === 'exception' ? t('trackPage.statusException') :
-                   t('trackPage.statusPending')}
+                   'Awaiting Customs Payment'}
                 </Badge>
                 <Button variant="outline" size="sm" onClick={handleDownloadReceipt} className="gap-2">
                   <Printer className="w-4 h-4" />
@@ -691,7 +696,8 @@ const Track = () => {
                         { key: 'label_created', label: t('trackPage.stageLabelCreated'), description: t('trackPage.stageLabelCreatedDesc'), icon: FileText, progress: 1 },
                         { key: 'picked_up', label: t('trackPage.stagePickedUp'), description: t('trackPage.stagePickedUpDesc'), icon: PackageCheck, progress: 25 },
                         { key: 'in_transit', label: t('trackPage.stageInTransit'), description: t('trackPage.stageInTransitDesc'), icon: Truck, progress: 50 },
-                        { key: 'out_for_delivery', label: t('trackPage.stageOutForDelivery'), description: t('trackPage.stageOutForDeliveryDesc'), icon: Send, progress: 85 },
+                        { key: 'out_for_delivery', label: t('trackPage.stageOutForDelivery'), description: t('trackPage.stageOutForDeliveryDesc'), icon: Send, progress: 80 },
+                        { key: 'arrived', label: 'Arrived', description: 'Package arrived at destination', icon: PackageCheck, progress: 95 },
                         { key: 'delivered', label: t('trackPage.stageDelivered'), description: t('trackPage.stageDeliveredDesc'), icon: Home, progress: 100 },
                       ];
 
@@ -701,7 +707,8 @@ const Track = () => {
                         'pending': 0,
                         'in-transit': 2,
                         'out-for-delivery': 3,
-                        'delivered': 4,
+                        'arrived': 4,
+                        'delivered': 5,
                         'exception': 2,
                       };
                       // Raw DB enum -> stage index (events use raw enum values like 'in_transit')
@@ -709,7 +716,8 @@ const Track = () => {
                         'queued': 0,
                         'in_transit': 2,
                         'out_for_delivery': 3,
-                        'delivered': 4,
+                        'arrived': 4,
+                        'delivered': 5,
                       };
 
                       // Use the HIGHEST stage from either the row status or the latest event status.
@@ -1012,7 +1020,7 @@ const Track = () => {
                               : 'bg-amber-100 text-amber-700 border-amber-200'
                           }
                         >
-                          {shipment.paymentStatus === 'paid' ? t('trackPage.paid') : t('trackPage.pendingPayment')}
+                          {shipment.paymentStatus === 'paid' ? 'Successful' : t('trackPage.pendingPayment')}
                         </Badge>
                       </div>
                     </CardHeader>

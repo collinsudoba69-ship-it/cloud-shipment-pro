@@ -280,6 +280,7 @@ export type Database = {
         | "queued"
         | "in_transit"
         | "out_for_delivery"
+        | "arrived"
         | "delivered"
     }
     CompositeTypes: {
@@ -414,6 +415,7 @@ export const Constants = {
         "queued",
         "in_transit",
         "out_for_delivery",
+        "arrived",
         "delivered",
       ],
     },
