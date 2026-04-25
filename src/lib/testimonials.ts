@@ -102,7 +102,9 @@ function buildPool(strings: ReviewStrings, roles: string[]): Review[] {
     const tpl = pick(strings.templates, rand);
     const extra = pick(strings.extras, rand);
     const text = tpl.replace("{extra}", extra);
-    const rating = rand() < 0.88 ? 5 : 4;
+    // Realistic rating mix: ~68% 5★, ~22% 4★, ~8% 3★, ~2% 2★
+    const r = rand();
+    const rating = r < 0.68 ? 5 : r < 0.90 ? 4 : r < 0.98 ? 3 : 2;
     pool.push({
       name,
       role,
