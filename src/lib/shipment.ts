@@ -25,10 +25,10 @@ export function generateTrackingNumber(): string {
 }
 
 export const SHIPMENT_STATUSES = [
-  { value: "queued", label: "Queued", progress: 1 },
-  { value: "in_transit", label: "In Transit", progress: 50 },
-  { value: "out_for_delivery", label: "Out for Delivery", progress: 80 },
-  { value: "arrived", label: "Arrived", progress: 95 },
+  { value: "queued", label: "Queued", progress: 12 },
+  { value: "in_transit", label: "In Transit", progress: 55 },
+  { value: "out_for_delivery", label: "Out for Delivery", progress: 78 },
+  { value: "arrived", label: "Arrived", progress: 92 },
   { value: "delivered", label: "Delivered", progress: 100 },
 ] as const;
 

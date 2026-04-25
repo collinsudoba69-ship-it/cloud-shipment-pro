@@ -48,7 +48,7 @@ const empty: FormState = {
   origin: "", destination: "", shipment_type: "Parcel",
   quantity: 1, weight: "",
   is_fragile: false, is_express: false,
-  status: "queued", progress: 10,
+  status: "queued", progress: 12,
   estimated_delivery_date: "", description: "",
   shipped_at: toLocalInput(),
   payment_status: "pending", amount_to_pay: "", payment_method: "", payment_reason: "",
