@@ -427,7 +427,7 @@ export const ShipmentInvoiceDialog = ({
                 </div>
               </div>
 
-              <div className="mt-6 rounded-2xl border border-border p-4">
+              <div data-pdf-section="summary" className="mt-6 rounded-2xl border border-border p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Shipment Summary</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {summaryFields.map((item) => (
