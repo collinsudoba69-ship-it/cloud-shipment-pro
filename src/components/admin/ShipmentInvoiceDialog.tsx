@@ -358,7 +358,7 @@ export const ShipmentInvoiceDialog = ({
 
           <div className="rounded-2xl border border-border bg-muted/25 p-4">
             <div ref={contentRef} className="mx-auto w-full max-w-[794px] rounded-[28px] bg-white p-6 text-left text-[hsl(215_45%_12%)] shadow-soft sm:p-8">
-              <div className={cn("rounded-[24px] px-6 py-6", activeTheme.headerClass)}>
+              <div data-pdf-section="header" className={cn("rounded-[24px] px-6 py-6", activeTheme.headerClass)}>
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-4">
                     <img src={previewLogo} alt="Cloud Shipment logo" className="h-20 w-auto max-w-[260px] object-contain brightness-[1.04]" />
