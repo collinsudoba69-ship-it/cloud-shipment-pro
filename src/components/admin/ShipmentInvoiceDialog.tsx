@@ -383,7 +383,7 @@ export const ShipmentInvoiceDialog = ({
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div data-pdf-section="parties-billing" className="mt-6 grid gap-4 md:grid-cols-2">
                 <div className="rounded-2xl border border-border p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Shipment Parties</p>
                   <div className="mt-4 space-y-4 text-sm">
