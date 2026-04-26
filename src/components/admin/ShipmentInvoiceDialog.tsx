@@ -447,7 +447,7 @@ export const ShipmentInvoiceDialog = ({
               )}
 
               {cleanFields.length > 0 && (
-                <div className="mt-6 rounded-2xl border border-border p-4">
+                <div data-pdf-section="additional" className="mt-6 rounded-2xl border border-border p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Additional Info</p>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     {cleanFields.map((field) => (
