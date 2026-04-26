@@ -180,30 +180,54 @@ export const ShipmentInvoiceDialog = ({
 
     setIsGenerating(true);
     try {
-      const canvas = await html2canvas(contentRef.current, {
-        backgroundColor: "#ffffff",
-        scale: 2,
-        useCORS: true,
-      });
+      const A4_WIDTH_MM = 210;
+      const A4_HEIGHT_MM = 297;
+      const MARGIN_MM = 12;
+      const CONTENT_WIDTH_MM = A4_WIDTH_MM - MARGIN_MM * 2;
+      const SECTION_GAP_MM = 4;
 
       const pdf = new jsPDF("p", "mm", "a4");
-      const width = pdf.internal.pageSize.getWidth();
-      const height = pdf.internal.pageSize.getHeight();
-      const imgData = canvas.toDataURL("image/png");
-      const ratio = Math.min(width / canvas.width, height / canvas.height);
-      const imgWidth = canvas.width * ratio;
-      const imgHeight = canvas.height * ratio;
-      let heightLeft = imgHeight;
-      let position = 0;
+      let currentY = MARGIN_MM;
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= height;
+      const sections = Array.from(
+        contentRef.current.querySelectorAll<HTMLElement>("[data-pdf-section]"),
+      );
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= height;
+      const targets = sections.length > 0 ? sections : [contentRef.current];
+
+      for (const section of targets) {
+        const canvas = await html2canvas(section, {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          useCORS: true,
+        });
+
+        const pxWidth = canvas.width;
+        const pxHeight = canvas.height;
+        const scaleFactor = CONTENT_WIDTH_MM / pxWidth;
+        let heightMM = pxHeight * scaleFactor;
+
+        const remaining = A4_HEIGHT_MM - MARGIN_MM - currentY;
+
+        // If section doesn't fit on remaining space, start a new page
+        if (heightMM > remaining && currentY > MARGIN_MM) {
+          pdf.addPage();
+          currentY = MARGIN_MM;
+        }
+
+        // If a single section is taller than full page, scale it down to fit one page
+        const maxAvailable = A4_HEIGHT_MM - MARGIN_MM * 2;
+        let drawWidth = CONTENT_WIDTH_MM;
+        if (heightMM > maxAvailable) {
+          const ratio = maxAvailable / heightMM;
+          heightMM = maxAvailable;
+          drawWidth = CONTENT_WIDTH_MM * ratio;
+        }
+
+        const imgData = canvas.toDataURL("image/png");
+        const xPos = MARGIN_MM + (CONTENT_WIDTH_MM - drawWidth) / 2;
+        pdf.addImage(imgData, "PNG", xPos, currentY, drawWidth, heightMM);
+        currentY += heightMM + SECTION_GAP_MM;
       }
 
       pdf.save(`${shipment.trackingNumber.toLowerCase()}-invoice.pdf`);
