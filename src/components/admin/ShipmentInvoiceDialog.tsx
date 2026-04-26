@@ -180,30 +180,54 @@ export const ShipmentInvoiceDialog = ({
 
     setIsGenerating(true);
     try {
-      const canvas = await html2canvas(contentRef.current, {
-        backgroundColor: "#ffffff",
-        scale: 2,
-        useCORS: true,
-      });
+      const A4_WIDTH_MM = 210;
+      const A4_HEIGHT_MM = 297;
+      const MARGIN_MM = 12;
+      const CONTENT_WIDTH_MM = A4_WIDTH_MM - MARGIN_MM * 2;
+      const SECTION_GAP_MM = 4;
 
       const pdf = new jsPDF("p", "mm", "a4");
-      const width = pdf.internal.pageSize.getWidth();
-      const height = pdf.internal.pageSize.getHeight();
-      const imgData = canvas.toDataURL("image/png");
-      const ratio = Math.min(width / canvas.width, height / canvas.height);
-      const imgWidth = canvas.width * ratio;
-      const imgHeight = canvas.height * ratio;
-      let heightLeft = imgHeight;
-      let position = 0;
+      let currentY = MARGIN_MM;
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= height;
+      const sections = Array.from(
+        contentRef.current.querySelectorAll<HTMLElement>("[data-pdf-section]"),
+      );
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= height;
+      const targets = sections.length > 0 ? sections : [contentRef.current];
+
+      for (const section of targets) {
+        const canvas = await html2canvas(section, {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          useCORS: true,
+        });
+
+        const pxWidth = canvas.width;
+        const pxHeight = canvas.height;
+        const scaleFactor = CONTENT_WIDTH_MM / pxWidth;
+        let heightMM = pxHeight * scaleFactor;
+
+        const remaining = A4_HEIGHT_MM - MARGIN_MM - currentY;
+
+        // If section doesn't fit on remaining space, start a new page
+        if (heightMM > remaining && currentY > MARGIN_MM) {
+          pdf.addPage();
+          currentY = MARGIN_MM;
+        }
+
+        // If a single section is taller than full page, scale it down to fit one page
+        const maxAvailable = A4_HEIGHT_MM - MARGIN_MM * 2;
+        let drawWidth = CONTENT_WIDTH_MM;
+        if (heightMM > maxAvailable) {
+          const ratio = maxAvailable / heightMM;
+          heightMM = maxAvailable;
+          drawWidth = CONTENT_WIDTH_MM * ratio;
+        }
+
+        const imgData = canvas.toDataURL("image/png");
+        const xPos = MARGIN_MM + (CONTENT_WIDTH_MM - drawWidth) / 2;
+        pdf.addImage(imgData, "PNG", xPos, currentY, drawWidth, heightMM);
+        currentY += heightMM + SECTION_GAP_MM;
       }
 
       pdf.save(`${shipment.trackingNumber.toLowerCase()}-invoice.pdf`);
@@ -334,7 +358,7 @@ export const ShipmentInvoiceDialog = ({
 
           <div className="rounded-2xl border border-border bg-muted/25 p-4">
             <div ref={contentRef} className="mx-auto w-full max-w-[794px] rounded-[28px] bg-white p-6 text-left text-[hsl(215_45%_12%)] shadow-soft sm:p-8">
-              <div className={cn("rounded-[24px] px-6 py-6", activeTheme.headerClass)}>
+              <div data-pdf-section="header" className={cn("rounded-[24px] px-6 py-6", activeTheme.headerClass)}>
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-4">
                     <img src={previewLogo} alt="Cloud Shipment logo" className="h-20 w-auto max-w-[260px] object-contain brightness-[1.04]" />
@@ -359,7 +383,7 @@ export const ShipmentInvoiceDialog = ({
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div data-pdf-section="parties-billing" className="mt-6 grid gap-4 md:grid-cols-2">
                 <div className="rounded-2xl border border-border p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Shipment Parties</p>
                   <div className="mt-4 space-y-4 text-sm">
@@ -403,7 +427,7 @@ export const ShipmentInvoiceDialog = ({
                 </div>
               </div>
 
-              <div className="mt-6 rounded-2xl border border-border p-4">
+              <div data-pdf-section="summary" className="mt-6 rounded-2xl border border-border p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Shipment Summary</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {summaryFields.map((item) => (
@@ -416,14 +440,14 @@ export const ShipmentInvoiceDialog = ({
               </div>
 
               {note && (
-                <div className="mt-6 rounded-2xl border border-border p-4">
+                <div data-pdf-section="note" className="mt-6 rounded-2xl border border-border p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Note</p>
                   <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-foreground">{note}</p>
                 </div>
               )}
 
               {cleanFields.length > 0 && (
-                <div className="mt-6 rounded-2xl border border-border p-4">
+                <div data-pdf-section="additional" className="mt-6 rounded-2xl border border-border p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Additional Info</p>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     {cleanFields.map((field) => (
