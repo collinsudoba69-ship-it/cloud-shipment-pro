@@ -440,7 +440,7 @@ export const ShipmentInvoiceDialog = ({
               </div>
 
               {note && (
-                <div className="mt-6 rounded-2xl border border-border p-4">
+                <div data-pdf-section="note" className="mt-6 rounded-2xl border border-border p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Note</p>
                   <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-foreground">{note}</p>
                 </div>
