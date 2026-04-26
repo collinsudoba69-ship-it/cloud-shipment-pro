@@ -222,10 +222,19 @@ const ShipmentForm = () => {
       const { data, error } = await supabase.from("shipments").insert(payload).select("id").single();
       if (error) { setLoading(false); return toast.error(error.message); }
       shipmentId = data.id;
-      // Initial timeline event uses the chosen registration date
+      // Initial timeline event uses the chosen registration date.
+      // The note adapts to the selected status so customers see contextual messaging.
+      const initialNoteByStatus: Record<ShipmentStatus, string> = {
+        queued: "Shipment registered",
+        in_transit: "Package is moving between hubs",
+        out_for_delivery: "Final vehicle dispatched to receiver",
+        arrived: "Package arrived at destination",
+        delivered: "Package delivered to recipient",
+      };
       await supabase.from("shipment_events").insert({
         shipment_id: shipmentId, status: form.status, location: form.origin,
-        note: "Shipment registered", created_by: user?.id ?? null,
+        note: initialNoteByStatus[form.status] ?? "Shipment registered",
+        created_by: user?.id ?? null,
         event_at: payload.shipped_at,
       });
 
