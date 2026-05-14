@@ -143,9 +143,9 @@ const Shipments = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete shipment?</AlertDialogTitle>
+                                <AlertDialogTitle>Are you sure you want to delete this Shipment?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This permanently removes shipment <strong>{r.tracking_number}</strong> and its timeline.
+                                  This action cannot be undone. Shipment <strong>{r.tracking_number}</strong> and its entire timeline will be permanently removed.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
