@@ -203,10 +203,7 @@ const Track = () => {
         : shipmentRow.estimated_delivery_date
           ? format(new Date(shipmentRow.estimated_delivery_date), 'PPP')
           : 'TBD',
-      progress: Math.max(
-        shipmentRow.progress ?? 0,
-        progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'arrived' | 'delivered')
-      ),
+      progress: shipmentRow.progress ?? progressForStatus(effectiveRawStatus as 'queued' | 'in_transit' | 'out_for_delivery' | 'arrived' | 'delivered'),
       carrier: shipmentRow.courier ?? 'Cloud Shipment',
       weight: shipmentRow.weight ? `${shipmentRow.weight} kg` : '—',
       service: shipmentRow.is_express ? 'Express' : (shipmentRow.shipment_type ?? 'Standard'),
