@@ -151,7 +151,7 @@ const ShipmentForm = () => {
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((p) => ({ ...p, [k]: v }));
 
   const handleStatusChange = (s: ShipmentStatus) => {
-    setForm((p) => ({ ...p, status: s }));
+    setForm((p) => ({ ...p, status: s, progress: isEdit ? p.progress : progressForStatus(s) }));
   };
 
   const handleUpload = async (files: FileList | null) => {
