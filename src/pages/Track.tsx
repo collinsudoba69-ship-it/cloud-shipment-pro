@@ -339,7 +339,7 @@ const Track = () => {
       setIsLive(false);
       supabase.removeChannel(channel);
     };
-  }, [shipment?.trackingNumber, refetchShipment]);
+  }, [shipment?.id, refetchShipment]);
 
   const handleCopyTracking = () => {
     if (shipment) {
