@@ -151,9 +151,8 @@ const ShipmentForm = () => {
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((p) => ({ ...p, [k]: v }));
 
   const handleStatusChange = (s: ShipmentStatus) => {
-    setForm((p) => ({ ...p, status: s, progress: isEdit ? p.progress : progressForStatus(s) }));
+    setForm((p) => ({ ...p, status: s, progress: progressForStatus(s) }));
   };
-
   const handleUpload = async (files: FileList | null) => {
     if (!files || !files.length) return;
     if (form.images.length + files.length > MAX_IMAGES) {
@@ -306,12 +305,12 @@ const ShipmentForm = () => {
     });
     if (error) return toast.error(error.message);
     // Sync shipment status to latest event
-    await supabase.from("shipments").update({ status: newEvent.status, progress: form.progress }).eq("id", id);
+    await supabase.from("shipments").update({ status: newEvent.status, progress: progressForStatus(newEvent.status) }).eq("id", id);
     toast.success("Timeline event added");
     setNewEvent({ status: "", location: "", note: "", event_at: toLocalInput() });
     const { data: evs } = await supabase.from("shipment_events").select("*").eq("shipment_id", id).order("event_at", { ascending: false });
     setEvents((evs ?? []) as TimelineEvent[]);
-    setForm((p) => ({ ...p, status: newEvent.status as ShipmentStatus }));
+   setForm((p) => ({ ...p, status: newEvent.status as ShipmentStatus, progress: progressForStatus(newEvent.status as ShipmentStatus) })); 
   };
 
   return (
