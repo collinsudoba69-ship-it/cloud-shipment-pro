@@ -268,7 +268,7 @@ const Track = () => {
   }, [buildShipmentData]);
 
   const handleTrack = async (number: string = trackingNumber) => {
-    if (!number.trim()) {
+    if (!number.trim().replace(/\s+/g, '')) {
       toast.error(t('trackPage.pleaseEnter'));
       return;
     }
@@ -284,7 +284,7 @@ const Track = () => {
       const { data: shipmentRow, error: shipErr } = await supabase
         .from('shipments')
         .select('*')
-        .ilike('tracking_number', number.trim())
+        .ilike('tracking_number', number.trim().replace(/\s+/g, ''))
         .maybeSingle();
 
       if (shipErr) throw shipErr;
