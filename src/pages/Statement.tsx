@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { Download, Printer, Image as ImageIcon } from "lucide-react";
+import { Download, Printer, Image as ImageIcon, ArrowLeft } from "lucide-react";
 import logoUrl from "@/assets/cloud-shipment-logo.png";
 
 type Customer = { id: string; name: string; slug: string; goal_amount: number; tracking_number: string };
@@ -90,11 +90,14 @@ const Statement = () => {
 
   return (
     <div className="min-h-screen bg-muted/40 py-6 px-4 print:bg-white print:p-0">
-      <div className="max-w-3xl mx-auto mb-4 flex flex-wrap justify-end gap-2 print:hidden">
+      <div className="max-w-3xl mx-auto mb-4 flex flex-wrap justify-between gap-2 print:hidden">
+        <Button variant="outline" size="sm" onClick={() => window.history.back()}><ArrowLeft className="w-4 h-4 mr-2" />Back</Button>
+        <div className="flex flex-wrap gap-2">
         <Button variant="outline" size="sm" onClick={() => window.print()}><Printer className="w-4 h-4 mr-2" />Print</Button>
         <Button variant="outline" size="sm" onClick={() => downloadImage("image/png")}><ImageIcon className="w-4 h-4 mr-2" />PNG</Button>
         <Button variant="outline" size="sm" onClick={() => downloadImage("image/jpeg")}><ImageIcon className="w-4 h-4 mr-2" />JPG</Button>
         <Button size="sm" onClick={downloadPdf}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
+        </div>
       </div>
 
       <div ref={sheetRef} className="max-w-3xl mx-auto bg-white shadow-sm print:shadow-none border-2 border-primary/80 print:border-primary">
