@@ -68,6 +68,68 @@ export type Database = {
         }
         Relationships: []
       }
+      customers: {
+        Row: {
+          created_at: string
+          goal_amount: number
+          id: string
+          name: string
+          slug: string
+          tracking_number: string
+        }
+        Insert: {
+          created_at?: string
+          goal_amount?: number
+          id?: string
+          name: string
+          slug: string
+          tracking_number?: string
+        }
+        Update: {
+          created_at?: string
+          goal_amount?: number
+          id?: string
+          name?: string
+          slug?: string
+          tracking_number?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_id: string
+          id: string
+          paid_at: string
+          reason: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_id: string
+          id?: string
+          paid_at?: string
+          reason: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_id?: string
+          id?: string
+          paid_at?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -264,6 +326,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      gen_tracking_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
