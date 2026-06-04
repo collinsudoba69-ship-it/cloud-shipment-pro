@@ -17,6 +17,9 @@ import ShipmentForm from "./pages/admin/ShipmentForm";
 import Users from "./pages/admin/Users";
 import Logs from "./pages/admin/Logs";
 import Settings from "./pages/admin/Settings";
+import PaymentCustomers from "./pages/admin/PaymentCustomers";
+import PaymentCustomerDetail from "./pages/admin/PaymentCustomerDetail";
+import Statement from "./pages/Statement";
 import BuyCredits from "./pages/BuyCredits";
 
 const queryClient = new QueryClient();
@@ -34,6 +37,7 @@ const App = () => (
               <Route path="/index" element={<Index />} />
               <Route path="/track" element={<Track />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/statement/:slug" element={<Statement />} />
               <Route
                 path="/buy-credits"
                 element={
@@ -71,6 +75,8 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route path="payments" element={<PaymentCustomers />} />
+                <Route path="payments/:id" element={<PaymentCustomerDetail />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
 
