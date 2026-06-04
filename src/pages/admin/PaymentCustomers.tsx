@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Plus, ExternalLink, Users as UsersIcon, Trash2 } from "lucide-react";
+import { Plus, ExternalLink, Users as UsersIcon, Trash2, ArrowLeft } from "lucide-react";
 
 type Customer = { id: string; name: string; slug: string; goal_amount: number; tracking_number: string; created_at: string };
 
@@ -89,6 +89,7 @@ const PaymentCustomers = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-2"><ArrowLeft className="w-4 h-4" />Back</button>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Payment Tracker</h1>
