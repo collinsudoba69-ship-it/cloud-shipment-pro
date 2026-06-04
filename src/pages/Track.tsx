@@ -51,6 +51,7 @@ interface TrackingEvent {
 }
 
 interface ShipmentData {
+  id: string;
   trackingNumber: string;
   status: 'pending' | 'in-transit' | 'out-for-delivery' | 'arrived' | 'delivered' | 'exception';
   origin: string;
@@ -194,6 +195,7 @@ const Track = () => {
     }
 
     return {
+      id: shipmentRow.id,
       trackingNumber: shipmentRow.tracking_number,
       status: statusMap[effectiveRawStatus] ?? 'pending',
       origin: shipmentRow.origin,
