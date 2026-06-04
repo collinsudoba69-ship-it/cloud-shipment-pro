@@ -147,7 +147,7 @@ const Statement = () => {
                       <td className="py-2 pr-2">{format(d, "PP")}</td>
                       <td className="py-2 px-2 text-muted-foreground">{format(d, "p")}</td>
                       <td className="py-2 px-2">{p.reason}</td>
-                      <td className="py-2 pl-2 text-right tabular-nums">${Number(p.amount).toFixed(2)}</td>
+                      <td className="py-2 pl-2 text-right tabular-nums">${Number(p.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     </tr>
                   );
                 })}
@@ -159,15 +159,15 @@ const Statement = () => {
             <div className="w-full max-w-xs border border-border">
               <div className="flex justify-between px-4 py-2 text-sm border-b border-border">
                 <span className="text-muted-foreground">Total Paid</span>
-                <span className="tabular-nums font-medium">${paid.toFixed(2)}</span>
+                <span className="tabular-nums font-medium">${paid.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between px-4 py-2 text-sm border-b border-border">
                 <span className="text-muted-foreground">Goal</span>
-                <span className="tabular-nums font-medium">${Number(customer.goal_amount).toFixed(2)}</span>
+                <span className="tabular-nums font-medium">${Number(customer.goal_amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between px-4 py-3 text-sm bg-primary text-primary-foreground">
                 <span className="font-medium">Remaining Balance</span>
-                <span className="tabular-nums font-semibold">${remaining.toFixed(2)}</span>
+                <span className="tabular-nums font-semibold">${remaining.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>
