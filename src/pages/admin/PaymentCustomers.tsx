@@ -141,9 +141,9 @@ const PaymentCustomers = () => {
                       <div className="text-xs text-muted-foreground">/{c.slug}</div>
                     </TableCell>
                     <TableCell className="font-mono text-xs">{c.tracking_number}</TableCell>
-                    <TableCell className="text-right tabular-nums">${paid.toFixed(2)}</TableCell>
-                    <TableCell className="text-right tabular-nums">${Number(c.goal_amount).toFixed(2)}</TableCell>
-                    <TableCell className="text-right tabular-nums font-medium">${remaining.toFixed(2)}</TableCell>
+                    <TableCell className="text-right tabular-nums">${paid.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                    <TableCell className="text-right tabular-nums">${Number(c.goal_amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                    <TableCell className="text-right tabular-nums font-medium">${remaining.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-2">
                         <Link to={`/statement/${c.slug}`} target="_blank" className="inline-flex items-center text-xs text-primary hover:underline">
