@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Plus, ExternalLink, Users as UsersIcon } from "lucide-react";
+import { Plus, ExternalLink, Users as UsersIcon, Trash2 } from "lucide-react";
 
 type Customer = { id: string; name: string; slug: string; goal_amount: number; tracking_number: string; created_at: string };
 
@@ -24,6 +25,8 @@ const PaymentCustomers = () => {
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("100");
   const [tracking, setTracking] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -51,8 +54,41 @@ const PaymentCustomers = () => {
     navigate(`/admin/payments/${data.id}`);
   };
 
+  const deleteCustomer = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    // Delete related payments first to avoid FK constraint errors
+    await (supabase as any).from("payments").delete().eq("customer_id", deleteTarget.id);
+    const { error } = await (supabase as any).from("customers").delete().eq("id", deleteTarget.id);
+    setDeleting(false);
+    if (error) return toast.error(error.message);
+    toast.success(`"${deleteTarget.name}" deleted`);
+    setDeleteTarget(null);
+    load();
+  };
+
   return (
     <div className="space-y-6">
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete customer?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <strong>{deleteTarget?.name}</strong> and all their payment records. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteCustomer}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting…" : "Yes, delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Payment Tracker</h1>
@@ -109,9 +145,19 @@ const PaymentCustomers = () => {
                     <TableCell className="text-right tabular-nums">${Number(c.goal_amount).toFixed(2)}</TableCell>
                     <TableCell className="text-right tabular-nums font-medium">${remaining.toFixed(2)}</TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Link to={`/statement/${c.slug}`} target="_blank" className="inline-flex items-center text-xs text-primary hover:underline">
-                        Statement <ExternalLink className="w-3 h-3 ml-1" />
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link to={`/statement/${c.slug}`} target="_blank" className="inline-flex items-center text-xs text-primary hover:underline">
+                          Statement <ExternalLink className="w-3 h-3 ml-1" />
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setDeleteTarget(c)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
