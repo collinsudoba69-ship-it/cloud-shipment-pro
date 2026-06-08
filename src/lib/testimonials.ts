@@ -84,27 +84,65 @@ function pick<T>(arr: T[], rand: () => number): T {
   return arr[Math.floor(rand() * arr.length)];
 }
 
-function buildPool(strings: ReviewStrings, roles: string[]): Review[] {
+// Light qualifiers that slightly soften a glowing review so a 4★ rating reads naturally.
+const SOFTENERS_BY_LANG: Record<string, string[]> = {
+  en: [
+    "A tiny delay at customs but otherwise excellent.",
+    "Packaging could be a touch sturdier, still great overall.",
+    "Took one extra day, but the tracking made up for it.",
+    "Minor hiccup with the first notification, support fixed it fast.",
+  ],
+};
+const MIXED_TEMPLATES_BY_LANG: Record<string, string[]> = {
+  en: [
+    "Decent service. Delivery arrived a day late but the tracking updates were clear and the team was polite when I asked.",
+    "Pretty good experience. The interface is clean, though I'd love to see more frequent status updates while in transit.",
+    "It worked. Nothing extraordinary, but my package got there safely and the price felt fair.",
+    "Solid courier. Had one delay during a holiday weekend, otherwise reliable and easy to use.",
+  ],
+};
+
+function buildPool(strings: ReviewStrings, roles: string[], lang: string): Review[] {
   const rand = mulberry32(20260101); // stable seed → identical pool composition
   const pool: Review[] = [];
-  const seen = new Set<string>();
+  const seenIdentity = new Set<string>();
+  const seenText = new Set<string>();
+  const baseLang = lang.split("-")[0];
+  const softeners = SOFTENERS_BY_LANG[lang] ?? SOFTENERS_BY_LANG[baseLang] ?? SOFTENERS_BY_LANG.en;
+  const mixedTemplates =
+    MIXED_TEMPLATES_BY_LANG[lang] ?? MIXED_TEMPLATES_BY_LANG[baseLang] ?? MIXED_TEMPLATES_BY_LANG.en;
   let attempts = 0;
-  while (pool.length < 520 && attempts < 5000) {
+  while (pool.length < 520 && attempts < 8000) {
     attempts++;
     const first = pick(FIRST_NAMES, rand);
     const lastI = pick(LAST_INITIALS, rand);
     const name = `${first} ${lastI}.`;
     const location = pick(LOCATIONS, rand);
     const role = pick(roles, rand);
-    const key = `${name}|${location}|${role}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    const tpl = pick(strings.templates, rand);
-    const extra = pick(strings.extras, rand);
-    const text = tpl.replace("{extra}", extra);
-    // Realistic rating mix: ~68% 5★, ~22% 4★, ~8% 3★, ~2% 2★
+    // Dedupe by identity (name+location) so the same person doesn't reappear
+    const identity = `${name}|${location}`;
+    if (seenIdentity.has(identity)) continue;
+    // Realistic rating mix: ~70% 5★, ~22% 4★, ~6% 3★, ~2% 2★
     const r = rand();
-    const rating = r < 0.68 ? 5 : r < 0.90 ? 4 : r < 0.98 ? 3 : 2;
+    const rating = r < 0.7 ? 5 : r < 0.92 ? 4 : r < 0.98 ? 3 : 2;
+    // Choose text that matches the rating
+    let text: string;
+    if (rating === 5) {
+      const tpl = pick(strings.templates, rand);
+      const extra = pick(strings.extras, rand);
+      text = tpl.replace("{extra}", extra);
+    } else if (rating === 4) {
+      const tpl = pick(strings.templates, rand);
+      const soft = pick(softeners, rand);
+      text = tpl.replace("{extra}", soft);
+    } else {
+      // 2-3 star → use the mixed/critical template set
+      text = pick(mixedTemplates, rand);
+    }
+    // Dedupe by review text so two senders never share the same words
+    if (seenText.has(text)) continue;
+    seenIdentity.add(identity);
+    seenText.add(text);
     pool.push({
       name,
       role,
@@ -140,7 +178,7 @@ function getPool(lang: string): Review[] {
   if (cached) return cached;
   const strings = getReviewStrings(lang);
   const roles = ROLES_BY_LANG[lang] ?? ROLES_BY_LANG[baseLang] ?? ROLES_BY_LANG.en;
-  const pool = buildPool(strings, roles);
+  const pool = buildPool(strings, roles, lang);
   poolCache.set(lang, pool);
   return pool;
 }

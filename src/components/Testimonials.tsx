@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Star, Quote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getDailyReviews, getPoolStats } from "@/lib/testimonials";
+import { getDailyReviews, getPoolStats, type Review } from "@/lib/testimonials";
 import { getReviewStrings } from "@/lib/locales/reviews";
+import { supabase } from "@/integrations/supabase/client";
+import ReviewForm from "./ReviewForm";
 
 const Stars = ({ rating }: { rating: number }) => (
   <div className="flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
@@ -16,6 +18,21 @@ const Stars = ({ rating }: { rating: number }) => (
     ))}
   </div>
 );
+
+interface UserReviewRow {
+  id: string;
+  display_name: string;
+  occupation: string;
+  location: string;
+  rating: number;
+  text: string;
+  created_at: string;
+}
+
+function startOfTodayUTC(): string {
+  const d = new Date();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).toISOString();
+}
 
 export const Testimonials = () => {
   const { i18n } = useTranslation();
@@ -29,7 +46,45 @@ export const Testimonials = () => {
     };
   }, [lang]);
 
+  const [userReviews, setUserReviews] = useState<UserReviewRow[]>([]);
+
+  const loadUserReviews = useCallback(async () => {
+    const { data } = await supabase
+      .from("user_reviews")
+      .select("id, display_name, occupation, location, rating, text, created_at")
+      .gte("created_at", startOfTodayUTC())
+      .order("created_at", { ascending: false })
+      .limit(24);
+    if (data) setUserReviews(data as UserReviewRow[]);
+  }, []);
+
+  useEffect(() => { loadUserReviews(); }, [loadUserReviews]);
+
   const isRTL = lang.startsWith("ar");
+
+  // Convert user reviews to Review shape and prepend
+  const userAsReviews: Review[] = userReviews.map((r) => {
+    const parts = r.display_name.trim().split(/\s+/);
+    const initials = (parts[0]?.[0] ?? "?") + (parts[1]?.[0] ?? "");
+    return {
+      name: r.display_name,
+      role: r.occupation,
+      location: r.location,
+      rating: r.rating,
+      text: r.text,
+      initials: initials.toUpperCase().slice(0, 2),
+    };
+  });
+
+  // Dedupe by text just in case
+  const seenText = new Set<string>();
+  const combined: Review[] = [];
+  for (const r of [...userAsReviews, ...reviews]) {
+    if (seenText.has(r.text)) continue;
+    seenText.add(r.text);
+    combined.push(r);
+    if (combined.length >= 24) break;
+  }
 
   return (
     <section className="py-16 bg-muted/30" dir={isRTL ? "rtl" : "ltr"}>
@@ -53,7 +108,7 @@ export const Testimonials = () => {
 
         {/* Reviews grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {reviews.map((r, idx) => (
+          {combined.map((r, idx) => (
             <Card
               key={`${r.name}-${idx}`}
               className="relative hover:shadow-lg transition-shadow duration-300 border-border/50"
@@ -77,13 +132,18 @@ export const Testimonials = () => {
                     </p>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {strings.todayLabels[idx % strings.todayLabels.length]}
+                    {idx < userAsReviews.length
+                      ? strings.todayLabels[0]
+                      : strings.todayLabels[idx % strings.todayLabels.length]}
                   </span>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
+
+        {/* Review form */}
+        <ReviewForm onSubmitted={loadUserReviews} />
 
         {/* Trust footer */}
         <div className="mt-12 text-center text-sm text-muted-foreground">
