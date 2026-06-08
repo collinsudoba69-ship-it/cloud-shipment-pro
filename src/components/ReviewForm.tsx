@@ -51,18 +51,26 @@ export const ReviewForm = ({ onSubmitted }: Props) => {
     }
     setSubmitting(true);
     const display_name = `${parsed.data.firstName} ${parsed.data.lastInitial.toUpperCase()}.`;
-    const { error } = await supabase.from("user_reviews").insert({
+    const { data, error } = await supabase.from("user_reviews").insert({
       display_name,
       occupation: parsed.data.occupation,
       location: parsed.data.location,
       text: parsed.data.text,
       rating: parsed.data.rating,
-    });
+    }).select("id").single();
     setSubmitting(false);
     if (error) {
       toast({ title: "Could not post review", description: error.message, variant: "destructive" });
       return;
     }
+    try {
+      const key = "my_review_ids";
+      const existing = JSON.parse(localStorage.getItem(key) || "[]");
+      if (data?.id) {
+        existing.push(data.id);
+        localStorage.setItem(key, JSON.stringify(existing));
+      }
+    } catch {}
     toast({ title: "Thanks for your review!", description: "It is now live on the homepage." });
     setFirstName(""); setLastInitial(""); setOccupation(""); setLocation(""); setText(""); setRating(5);
     onSubmitted?.();
@@ -91,13 +99,13 @@ export const ReviewForm = ({ onSubmitted }: Props) => {
             />
           </div>
           <Input
-            placeholder="Occupation (e.g. Boutique Owner)"
+            placeholder="Occupation (e.g. Retired)"
             value={occupation}
             onChange={(e) => setOccupation(e.target.value)}
             maxLength={60}
           />
           <Input
-            placeholder="City, Country (e.g. Lagos, Nigeria)"
+            placeholder="City, Country (e.g. Chicago, United States)"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             maxLength={80}
