@@ -91,13 +91,13 @@ export const ReviewForm = ({ onSubmitted }: Props) => {
             />
           </div>
           <Input
-            placeholder="Occupation (e.g. Boutique Owner)"
+            placeholder="Occupation (e.g. Retired)"
             value={occupation}
             onChange={(e) => setOccupation(e.target.value)}
             maxLength={60}
           />
           <Input
-            placeholder="City, Country (e.g. Lagos, Nigeria)"
+            placeholder="City, Country (e.g. Chicago, United States)"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             maxLength={80}
