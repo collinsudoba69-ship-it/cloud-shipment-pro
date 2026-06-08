@@ -38,6 +38,7 @@ function startOfTodayUTC(): string {
 
 export const Testimonials = () => {
   const { i18n } = useTranslation();
+  const { toast } = useToast();
   const lang = i18n.language || "en";
 
   const { reviews, stats, strings } = useMemo(() => {
@@ -49,6 +50,15 @@ export const Testimonials = () => {
   }, [lang]);
 
   const [userReviews, setUserReviews] = useState<UserReviewRow[]>([]);
+  const [ownIds, setOwnIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      setOwnIds(JSON.parse(localStorage.getItem("my_review_ids") || "[]"));
+    } catch {
+      setOwnIds([]);
+    }
+  }, []);
 
   const loadUserReviews = useCallback(async () => {
     const { data } = await supabase
@@ -58,14 +68,32 @@ export const Testimonials = () => {
       .order("created_at", { ascending: false })
       .limit(24);
     if (data) setUserReviews(data as UserReviewRow[]);
+    try {
+      setOwnIds(JSON.parse(localStorage.getItem("my_review_ids") || "[]"));
+    } catch {}
   }, []);
 
   useEffect(() => { loadUserReviews(); }, [loadUserReviews]);
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete your review?")) return;
+    const { error } = await supabase.from("user_reviews").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Could not delete", description: error.message, variant: "destructive" });
+      return;
+    }
+    const next = ownIds.filter((x) => x !== id);
+    setOwnIds(next);
+    localStorage.setItem("my_review_ids", JSON.stringify(next));
+    setUserReviews((prev) => prev.filter((r) => r.id !== id));
+    toast({ title: "Review deleted" });
+  };
+
   const isRTL = lang.startsWith("ar");
 
-  // Convert user reviews to Review shape and prepend
-  const userAsReviews: Review[] = userReviews.map((r) => {
+  type Item = Review & { ownerId?: string };
+
+  const userAsReviews: Item[] = userReviews.map((r) => {
     const parts = r.display_name.trim().split(/\s+/);
     const initials = (parts[0]?.[0] ?? "?") + (parts[1]?.[0] ?? "");
     return {
@@ -75,12 +103,12 @@ export const Testimonials = () => {
       rating: r.rating,
       text: r.text,
       initials: initials.toUpperCase().slice(0, 2),
+      ownerId: r.id,
     };
   });
 
-  // Dedupe by text just in case
   const seenText = new Set<string>();
-  const combined: Review[] = [];
+  const combined: Item[] = [];
   for (const r of [...userAsReviews, ...reviews]) {
     if (seenText.has(r.text)) continue;
     seenText.add(r.text);
@@ -110,7 +138,9 @@ export const Testimonials = () => {
 
         {/* Reviews grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {combined.map((r, idx) => (
+          {combined.map((r, idx) => {
+            const isOwn = !!r.ownerId && ownIds.includes(r.ownerId);
+            return (
             <Card
               key={`${r.name}-${idx}`}
               className="relative hover:shadow-lg transition-shadow duration-300 border-border/50"
@@ -139,9 +169,22 @@ export const Testimonials = () => {
                       : strings.todayLabels[idx % strings.todayLabels.length]}
                   </span>
                 </div>
+                {isOwn && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(r.ownerId!)}
+                    className="mt-3 h-8 px-2 text-xs text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" />
+                    Delete my review
+                  </Button>
+                )}
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
 
         {/* Review form */}
