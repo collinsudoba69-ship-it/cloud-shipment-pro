@@ -178,7 +178,7 @@ function getPool(lang: string): Review[] {
   if (cached) return cached;
   const strings = getReviewStrings(lang);
   const roles = ROLES_BY_LANG[lang] ?? ROLES_BY_LANG[baseLang] ?? ROLES_BY_LANG.en;
-  const pool = buildPool(strings, roles);
+  const pool = buildPool(strings, roles, lang);
   poolCache.set(lang, pool);
   return pool;
 }
