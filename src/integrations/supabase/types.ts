@@ -300,6 +300,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_reviews: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          location: string
+          occupation: string
+          rating: number
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          location: string
+          occupation: string
+          rating: number
+          text: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          location?: string
+          occupation?: string
+          rating?: number
+          text?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
