@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Star, Quote } from "lucide-react";
+import { Star, Quote, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { getDailyReviews, getPoolStats, type Review } from "@/lib/testimonials";
 import { getReviewStrings } from "@/lib/locales/reviews";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import ReviewForm from "./ReviewForm";
 
 const Stars = ({ rating }: { rating: number }) => (
