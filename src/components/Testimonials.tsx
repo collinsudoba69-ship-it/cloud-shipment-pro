@@ -189,8 +189,33 @@ export const Testimonials = () => {
           })}
         </div>
 
-        {/* Review form */}
-        <ReviewForm onSubmitted={loadUserReviews} />
+        {/* Review form trigger */}
+        <div className="mt-10 flex justify-center">
+          <Dialog open={formOpen} onOpenChange={setFormOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" className="gap-2 shadow-md">
+                <PenSquare className="h-4 w-4" />
+                Write a review
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl p-0 max-h-[90vh] overflow-y-auto">
+              <DialogHeader className="px-6 pt-6">
+                <DialogTitle>Share your experience</DialogTitle>
+                <DialogDescription>
+                  Your review appears live below and is refreshed the next day.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="px-2 pb-2">
+                <ReviewForm
+                  onSubmitted={() => {
+                    setFormOpen(false);
+                    loadUserReviews();
+                  }}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
 
         {/* Trust footer */}
         <div className="mt-12 text-center text-sm text-muted-foreground">
