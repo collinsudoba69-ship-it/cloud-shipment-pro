@@ -193,7 +193,7 @@ export const Testimonials = () => {
         <div className="mt-10 flex justify-center">
           <Dialog open={formOpen} onOpenChange={setFormOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" className="gap-2 shadow-md bg-blue-600 hover:bg-blue-700 text-white">
+              <Button size="lg" className="gap-2 shadow-md">
                 <PenSquare className="h-4 w-4" />
                 Write a review
               </Button>
