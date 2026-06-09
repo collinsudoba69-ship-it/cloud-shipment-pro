@@ -39,6 +39,7 @@ useEffect(() => {
 
           <form onSubmit={handleTrack} className="mx-auto flex max-w-xl gap-3 bg-white p-3 rounded-2xl shadow-lg">
             <Input
+              id="tracking-input"
               value={tracking}
               onChange={(e) => setTracking(e.target.value)}
               placeholder={t("home.heroPlaceholder")}

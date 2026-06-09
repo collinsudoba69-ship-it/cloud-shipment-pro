@@ -193,7 +193,7 @@ export const Testimonials = () => {
         <div className="mt-10 flex justify-center">
           <Dialog open={formOpen} onOpenChange={setFormOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" className="gap-2 shadow-md">
+              <Button size="lg" className="gap-2 shadow-md bg-blue-600 hover:bg-blue-700 text-white">
                 <PenSquare className="h-4 w-4" />
                 Write a review
               </Button>
@@ -221,7 +221,21 @@ export const Testimonials = () => {
         {/* Trust footer */}
         <div className="mt-12 text-center text-sm text-muted-foreground">
           {strings.footer}{" "}
-          <span className="text-primary font-medium">{strings.trackCta}</span>
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById("tracking-input");
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(() => (el as HTMLInputElement).focus(), 500);
+              } else {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+            className="text-primary font-medium hover:underline"
+          >
+            {strings.trackCta}
+          </button>
         </div>
       </div>
     </section>
