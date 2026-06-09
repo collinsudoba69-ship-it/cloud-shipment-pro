@@ -29,9 +29,10 @@ const schema = z.object({
 
 interface Props {
   onSubmitted?: () => void;
+  embedded?: boolean;
 }
 
-export const ReviewForm = ({ onSubmitted }: Props) => {
+export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
   const { toast } = useToast();
   const [firstName, setFirstName] = useState("");
   const [lastInitial, setLastInitial] = useState("");
