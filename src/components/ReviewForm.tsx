@@ -77,14 +77,8 @@ export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
     onSubmitted?.();
   };
 
-  return (
-    <Card className="max-w-2xl mx-auto mt-12 border-border/50">
-      <CardContent className="p-6">
-        <h3 className="text-xl font-bold mb-1">Share your experience</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Your review appears live below and is refreshed the next day.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-4">
+  const formBody = (
+    <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_90px] gap-3">
             <Input
               placeholder="First name (e.g. David)"
