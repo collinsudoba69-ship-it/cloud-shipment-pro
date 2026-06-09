@@ -29,9 +29,10 @@ const schema = z.object({
 
 interface Props {
   onSubmitted?: () => void;
+  embedded?: boolean;
 }
 
-export const ReviewForm = ({ onSubmitted }: Props) => {
+export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
   const { toast } = useToast();
   const [firstName, setFirstName] = useState("");
   const [lastInitial, setLastInitial] = useState("");
@@ -76,14 +77,8 @@ export const ReviewForm = ({ onSubmitted }: Props) => {
     onSubmitted?.();
   };
 
-  return (
-    <Card className="max-w-2xl mx-auto mt-12 border-border/50">
-      <CardContent className="p-6">
-        <h3 className="text-xl font-bold mb-1">Share your experience</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Your review appears live below and is refreshed the next day.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-4">
+  const formBody = (
+    <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_90px] gap-3">
             <Input
               placeholder="First name (e.g. David)"
@@ -141,7 +136,21 @@ export const ReviewForm = ({ onSubmitted }: Props) => {
           <Button type="submit" disabled={submitting} className="w-full">
             {submitting ? "Posting…" : "Post review"}
           </Button>
-        </form>
+    </form>
+  );
+
+  if (embedded) {
+    return <div className="p-4">{formBody}</div>;
+  }
+
+  return (
+    <Card className="max-w-2xl mx-auto mt-12 border-border/50">
+      <CardContent className="p-6">
+        <h3 className="text-xl font-bold mb-1">Share your experience</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Your review appears live below and is refreshed the next day.
+        </p>
+        {formBody}
       </CardContent>
     </Card>
   );
