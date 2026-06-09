@@ -136,7 +136,21 @@ export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
           <Button type="submit" disabled={submitting} className="w-full">
             {submitting ? "Posting…" : "Post review"}
           </Button>
-        </form>
+    </form>
+  );
+
+  if (embedded) {
+    return <div className="p-4">{formBody}</div>;
+  }
+
+  return (
+    <Card className="max-w-2xl mx-auto mt-12 border-border/50">
+      <CardContent className="p-6">
+        <h3 className="text-xl font-bold mb-1">Share your experience</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Your review appears live below and is refreshed the next day.
+        </p>
+        {formBody}
       </CardContent>
     </Card>
   );
