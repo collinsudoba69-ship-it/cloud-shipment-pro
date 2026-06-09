@@ -207,6 +207,7 @@ export const Testimonials = () => {
               </DialogHeader>
               <div className="px-2 pb-2">
                 <ReviewForm
+                  embedded
                   onSubmitted={() => {
                     setFormOpen(false);
                     loadUserReviews();
