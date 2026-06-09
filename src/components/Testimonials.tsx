@@ -52,6 +52,7 @@ export const Testimonials = () => {
 
   const [userReviews, setUserReviews] = useState<UserReviewRow[]>([]);
   const [ownIds, setOwnIds] = useState<string[]>([]);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     try {
