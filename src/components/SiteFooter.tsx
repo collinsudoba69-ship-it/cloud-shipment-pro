@@ -24,7 +24,7 @@ export const SiteFooter = () => {
   const waDigits = whatsapp.replace(/[^\d]/g, "");
   return (
     <footer className="border-t border-border/60 bg-secondary/40">
-      <div className="container py-12">
+      <div className="container pt-6 pb-12">
         {/* Global offices */}
         <div className="mb-10 rounded-2xl border border-border/60 bg-background/60 p-6 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
