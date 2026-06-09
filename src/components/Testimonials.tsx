@@ -119,7 +119,7 @@ export const Testimonials = () => {
   }
 
   return (
-    <section className="py-16 bg-muted/30" dir={isRTL ? "rtl" : "ltr"}>
+    <section className="pt-16 pb-6 bg-muted/30" dir={isRTL ? "rtl" : "ltr"}>
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
@@ -219,7 +219,7 @@ export const Testimonials = () => {
         </div>
 
         {/* Trust footer */}
-        <div className="mt-12 text-center text-sm text-muted-foreground">
+        <div className="mt-4 text-center text-sm text-muted-foreground">
           {strings.footer}{" "}
           <button
             type="button"
