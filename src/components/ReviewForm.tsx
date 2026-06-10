@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getReviewUIStrings } from "@/lib/locales/reviewUI";
 
 const schema = z.object({
   firstName: z.string().trim().min(2, "Enter your first name").max(30),
@@ -34,6 +36,8 @@ interface Props {
 
 export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
   const { toast } = useToast();
+  const { i18n } = useTranslation();
+  const ui = getReviewUIStrings(i18n.language || "en");
   const [firstName, setFirstName] = useState("");
   const [lastInitial, setLastInitial] = useState("");
   const [occupation, setOccupation] = useState("");
@@ -124,32 +128,32 @@ export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
     <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_90px] gap-3">
             <Input
-              placeholder="First name (e.g. David)"
+              placeholder={ui.firstNamePh}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               maxLength={30}
             />
             <Input
-              placeholder="W"
+              placeholder={ui.lastInitialPh}
               value={lastInitial}
               onChange={(e) => setLastInitial(e.target.value.slice(0, 1))}
               maxLength={1}
             />
           </div>
           <Input
-            placeholder="Occupation (e.g. Retired)"
+            placeholder={ui.occupationPh}
             value={occupation}
             onChange={(e) => setOccupation(e.target.value)}
             maxLength={60}
           />
           <Input
-            placeholder="City, Country (e.g. Chicago, United States)"
+            placeholder={ui.locationPh}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             maxLength={80}
           />
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Your rating:</span>
+            <span className="text-sm text-muted-foreground">{ui.yourRating}</span>
             <div className="flex gap-0.5">
               {Array.from({ length: 5 }).map((_, i) => {
                 const v = i + 1;
@@ -170,14 +174,14 @@ export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
             </div>
           </div>
           <Textarea
-            placeholder="Tell us about your experience…"
+            placeholder={ui.experiencePh}
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={600}
             rows={4}
           />
           <Button type="submit" disabled={submitting} className="w-full">
-            {submitting ? "Posting…" : "Post review"}
+            {submitting ? ui.posting : ui.postReview}
           </Button>
     </form>
   );
@@ -189,9 +193,9 @@ export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
   return (
     <Card className="max-w-2xl mx-auto mt-12 border-border/50">
       <CardContent className="p-6">
-        <h3 className="text-xl font-bold mb-1">Share your experience</h3>
+        <h3 className="text-xl font-bold mb-1">{ui.shareTitle}</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Your review appears live below and is refreshed the next day.
+          {ui.shareDesc}
         </p>
         {formBody}
       </CardContent>
