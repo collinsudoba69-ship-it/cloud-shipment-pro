@@ -303,30 +303,42 @@ export type Database = {
       user_reviews: {
         Row: {
           created_at: string
+          device_id: string | null
           display_name: string
           id: string
           location: string
+          name_key: string | null
           occupation: string
           rating: number
+          review_day: string | null
           text: string
+          text_key: string | null
         }
         Insert: {
           created_at?: string
+          device_id?: string | null
           display_name: string
           id?: string
           location: string
+          name_key?: string | null
           occupation: string
           rating: number
+          review_day?: string | null
           text: string
+          text_key?: string | null
         }
         Update: {
           created_at?: string
+          device_id?: string | null
           display_name?: string
           id?: string
           location?: string
+          name_key?: string | null
           occupation?: string
           rating?: number
+          review_day?: string | null
           text?: string
+          text_key?: string | null
         }
         Relationships: []
       }
