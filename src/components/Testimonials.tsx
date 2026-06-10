@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { getDailyReviews, getPoolStats, type Review } from "@/lib/testimonials";
 import { getReviewStrings } from "@/lib/locales/reviews";
+import { getReviewUIStrings } from "@/lib/locales/reviewUI";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ReviewForm from "./ReviewForm";
@@ -42,17 +43,19 @@ export const Testimonials = () => {
   const { toast } = useToast();
   const lang = i18n.language || "en";
 
-  const { reviews, stats, strings } = useMemo(() => {
+  const { reviews, stats, strings, ui } = useMemo(() => {
     return {
       reviews: getDailyReviews(lang, 24),
       stats: getPoolStats(lang),
       strings: getReviewStrings(lang),
+      ui: getReviewUIStrings(lang),
     };
   }, [lang]);
 
   const [userReviews, setUserReviews] = useState<UserReviewRow[]>([]);
   const [ownIds, setOwnIds] = useState<string[]>([]);
   const [formOpen, setFormOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     try {
@@ -78,7 +81,7 @@ export const Testimonials = () => {
   useEffect(() => { loadUserReviews(); }, [loadUserReviews]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete your review?")) return;
+    if (!confirm(ui.confirmDelete)) return;
     const { error } = await supabase.from("user_reviews").delete().eq("id", id);
     if (error) {
       toast({ title: "Could not delete", description: error.message, variant: "destructive" });
@@ -145,55 +148,77 @@ export const Testimonials = () => {
         </div>
 
         {/* Reviews grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {combined.map((r, idx) => {
-            const isOwn = !!r.ownerId && ownIds.includes(r.ownerId);
-            return (
-            <Card
-              key={`${r.name}-${idx}`}
-              className="relative hover:shadow-lg transition-shadow duration-300 border-border/50"
-            >
-              <CardContent className="p-6">
-                <Quote className={`absolute top-4 ${isRTL ? "left-4" : "right-4"} h-8 w-8 text-primary/10`} />
-                <Stars rating={r.rating} />
-                <p className="mt-3 text-sm leading-relaxed text-foreground/90">
-                  "{r.text}"
-                </p>
-                <div className="mt-5 flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-                      {r.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{r.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {r.role} · {r.location}
-                    </p>
-                  </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {idx < userAsReviews.length
-                      ? strings.todayLabels[0]
-                      : strings.todayLabels[idx % strings.todayLabels.length]}
-                  </span>
-                </div>
-                {isOwn && (
+        {(() => {
+          const INITIAL = 6;
+          const visible = expanded ? combined : combined.slice(0, INITIAL);
+          const hiddenCount = Math.max(0, combined.length - INITIAL);
+          return (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {visible.map((r, idx) => {
+                  const isOwn = !!r.ownerId && ownIds.includes(r.ownerId);
+                  return (
+                    <Card
+                      key={`${r.name}-${idx}`}
+                      className="relative hover:shadow-lg transition-shadow duration-300 border-border/50"
+                    >
+                      <CardContent className="p-6">
+                        <Quote className={`absolute top-4 ${isRTL ? "left-4" : "right-4"} h-8 w-8 text-primary/10`} />
+                        <Stars rating={r.rating} />
+                        <p className="mt-3 text-sm leading-relaxed text-foreground/90">
+                          "{r.text}"
+                        </p>
+                        <div className="mt-5 flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                              {r.initials}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate">{r.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {r.role} · {r.location}
+                            </p>
+                          </div>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {idx < userAsReviews.length
+                              ? strings.todayLabels[0]
+                              : strings.todayLabels[idx % strings.todayLabels.length]}
+                          </span>
+                        </div>
+                        {isOwn && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(r.ownerId!)}
+                            className="mt-3 h-8 px-2 text-xs text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 mr-1" />
+                            {ui.deleteMyReview}
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {combined.length > INITIAL && (
+                <div className="mt-6 flex justify-center">
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={() => handleDelete(r.ownerId!)}
-                    className="mt-3 h-8 px-2 text-xs text-destructive hover:text-destructive"
+                    onClick={() => setExpanded((v) => !v)}
                   >
-                    <Trash2 className="h-3.5 w-3.5 mr-1" />
-                    Delete my review
+                    {expanded ? ui.showLess : ui.seeMore(hiddenCount)}
                   </Button>
-                )}
-              </CardContent>
-            </Card>
-            );
-          })}
-        </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {/* Review form trigger */}
         <div className="mt-10 flex justify-center">
@@ -201,14 +226,14 @@ export const Testimonials = () => {
             <DialogTrigger asChild>
               <Button size="lg" className="gap-2 shadow-md">
                 <PenSquare className="h-4 w-4" />
-                Write a review
+                {ui.writeReview}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl p-0 max-h-[90vh] overflow-y-auto">
               <DialogHeader className="px-6 pt-6">
-                <DialogTitle>Share your experience</DialogTitle>
+                <DialogTitle>{ui.shareTitle}</DialogTitle>
                 <DialogDescription>
-                  Your review appears live below and is refreshed the next day.
+                  {ui.shareDesc}
                 </DialogDescription>
               </DialogHeader>
               <div className="px-2 pb-2">
