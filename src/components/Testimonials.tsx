@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { getDailyReviews, getPoolStats, type Review } from "@/lib/testimonials";
 import { getReviewStrings } from "@/lib/locales/reviews";
+import { getReviewUIStrings } from "@/lib/locales/reviewUI";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ReviewForm from "./ReviewForm";
@@ -42,17 +43,19 @@ export const Testimonials = () => {
   const { toast } = useToast();
   const lang = i18n.language || "en";
 
-  const { reviews, stats, strings } = useMemo(() => {
+  const { reviews, stats, strings, ui } = useMemo(() => {
     return {
       reviews: getDailyReviews(lang, 24),
       stats: getPoolStats(lang),
       strings: getReviewStrings(lang),
+      ui: getReviewUIStrings(lang),
     };
   }, [lang]);
 
   const [userReviews, setUserReviews] = useState<UserReviewRow[]>([]);
   const [ownIds, setOwnIds] = useState<string[]>([]);
   const [formOpen, setFormOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     try {
@@ -78,7 +81,7 @@ export const Testimonials = () => {
   useEffect(() => { loadUserReviews(); }, [loadUserReviews]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete your review?")) return;
+    if (!confirm(ui.confirmDelete)) return;
     const { error } = await supabase.from("user_reviews").delete().eq("id", id);
     if (error) {
       toast({ title: "Could not delete", description: error.message, variant: "destructive" });
