@@ -109,14 +109,20 @@ export const Testimonials = () => {
     };
   });
 
+  const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
   const seenText = new Set<string>();
+  const seenName = new Set<string>();
   const combined: Item[] = [];
   for (const r of [...userAsReviews, ...reviews]) {
-    if (seenText.has(r.text)) continue;
-    seenText.add(r.text);
+    const tk = normalize(r.text);
+    const nk = normalize(r.name);
+    if (seenText.has(tk) || seenName.has(nk)) continue;
+    seenText.add(tk);
+    seenName.add(nk);
     combined.push(r);
     if (combined.length >= 24) break;
   }
+
 
   return (
     <section className="pt-16 pb-6 bg-muted/30" dir={isRTL ? "rtl" : "ltr"}>

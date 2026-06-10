@@ -43,6 +43,20 @@ export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
   const [hover, setHover] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
+  const getDeviceId = (): string => {
+    try {
+      const key = "cs_device_id";
+      let id = localStorage.getItem(key);
+      if (!id) {
+        id = (crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+        localStorage.setItem(key, id);
+      }
+      return id;
+    } catch {
+      return `nostor-${Math.random().toString(36).slice(2)}`;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse({ firstName, lastInitial, occupation, location, text, rating });
@@ -50,17 +64,44 @@ export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
       toast({ title: "Please check your entry", description: parsed.error.issues[0].message, variant: "destructive" });
       return;
     }
+    // Block re-submission from same device same day
+    try {
+      const lastDay = localStorage.getItem("my_review_day");
+      const todayUTC = new Date().toISOString().slice(0, 10);
+      if (lastDay === todayUTC) {
+        toast({
+          title: "You've already reviewed today",
+          description: "Only one review per device per day. Come back tomorrow.",
+          variant: "destructive",
+        });
+        return;
+      }
+    } catch {}
+
     setSubmitting(true);
     const display_name = `${parsed.data.firstName} ${parsed.data.lastInitial.toUpperCase()}.`;
+    const device_id = getDeviceId();
     const { data, error } = await supabase.from("user_reviews").insert({
       display_name,
       occupation: parsed.data.occupation,
       location: parsed.data.location,
       text: parsed.data.text,
       rating: parsed.data.rating,
+      device_id,
     }).select("id").single();
     setSubmitting(false);
     if (error) {
+      // Postgres unique violation = 23505
+      const code = (error as { code?: string }).code;
+      if (code === "23505") {
+        const msg = error.message.includes("device")
+          ? "This device has already posted a review today."
+          : error.message.includes("name")
+          ? "Someone has already posted a review under that name today. Try a different first name or initial."
+          : "That exact review has already been posted today. Please write your own words.";
+        toast({ title: "Duplicate review", description: msg, variant: "destructive" });
+        return;
+      }
       toast({ title: "Could not post review", description: error.message, variant: "destructive" });
       return;
     }
@@ -71,11 +112,13 @@ export const ReviewForm = ({ onSubmitted, embedded = false }: Props) => {
         existing.push(data.id);
         localStorage.setItem(key, JSON.stringify(existing));
       }
+      localStorage.setItem("my_review_day", new Date().toISOString().slice(0, 10));
     } catch {}
     toast({ title: "Thanks for your review!", description: "It is now live on the homepage." });
     setFirstName(""); setLastInitial(""); setOccupation(""); setLocation(""); setText(""); setRating(5);
     onSubmitted?.();
   };
+
 
   const formBody = (
     <form onSubmit={handleSubmit} className="space-y-4">
