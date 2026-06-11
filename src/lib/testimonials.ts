@@ -102,47 +102,69 @@ const MIXED_TEMPLATES_BY_LANG: Record<string, string[]> = {
   ],
 };
 
+// Strip "bot-looking" punctuation (em-dash, en-dash, " - ") so reviews read more
+// naturally; compound words like "stress-free" are kept intact.
+function cleanText(s: string): string {
+  return s
+    .replace(/\s*[—–]\s*/g, ", ")
+    .replace(/\s+-\s+/g, ", ")
+    .replace(/,\s*,/g, ",")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+// Reject templates that reference internal/admin features ordinary customers
+// would never talk about.
+function isCustomerSafe(t: string): boolean {
+  return !/admin|dashboard|dashbord|dashboar|panel admin|panel de admin|adminpanel|admin-?dashboard|painel admin|panel administrator|administrátor|admin panel/i.test(t);
+}
+
 function buildPool(strings: ReviewStrings, roles: string[], lang: string): Review[] {
   const rand = mulberry32(20260101); // stable seed → identical pool composition
   const pool: Review[] = [];
   const seenIdentity = new Set<string>();
   const seenText = new Set<string>();
+  const usedTemplates = new Set<string>(); // ensure each template is used at most once
   const baseLang = lang.split("-")[0];
   const softeners = SOFTENERS_BY_LANG[lang] ?? SOFTENERS_BY_LANG[baseLang] ?? SOFTENERS_BY_LANG.en;
   const mixedTemplates =
     MIXED_TEMPLATES_BY_LANG[lang] ?? MIXED_TEMPLATES_BY_LANG[baseLang] ?? MIXED_TEMPLATES_BY_LANG.en;
+  const safeTemplates = strings.templates.filter(isCustomerSafe);
+  const safeMixed = mixedTemplates.filter(isCustomerSafe);
   let attempts = 0;
-  while (pool.length < 520 && attempts < 8000) {
+  while (pool.length < 520 && attempts < 20000) {
     attempts++;
     const first = pick(FIRST_NAMES, rand);
     const lastI = pick(LAST_INITIALS, rand);
     const name = `${first} ${lastI}.`;
     const location = pick(LOCATIONS, rand);
     const role = pick(roles, rand);
-    // Dedupe by identity (name+location) so the same person doesn't reappear
     const identity = `${name}|${location}`;
     if (seenIdentity.has(identity)) continue;
-    // Realistic rating mix: ~70% 5★, ~22% 4★, ~6% 3★, ~2% 2★
     const r = rand();
     const rating = r < 0.7 ? 5 : r < 0.92 ? 4 : r < 0.98 ? 3 : 2;
-    // Choose text that matches the rating
+    let tpl: string;
     let text: string;
     if (rating === 5) {
-      const tpl = pick(strings.templates, rand);
+      tpl = pick(safeTemplates, rand);
+      if (usedTemplates.has(tpl)) continue;
       const extra = pick(strings.extras, rand);
       text = tpl.replace("{extra}", extra);
     } else if (rating === 4) {
-      const tpl = pick(strings.templates, rand);
+      tpl = pick(safeTemplates, rand);
+      if (usedTemplates.has(tpl)) continue;
       const soft = pick(softeners, rand);
       text = tpl.replace("{extra}", soft);
     } else {
-      // 2-3 star → use the mixed/critical template set
-      text = pick(mixedTemplates, rand);
+      tpl = pick(safeMixed, rand);
+      if (usedTemplates.has(tpl)) continue;
+      text = tpl;
     }
-    // Dedupe by review text so two senders never share the same words
+    text = cleanText(text);
     if (seenText.has(text)) continue;
     seenIdentity.add(identity);
     seenText.add(text);
+    usedTemplates.add(tpl);
     pool.push({
       name,
       role,
@@ -151,6 +173,9 @@ function buildPool(strings: ReviewStrings, roles: string[], lang: string): Revie
       text,
       initials: (first[0] + lastI).toUpperCase(),
     });
+    // Each template only fuels one card — once we've exhausted unique templates,
+    // we're done. This guarantees no two cards share the same base sentence.
+    if (usedTemplates.size >= safeTemplates.length + safeMixed.length) break;
   }
   return pool;
 }
