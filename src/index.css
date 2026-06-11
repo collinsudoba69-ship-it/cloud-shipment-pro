@@ -148,6 +148,7 @@
 .shipment-map-shell {
   position: relative;
   overflow: hidden;
+  isolation: isolate;
   min-height: 400px;
   border-radius: 1.25rem;
   border: 1px solid hsl(var(--border));
@@ -277,8 +278,14 @@
 @media (max-width: 640px) {
   .shipment-map-shell,
   .shipment-map-canvas {
-    min-height: 340px;
-    height: 340px;
+    min-height: 280px;
+    height: 280px;
+    max-width: 100%;
+  }
+
+  .shipment-map-shell .leaflet-container {
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .shipment-map-overlay--right {
