@@ -216,6 +216,6 @@ export function getDailyReviews(lang: string, count = 24, date = new Date()): Re
 }
 
 export function getPoolStats(lang: string) {
-  const pool = getReviewPool(lang);
+  const pool = getPool(lang);
   return { size: 520, avg: "4.8" };
 }
