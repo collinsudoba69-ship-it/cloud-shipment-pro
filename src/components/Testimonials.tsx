@@ -136,18 +136,6 @@ export const Testimonials = () => {
     combined.push(r);
     if (combined.length >= 24) break;
   }
-  const seenText = new Set<string>();
-  const seenName = new Set<string>();
-  const combined: Item[] = [];
-  for (const r of [...userAsReviews, ...reviews]) {
-    const tk = normalize(r.text);
-    const nk = normalize(r.name);
-    if (seenText.has(tk) || seenName.has(nk)) continue;
-    seenText.add(tk);
-    seenName.add(nk);
-    combined.push(r);
-    if (combined.length >= 24) break;
-  }
 
 
   return (
