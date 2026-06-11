@@ -98,6 +98,14 @@ export const Testimonials = () => {
 
   type Item = Review & { ownerId?: string };
 
+  const cleanCopy = (s: string) =>
+    s
+      .replace(/\s*[—–]\s*/g, ", ")
+      .replace(/\s+-\s+/g, ", ")
+      .replace(/,\s*,/g, ",")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+
   const userAsReviews: Item[] = userReviews.map((r) => {
     const parts = r.display_name.trim().split(/\s+/);
     const initials = (parts[0]?.[0] ?? "?") + (parts[1]?.[0] ?? "");
@@ -106,18 +114,21 @@ export const Testimonials = () => {
       role: r.occupation,
       location: r.location,
       rating: r.rating,
-      text: r.text,
+      text: cleanCopy(r.text),
       initials: initials.toUpperCase().slice(0, 2),
       ownerId: r.id,
     };
   });
 
-  const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+  const normalize = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+  // Dedupe by an early-sentence fingerprint so two reviews that share the same
+  // opening phrase (e.g. "My fragile items always arrive…") never both appear.
+  const fingerprint = (s: string) => normalize(s).split(" ").slice(0, 8).join(" ");
   const seenText = new Set<string>();
   const seenName = new Set<string>();
   const combined: Item[] = [];
   for (const r of [...userAsReviews, ...reviews]) {
-    const tk = normalize(r.text);
+    const tk = fingerprint(r.text);
     const nk = normalize(r.name);
     if (seenText.has(tk) || seenName.has(nk)) continue;
     seenText.add(tk);
