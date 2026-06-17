@@ -24,6 +24,9 @@ const PaymentCustomerDetail = () => {
   const [loading, setLoading] = useState(true);
   const [trackingDraft, setTrackingDraft] = useState("");
   const [savingTracking, setSavingTracking] = useState(false);
+  const [goalDraft, setGoalDraft] = useState("");
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [savingGoal, setSavingGoal] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
   const [time, setTime] = useState<string>(format(new Date(), "HH:mm"));
   const [amount, setAmount] = useState("");
@@ -44,7 +47,10 @@ const PaymentCustomerDetail = () => {
     if (ce) toast.error(ce.message);
     if (pe) toast.error(pe.message);
     setCustomer(c as Customer | null);
-    if (c) setTrackingDraft((c as Customer).tracking_number ?? "");
+    if (c) {
+      setTrackingDraft((c as Customer).tracking_number ?? "");
+      setGoalDraft(String((c as Customer).goal_amount ?? ""));
+    }
     setPayments((ps ?? []) as Payment[]);
     setLoading(false);
   };
@@ -102,6 +108,23 @@ const PaymentCustomerDetail = () => {
     load();
   };
 
+  const saveGoal = async () => {
+    const val = Number(goalDraft);
+    if (isNaN(val) || val <= 0) return toast.error("Please enter a valid goal amount");
+    setSavingGoal(true);
+    const { error } = await (supabase as any).from("customers").update({ goal_amount: val }).eq("id", customer!.id);
+    setSavingGoal(false);
+    if (error) return toast.error(error.message);
+    toast.success("Goal amount updated");
+    setEditingGoal(false);
+    load();
+  };
+
+  const cancelGoalEdit = () => {
+    setGoalDraft(String(customer?.goal_amount ?? ""));
+    setEditingGoal(false);
+  };
+
   if (loading) return <div className="text-sm text-muted-foreground">Loading…</div>;
   if (!customer) return <div>Not found.</div>;
 
@@ -148,9 +171,57 @@ const PaymentCustomerDetail = () => {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Paid</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold tabular-nums">${paid.toFixed(2)}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Goal</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold tabular-nums">${Number(customer.goal_amount).toFixed(2)}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Remaining</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold tabular-nums text-primary">${remaining.toFixed(2)}</div><div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden"><div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} /></div></CardContent></Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Paid</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold tabular-nums">${paid.toFixed(2)}</div></CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Goal</CardTitle>
+              {!editingGoal && (
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingGoal(true)}>
+                  <Pencil className="w-3 h-3 text-muted-foreground" />
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {editingGoal ? (
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground text-sm">$</span>
+                <Input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={goalDraft}
+                  onChange={(e) => setGoalDraft(e.target.value)}
+                  className="h-8 text-lg font-semibold tabular-nums"
+                  autoFocus
+                />
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={saveGoal} disabled={savingGoal}>
+                  <Check className="w-4 h-4 text-primary" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={cancelGoalEdit}>
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </Button>
+              </div>
+            ) : (
+              <div className="text-2xl font-semibold tabular-nums">${Number(customer.goal_amount).toFixed(2)}</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Remaining</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold tabular-nums text-primary">${remaining.toFixed(2)}</div>
+            <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
+              <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
