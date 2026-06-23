@@ -30,7 +30,6 @@ export const SHIPMENT_STATUSES = [
   { value: "out_for_delivery", label: "Out for Delivery", progress: 78 },
   { value: "arrived", label: "Arrived", progress: 92 },
   { value: "delivered", label: "Delivered", progress: 100 },
-  { value: "on_hold", label: "On Hold", progress: 50 },
 ] as const;
 
 export type ShipmentStatus = typeof SHIPMENT_STATUSES[number]["value"];
