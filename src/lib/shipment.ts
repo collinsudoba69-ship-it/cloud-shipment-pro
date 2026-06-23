@@ -30,6 +30,7 @@ export const SHIPMENT_STATUSES = [
   { value: "out_for_delivery", label: "Out for Delivery", progress: 78 },
   { value: "arrived", label: "Arrived", progress: 92 },
   { value: "delivered", label: "Delivered", progress: 100 },
+  { value: "on_hold", label: "On Hold", progress: 50 },
 ] as const;
 
 export type ShipmentStatus = typeof SHIPMENT_STATUSES[number]["value"];
@@ -49,5 +50,7 @@ export function statusColorClass(status: ShipmentStatus): string {
     case "out_for_delivery": return "bg-warning/15 text-warning";
     case "arrived": return "bg-info/15 text-info";
     case "delivered": return "bg-success/15 text-success";
+    case "on_hold": return "bg-destructive/15 text-destructive";
   }
 }
+

@@ -368,6 +368,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_hold_overdue_shipments: { Args: never; Returns: number }
       gen_tracking_number: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -387,6 +388,7 @@ export type Database = {
         | "out_for_delivery"
         | "arrived"
         | "delivered"
+        | "on_hold"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -522,6 +524,7 @@ export const Constants = {
         "out_for_delivery",
         "arrived",
         "delivered",
+        "on_hold",
       ],
     },
   },
