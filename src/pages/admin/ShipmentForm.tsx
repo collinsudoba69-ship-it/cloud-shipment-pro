@@ -229,6 +229,8 @@ const ShipmentForm = () => {
         out_for_delivery: "Final vehicle dispatched to receiver",
         arrived: "Package arrived at destination",
         delivered: "Package delivered to recipient",
+        on_hold: "Shipment placed on hold",
+
       };
       await supabase.from("shipment_events").insert({
         shipment_id: shipmentId, status: form.status, location: form.origin,
