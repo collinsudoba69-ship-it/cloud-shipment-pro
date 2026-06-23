@@ -98,11 +98,23 @@ const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
 
 export const lookupFallback = (location: string): LatLng | null => {
   const key = normalize(location);
+  if (!key) return null;
   if (FALLBACK[key]) return FALLBACK[key];
-  // partial match on first comma segment
-  const first = key.split(",")[0].trim();
-  for (const [k, v] of Object.entries(FALLBACK)) {
-    if (k.startsWith(first) || first.includes(k.split(",")[0])) return v;
+
+  const segments = key.split(",").map((s) => s.trim()).filter(Boolean);
+  for (const seg of segments) {
+    if (FALLBACK[seg]) return FALLBACK[seg];
+  }
+  for (const seg of segments) {
+    for (const [k, v] of Object.entries(FALLBACK)) {
+      const head = k.split(",")[0];
+      if (seg === head || seg.endsWith(" " + head) || seg.startsWith(head + " ")) return v;
+    }
+  }
+
+  // Country-level fallback by substring on the full string
+  for (const [k, v] of Object.entries(COUNTRY_FALLBACK)) {
+    if (key.includes(k)) return v;
   }
   return null;
 };
