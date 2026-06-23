@@ -368,6 +368,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_hold_overdue_shipments: { Args: never; Returns: number }
       gen_tracking_number: { Args: never; Returns: string }
       has_role: {
         Args: {
