@@ -52,8 +52,3 @@ export function statusColorClass(status: ShipmentStatus): string {
   }
 }
 
-// Keep an exhaustive default to satisfy the compiler
-
-  }
-}
-
