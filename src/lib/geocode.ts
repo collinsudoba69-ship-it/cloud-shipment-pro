@@ -119,51 +119,6 @@ export const lookupFallback = (location: string): LatLng | null => {
   return null;
 };
 
-// Build a series of progressively broader query strings so a long street
-// address still resolves to *somewhere* sensible (city, then country).
-const buildQueryCandidates = (location: string): string[] => {
-  const raw = location.trim();
-  if (!raw) return [];
-  const out = new Set<string>();
-  out.add(raw);
-
-  const segments = raw.split(",").map((s) => s.trim()).filter(Boolean);
-  if (segments.length > 1) {
-    // last 2 segments (often "City, Country")
-    out.add(segments.slice(-2).join(", "));
-    // just the last segment (often the country)
-    out.add(segments[segments.length - 1]);
-    // second-to-last on its own (often the city)
-    out.add(segments[segments.length - 2]);
-  }
-
-  // Strip leading street tokens like "ul.", "st.", numbers, postal codes
-  const cleaned = raw
-    .replace(/\b\d{2}-\d{3}\b/g, " ") // PL-style postal code 71-047
-    .replace(/\b\d{4,6}\b/g, " ")
-    .replace(/\b(ul\.?|st\.?|str\.?|ave\.?|rd\.?|blvd\.?|skrytka)\b/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (cleaned && cleaned !== raw) out.add(cleaned);
-
-  return Array.from(out).filter(Boolean);
-};
-
-const fetchNominatim = async (q: string): Promise<LatLng | null> => {
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
-    const res = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!res.ok) return null;
-    const data = (await res.json()) as Array<{ lat: string; lon: string }>;
-    if (data && data.length > 0) {
-      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-    }
-  } catch {
-    // ignore network errors
-  }
-  return null;
-};
-
 export const geocode = async (location: string): Promise<LatLng> => {
   const key = normalize(location);
   if (!key) return [0, 0];
@@ -176,17 +131,24 @@ export const geocode = async (location: string): Promise<LatLng> => {
     return disk[key];
   }
 
-  // Try Nominatim with progressively broader queries
-  for (const candidate of buildQueryCandidates(location)) {
-    const hit = await fetchNominatim(candidate);
-    if (hit) {
-      memoryCache.set(key, hit);
-      saveDiskCache(key, hit);
-      return hit;
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(location)}`;
+    const res = await fetch(url, {
+      headers: { Accept: "application/json" },
+    });
+    if (res.ok) {
+      const data = (await res.json()) as Array<{ lat: string; lon: string }>;
+      if (data && data.length > 0) {
+        const coords: LatLng = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        memoryCache.set(key, coords);
+        saveDiskCache(key, coords);
+        return coords;
+      }
     }
+  } catch {
+    // network errors fall through to fallback
   }
 
-  // Local fallback (cities + country substring match)
   const fb = lookupFallback(location);
   if (fb) {
     memoryCache.set(key, fb);
@@ -196,4 +158,3 @@ export const geocode = async (location: string): Promise<LatLng> => {
   // Last-resort default (Atlantic) so the map still renders
   return [20, 0];
 };
-
