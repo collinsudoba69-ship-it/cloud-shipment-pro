@@ -49,7 +49,11 @@ export function statusColorClass(status: ShipmentStatus): string {
     case "out_for_delivery": return "bg-warning/15 text-warning";
     case "arrived": return "bg-info/15 text-info";
     case "delivered": return "bg-success/15 text-success";
-    case "on_hold": return "bg-destructive/15 text-destructive";
+  }
+}
+
+// Keep an exhaustive default to satisfy the compiler
+
   }
 }
 
