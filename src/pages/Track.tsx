@@ -227,21 +227,18 @@ const Track = () => {
     };
   }, []);
 
-  const refetchShipment = useCallback(async (shipmentId: string, opts?: { notifyNewEvent?: boolean; notifyStatusChange?: boolean }) => {
-    const { data: shipmentRow } = await supabase
-      .from('shipments')
-      .select('*')
-      .eq('id', shipmentId)
-      .maybeSingle();
+  const refetchShipment = useCallback(async (_shipmentId: string, opts?: { notifyNewEvent?: boolean; notifyStatusChange?: boolean }) => {
+    const tn = shipment?.trackingNumber;
+    if (!tn) return;
+    const { data, error } = await supabase.functions.invoke('public-track', {
+      body: { tracking_number: tn },
+    });
+    if (error) return;
+    const shipmentRow = (data as any)?.shipment;
+    const eventsRows = (data as any)?.events ?? [];
     if (!shipmentRow) return;
 
-    const { data: eventsRows } = await supabase
-      .from('shipment_events')
-      .select('*')
-      .eq('shipment_id', shipmentId)
-      .order('event_at', { ascending: true });
-
-    const next = buildShipmentData(shipmentRow, eventsRows ?? []);
+    const next = buildShipmentData(shipmentRow, eventsRows);
     setShipment(next);
 
     if (opts?.notifyStatusChange && prevStatusRef.current && prevStatusRef.current !== next.status) {
@@ -267,10 +264,11 @@ const Track = () => {
       }
     }
     prevEventCountRef.current = next.events.length;
-  }, [buildShipmentData]);
+  }, [buildShipmentData, shipment?.trackingNumber]);
 
   const handleTrack = async (number: string = trackingNumber) => {
-    if (!number.trim().replace(/\s+/g, '')) {
+    const cleaned = number.trim().replace(/\s+/g, '');
+    if (!cleaned) {
       toast.error(t('trackPage.pleaseEnter'));
       return;
     }
@@ -283,26 +281,20 @@ const Track = () => {
     try {
       setSearchParams({ n: number });
 
-      const { data: shipmentRow, error: shipErr } = await supabase
-        .from('shipments')
-        .select('*')
-        .ilike('tracking_number', number.trim().replace(/\s+/g, ''))
-        .maybeSingle();
+      const { data, error: fnErr } = await supabase.functions.invoke('public-track', {
+        body: { tracking_number: cleaned },
+      });
+      if (fnErr) throw fnErr;
+      const shipmentRow = (data as any)?.shipment;
+      const eventsRows = (data as any)?.events ?? [];
 
-      if (shipErr) throw shipErr;
       if (!shipmentRow) {
         setError(t('trackPage.notFound'));
         toast.error(t('trackPage.shipmentNotFound'));
         return;
       }
 
-      const { data: eventsRows } = await supabase
-        .from('shipment_events')
-        .select('*')
-        .eq('shipment_id', shipmentRow.id)
-        .order('event_at', { ascending: true });
-
-      const real = buildShipmentData(shipmentRow, eventsRows ?? []);
+      const real = buildShipmentData(shipmentRow, eventsRows);
       setShipment(real);
       shipmentIdRef.current = shipmentRow.id;
       prevStatusRef.current = real.status;
@@ -317,29 +309,17 @@ const Track = () => {
     }
   };
 
-  // Realtime: subscribe to live updates for the current shipment
+  // Poll for live updates for the current shipment (public tracking uses secure edge function).
   useEffect(() => {
     const sid = shipmentIdRef.current;
     if (!shipment || !sid) return;
-
-    const channel = supabase
-      .channel(`track-${sid}`)
-      .on('postgres_changes', {
-        event: '*', schema: 'public', table: 'shipments', filter: `id=eq.${sid}`,
-      }, () => refetchShipment(sid, { notifyStatusChange: true }))
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'shipment_events', filter: `shipment_id=eq.${sid}`,
-      }, () => refetchShipment(sid, { notifyNewEvent: true, notifyStatusChange: true }))
-      .on('postgres_changes', {
-        event: 'UPDATE', schema: 'public', table: 'shipment_events', filter: `shipment_id=eq.${sid}`,
-      }, () => refetchShipment(sid, { notifyStatusChange: true }))
-      .subscribe((status) => {
-        setIsLive(status === 'SUBSCRIBED');
-      });
-
+    setIsLive(true);
+    const interval = window.setInterval(() => {
+      refetchShipment(sid, { notifyNewEvent: true, notifyStatusChange: true });
+    }, 15000);
     return () => {
       setIsLive(false);
-      supabase.removeChannel(channel);
+      window.clearInterval(interval);
     };
   }, [shipment?.id, refetchShipment]);
 
