@@ -1,23 +1,71 @@
 // Lightweight worldwide geocoder using OpenStreetMap Nominatim.
 // Results are cached in-memory and in localStorage to avoid repeat lookups.
+// When a specific street address can't be resolved, we progressively simplify
+// the query (city+state, state+country, country) so the map never lands on the
+// wrong continent.
 
 export type LatLng = [number, number];
 
 const FALLBACK: Record<string, LatLng> = {
+  // US cities / states
   "washington, dc": [38.9072, -77.0369],
   "washington dc": [38.9072, -77.0369],
   "new jersey": [40.0583, -74.4057],
   "new york": [40.7128, -74.006],
   "new york, ny": [40.7128, -74.006],
   "los angeles, ca": [34.0522, -118.2437],
+  "los angeles": [34.0522, -118.2437],
+  "santa clarita, ca": [34.3917, -118.5426],
+  "santa clarita": [34.3917, -118.5426],
+  "san francisco, ca": [37.7749, -122.4194],
+  "san diego, ca": [32.7157, -117.1611],
+  "sacramento, ca": [38.5816, -121.4944],
   "chicago, il": [41.8781, -87.6298],
   "miami, fl": [25.7617, -80.1918],
+  "orlando, fl": [28.5383, -81.3792],
   "seattle, wa": [47.6062, -122.3321],
+  "portland, or": [45.5152, -122.6784],
+  "boston, ma": [42.3601, -71.0589],
+  "philadelphia, pa": [39.9526, -75.1652],
+  "houston, tx": [29.7604, -95.3698],
+  "dallas, tx": [32.7767, -96.797],
+  "austin, tx": [30.2672, -97.7431],
+  "atlanta, ga": [33.749, -84.388],
+  "denver, co": [39.7392, -104.9903],
+  "phoenix, az": [33.4484, -112.074],
+  "las vegas, nv": [36.1699, -115.1398],
+  "detroit, mi": [42.3314, -83.0458],
+  "minneapolis, mn": [44.9778, -93.265],
+  "charlotte, nc": [35.2271, -80.8431],
+  // US state centroids for two-letter fallbacks
+  ca: [36.7783, -119.4179],
+  california: [36.7783, -119.4179],
+  fl: [27.6648, -81.5158],
+  tx: [31.9686, -99.9018],
+  ny: [40.7128, -74.006],
+  wa: [47.7511, -120.7401],
+  or: [43.8041, -120.5542],
+  nv: [38.8026, -116.4194],
+  az: [34.0489, -111.0937],
+  co: [39.5501, -105.7821],
+  il: [40.6331, -89.3985],
+  ga: [32.1656, -82.9001],
+  nc: [35.7596, -79.0193],
+  ma: [42.4072, -71.3824],
+  pa: [41.2033, -77.1945],
+  mi: [44.3148, -85.6024],
+  oh: [40.4173, -82.9071],
+  va: [37.4316, -78.6569],
+  nj: [40.0583, -74.4057],
+  // World cities
   london: [51.5072, -0.1276],
   paris: [48.8566, 2.3522],
   dubai: [25.2048, 55.2708],
   lagos: [6.5244, 3.3792],
   shanghai: [31.2304, 121.4737],
+  toronto: [43.6532, -79.3832],
+  vancouver: [49.2827, -123.1207],
+  montreal: [45.5017, -73.5673],
   "northam, western australia, australia": [-31.6536, 116.6689],
   "perth, australia": [-31.9523, 115.8613],
   "sydney, australia": [-33.8688, 151.2093],
@@ -69,10 +117,12 @@ const COUNTRY_FALLBACK: Record<string, LatLng> = {
   australia: [-25.2744, 133.7751],
   usa: [39.8283, -98.5795],
   "u.s.a": [39.8283, -98.5795],
+  "u.s.a.": [39.8283, -98.5795],
   "united states": [39.8283, -98.5795],
+  "united states of america": [39.8283, -98.5795],
 };
 
-const CACHE_KEY = "geocode-cache-v1";
+const CACHE_KEY = "geocode-cache-v2";
 const memoryCache = new Map<string, LatLng>();
 
 const loadDiskCache = (): Record<string, LatLng> => {
@@ -96,15 +146,38 @@ const saveDiskCache = (key: string, value: LatLng) => {
 
 const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
 
+// Drop the street number/name so "18820 Aphrodite Ln, Santa Clarita, CA" becomes "Santa Clarita, CA".
+const simplifyQueries = (location: string): string[] => {
+  const parts = location.split(",").map((s) => s.trim()).filter(Boolean);
+  const out = new Set<string>();
+  out.add(location);
+  if (parts.length >= 2) {
+    // Drop successive leading segments (street number, street name, neighborhood)
+    for (let i = 1; i < parts.length; i++) {
+      out.add(parts.slice(i).join(", "));
+    }
+  }
+  // Also try the last segment alone (usually country or state)
+  if (parts.length > 0) out.add(parts[parts.length - 1]);
+  return Array.from(out);
+};
+
 export const lookupFallback = (location: string): LatLng | null => {
   const key = normalize(location);
   if (!key) return null;
   if (FALLBACK[key]) return FALLBACK[key];
 
   const segments = key.split(",").map((s) => s.trim()).filter(Boolean);
+  // Try progressively shorter suffixes ("city, state, country" → "state, country" → "country")
+  for (let i = 0; i < segments.length; i++) {
+    const suffix = segments.slice(i).join(", ");
+    if (FALLBACK[suffix]) return FALLBACK[suffix];
+  }
+  // Try each individual segment as an exact key
   for (const seg of segments) {
     if (FALLBACK[seg]) return FALLBACK[seg];
   }
+  // Prefix/suffix word match on individual segments
   for (const seg of segments) {
     for (const [k, v] of Object.entries(FALLBACK)) {
       const head = k.split(",")[0];
@@ -115,6 +188,21 @@ export const lookupFallback = (location: string): LatLng | null => {
   // Country-level fallback by substring on the full string
   for (const [k, v] of Object.entries(COUNTRY_FALLBACK)) {
     if (key.includes(k)) return v;
+  }
+  return null;
+};
+
+const fetchNominatim = async (query: string): Promise<LatLng | null> => {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+    const res = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!res.ok) return null;
+    const data = (await res.json()) as Array<{ lat: string; lon: string }>;
+    if (data && data.length > 0) {
+      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+    }
+  } catch {
+    // ignore
   }
   return null;
 };
@@ -131,30 +219,26 @@ export const geocode = async (location: string): Promise<LatLng> => {
     return disk[key];
   }
 
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(location)}`;
-    const res = await fetch(url, {
-      headers: { Accept: "application/json" },
-    });
-    if (res.ok) {
-      const data = (await res.json()) as Array<{ lat: string; lon: string }>;
-      if (data && data.length > 0) {
-        const coords: LatLng = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-        memoryCache.set(key, coords);
-        saveDiskCache(key, coords);
-        return coords;
-      }
+  // Try Nominatim with progressively simpler queries so a bad street address
+  // still resolves to at least the correct city / state / country.
+  const queries = simplifyQueries(location);
+  for (const q of queries) {
+    const hit = await fetchNominatim(q);
+    if (hit) {
+      memoryCache.set(key, hit);
+      saveDiskCache(key, hit);
+      return hit;
     }
-  } catch {
-    // network errors fall through to fallback
+    // Local fallback for this simplified variant before going to the network again
+    const fb = lookupFallback(q);
+    if (fb) {
+      memoryCache.set(key, fb);
+      saveDiskCache(key, fb);
+      return fb;
+    }
   }
 
-  const fb = lookupFallback(location);
-  if (fb) {
-    memoryCache.set(key, fb);
-    return fb;
-  }
-
-  // Last-resort default (Atlantic) so the map still renders
-  return [20, 0];
+  // Absolute last-resort: the geographic center of the world, not West Africa.
+  // Better to show a neutral point than to mislocate a US address to Mali.
+  return [0, 0];
 };
