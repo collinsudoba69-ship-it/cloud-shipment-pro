@@ -309,29 +309,17 @@ const Track = () => {
     }
   };
 
-  // Realtime: subscribe to live updates for the current shipment
+  // Poll for live updates for the current shipment (public tracking uses secure edge function).
   useEffect(() => {
     const sid = shipmentIdRef.current;
     if (!shipment || !sid) return;
-
-    const channel = supabase
-      .channel(`track-${sid}`)
-      .on('postgres_changes', {
-        event: '*', schema: 'public', table: 'shipments', filter: `id=eq.${sid}`,
-      }, () => refetchShipment(sid, { notifyStatusChange: true }))
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'shipment_events', filter: `shipment_id=eq.${sid}`,
-      }, () => refetchShipment(sid, { notifyNewEvent: true, notifyStatusChange: true }))
-      .on('postgres_changes', {
-        event: 'UPDATE', schema: 'public', table: 'shipment_events', filter: `shipment_id=eq.${sid}`,
-      }, () => refetchShipment(sid, { notifyStatusChange: true }))
-      .subscribe((status) => {
-        setIsLive(status === 'SUBSCRIBED');
-      });
-
+    setIsLive(true);
+    const interval = window.setInterval(() => {
+      refetchShipment(sid, { notifyNewEvent: true, notifyStatusChange: true });
+    }, 15000);
     return () => {
       setIsLive(false);
-      supabase.removeChannel(channel);
+      window.clearInterval(interval);
     };
   }, [shipment?.id, refetchShipment]);
 
