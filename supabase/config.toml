@@ -2,3 +2,9 @@ project_id = "cfqifskdahltmczskezd"
 
 [functions.translate-text]
 verify_jwt = false
+
+[functions.public-track]
+verify_jwt = false
+
+[functions.public-statement]
+verify_jwt = false
