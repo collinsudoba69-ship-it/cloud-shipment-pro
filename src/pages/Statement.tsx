@@ -19,11 +19,10 @@ const Statement = () => {
 
   useEffect(() => {
     (async () => {
-      const { data: c } = await (supabase as any).from("customers").select("*").eq("slug", slug).maybeSingle();
-      if (!c) { setNotFoundState(true); setLoading(false); return; }
-      setCustomer(c as Customer);
-      const { data: ps } = await (supabase as any).from("payments").select("*").eq("customer_id", (c as Customer).id).order("paid_at", { ascending: true });
-      setPayments((ps ?? []) as Payment[]);
+      const { data, error } = await supabase.functions.invoke("public-statement", { body: { slug } });
+      if (error || !(data as any)?.customer) { setNotFoundState(true); setLoading(false); return; }
+      setCustomer((data as any).customer as Customer);
+      setPayments(((data as any).payments ?? []) as Payment[]);
       setLoading(false);
     })();
   }, [slug]);
