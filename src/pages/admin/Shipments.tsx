@@ -54,18 +54,6 @@ const Shipments = () => {
     });
   };
 
-  const toggleAll = () => {
-    if (selected.size === filtered.length) {
-      setSelected(new Set());
-    } else {
-      setSelected(new Set(filtered.map((r) => r.id)));
-    }
-  };
-
-  const selectedRecipients = filtered
-    .filter((r) => selected.has(r.id))
-    .map((r) => ({ email: r.receiver_email || "", name: r.receiver_name }));
-
   const filtered = rows.filter((r) => {
     if (!q.trim()) return true;
     const s = q.toLowerCase();
@@ -77,6 +65,18 @@ const Shipments = () => {
       r.origin.toLowerCase().includes(s)
     );
   });
+
+  const toggleAll = () => {
+    if (selected.size === filtered.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filtered.map((r) => r.id)));
+    }
+  };
+
+  const selectedRecipients = filtered
+    .filter((r) => selected.has(r.id))
+    .map((r) => ({ email: r.receiver_email || "", name: r.receiver_name }));
 
   const handleDelete = async (id: string, tracking: string) => {
     const { error } = await supabase.from("shipments").delete().eq("id", id);
