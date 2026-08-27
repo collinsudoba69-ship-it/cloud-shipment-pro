@@ -1,5 +1,5 @@
 // Edge function: translate-text
-// Uses Lovable AI Gateway to translate arbitrary text to a target language.
+// Uses Google Gemini directly to translate arbitrary text to a target language.
 // No JWT required (public translation utility).
 
 const corsHeaders = {
@@ -62,10 +62,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
+        JSON.stringify({ error: "GEMINI_API_KEY not configured" }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -76,15 +76,15 @@ Deno.serve(async (req) => {
     const langName = LANG_NAMES[targetLang] ?? targetLang;
 
     const aiRes = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${GEMINI_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite",
+          model: "gemini-2.5-flash-lite",
           messages: [
             {
               role: "system",
@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
     }
     if (!aiRes.ok) {
       const err = await aiRes.text();
-      console.error("AI gateway error:", aiRes.status, err);
+      console.error("Gemini error:", aiRes.status, err);
       return new Response(JSON.stringify({ translated: text }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
