@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { Infinity as InfIcon, Plus, Minus, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import BackButton from "@/components/BackButton";
+import SendUpdateDialog from "@/components/admin/SendUpdateDialog";
 
 interface UserRow {
   id: string;
@@ -36,6 +37,7 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [adjust, setAdjust] = useState<Record<string, string>>({});
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const load = async () => {
     setLoading(true);
@@ -50,6 +52,26 @@ const Users = () => {
   };
 
   useEffect(() => { load(); }, []);
+
+  const toggleRow = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selected.size === rows.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(rows.map((r) => r.user_id)));
+    }
+  };
+
+  const selectedRecipients = rows
+    .filter((r) => selected.has(r.user_id))
+    .map((r) => ({ email: r.email, name: r.display_name || undefined }));
 
   const updateCredits = async (row: UserRow, delta: number) => {
     if (row.unlimited_credits) return toast.info("This user has unlimited credits.");
@@ -100,9 +122,12 @@ const Users = () => {
   return (
     <div className="space-y-6">
       <BackButton />
-      <div>
-        <h1 className="text-2xl font-bold">Users & roles</h1>
-        <p className="text-muted-foreground">Manage staff access, credits, and accounts. 1,000 credits = $1 USD · 2,000 credits per shipment.</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Users & roles</h1>
+          <p className="text-muted-foreground">Manage staff access, credits, and accounts. 1,000 credits = $1 USD · 2,000 credits per shipment.</p>
+        </div>
+        <SendUpdateDialog recipients={selectedRecipients} disabled={selected.size === 0} />
       </div>
 
       <Card>
@@ -115,6 +140,9 @@ const Users = () => {
               <table className="w-full text-sm">
                 <thead className="border-b bg-muted/40 text-left text-xs uppercase text-muted-foreground">
                   <tr>
+                    <th className="px-4 py-3 w-8">
+                      <input type="checkbox" checked={rows.length > 0 && selected.size === rows.length} onChange={toggleAll} />
+                    </th>
                     <th className="px-4 py-3">User</th>
                     <th className="px-4 py-3">Roles</th>
                     <th className="px-4 py-3">Credits</th>
@@ -127,6 +155,9 @@ const Users = () => {
                     const isSuper = r.roles.includes("super_admin");
                     return (
                       <tr key={r.id}>
+                        <td className="px-4 py-3">
+                          <input type="checkbox" checked={selected.has(r.user_id)} onChange={() => toggleRow(r.user_id)} />
+                        </td>
                         <td className="px-4 py-3">
                           <p className="font-medium">{r.display_name ?? r.email.split("@")[0]}</p>
                           <p className="text-xs text-muted-foreground">{r.email}</p>
