@@ -13,12 +13,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import ShipmentInvoiceDialog from "@/components/admin/ShipmentInvoiceDialog";
 import BackButton from "@/components/BackButton";
+import SendUpdateDialog from "@/components/admin/SendUpdateDialog";
 
 interface Row {
   id: string;
   tracking_number: string;
   sender_name: string;
   receiver_name: string;
+  receiver_email: string | null;
   origin: string;
   destination: string;
   status: ShipmentStatus;
@@ -30,18 +32,39 @@ const Shipments = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const load = async () => {
     setLoading(true);
     const { data } = await supabase
       .from("shipments")
-      .select("id, tracking_number, sender_name, receiver_name, origin, destination, status, created_at")
+      .select("id, tracking_number, sender_name, receiver_name, receiver_email, origin, destination, status, created_at")
       .order("created_at", { ascending: false });
     setRows((data ?? []) as Row[]);
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
+
+  const toggleRow = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selected.size === filtered.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filtered.map((r) => r.id)));
+    }
+  };
+
+  const selectedRecipients = filtered
+    .filter((r) => selected.has(r.id))
+    .map((r) => ({ email: r.receiver_email || "", name: r.receiver_name }));
 
   const filtered = rows.filter((r) => {
     if (!q.trim()) return true;
@@ -76,9 +99,12 @@ const Shipments = () => {
           <h1 className="text-2xl font-bold">Shipments</h1>
           <p className="text-muted-foreground">Manage every shipment in the system.</p>
         </div>
-        <Button asChild className="gap-2">
-          <Link to="/admin/shipments/new"><Plus className="h-4 w-4" />New shipment</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <SendUpdateDialog recipients={selectedRecipients} disabled={selected.size === 0} />
+          <Button asChild className="gap-2">
+            <Link to="/admin/shipments/new"><Plus className="h-4 w-4" />New shipment</Link>
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -101,6 +127,9 @@ const Shipments = () => {
               <table className="w-full text-sm">
                 <thead className="border-b bg-muted/40 text-left text-xs uppercase text-muted-foreground">
                   <tr>
+                    <th className="px-4 py-3 w-8">
+                      <input type="checkbox" checked={filtered.length > 0 && selected.size === filtered.length} onChange={toggleAll} />
+                    </th>
                     <th className="px-4 py-3">Tracking #</th>
                     <th className="px-4 py-3">Receiver</th>
                     <th className="px-4 py-3">Route</th>
@@ -112,6 +141,9 @@ const Shipments = () => {
                 <tbody className="divide-y">
                   {filtered.map((r) => (
                     <tr key={r.id} className="transition-colors hover:bg-muted/30">
+                      <td className="px-4 py-3">
+                        <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleRow(r.id)} />
+                      </td>
                       <td className="px-4 py-3 font-medium">
                         <Link to={`/admin/shipments/${r.id}`} className="hover:text-primary">{r.tracking_number}</Link>
                       </td>
