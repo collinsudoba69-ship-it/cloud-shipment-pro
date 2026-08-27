@@ -71,21 +71,61 @@ function statusUpdateTemplate(data: any): { subject: string; html: string } {
   return { subject: `Shipment ${trackingNumber} update: ${status.replace(/_/g, " ")}`, html: wrapEmail(body, "Your shipment status has changed") };
 }
 
+function formatDate(d: string | null | undefined): string {
+  if (!d) return "To be confirmed";
+  try {
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  } catch {
+    return String(d);
+  }
+}
+
+function currentStatusLine(data: any): string {
+  const { paymentStatus, paymentReason, statusLabel } = data;
+  if (paymentStatus && paymentStatus.toLowerCase() !== "paid") {
+    return `Awaiting ${paymentReason || "Payment"}`;
+  }
+  return statusLabel || "Processing";
+}
+
 function newShipmentTemplate(data: any): { subject: string; html: string } {
-  const { trackingNumber, receiverName, origin, destination } = data;
+  const {
+    trackingNumber, receiverName, senderName, courier,
+    estimatedDeliveryDate, quantity, weight,
+    amountToPay, paymentMethod, paymentStatus, paymentReason,
+  } = data;
   const trackUrl = `${SITE_URL}/track?tn=${encodeURIComponent(trackingNumber)}`;
+
   const body = `
-    <p>Hi ${receiverName || "there"},</p>
-    <p>A new shipment has been created for you.</p>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;">
+    <h2 style="margin:0 0 16px;color:${BRAND_COLOR};font-size:20px;">Shipment is on its way</h2>
+    <p>Dear ${receiverName || "Customer"},</p>
+    <p>Your shipment with waybill number:</p>
+    <p style="font-size:18px;font-weight:bold;color:${ACCENT_COLOR};margin:4px 0 16px;">${trackingNumber}</p>
+    <p>from <strong>${senderName || "-"}</strong> is scheduled for delivery.</p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
       <tr><td style="background:#f9fafb;border-radius:8px;padding:16px;">
-        <p style="margin:0 0 8px;"><strong>Tracking Number:</strong> ${trackingNumber}</p>
-        <p style="margin:0 0 8px;"><strong>From:</strong> ${origin || "-"}</p>
-        <p style="margin:0;"><strong>To:</strong> ${destination || "-"}</p>
+        <p style="margin:0 0 10px;"><strong>Estimated Delivery Date:</strong><br>${formatDate(estimatedDeliveryDate)}</p>
+        <p style="margin:0 0 10px;"><strong>Current Status:</strong><br>${currentStatusLine(data)}</p>
+        <p style="margin:0;"><strong>Service:</strong> ${courier || "Cloud Shipment"}</p>
       </td></tr>
     </table>
-    ${ctaButton("Track Shipment", trackUrl)}`;
-  return { subject: `New shipment created: ${trackingNumber}`, html: wrapEmail(body, "A new shipment has been created") };
+
+    ${ctaButton("Track Shipment", trackUrl)}
+
+    <h3 style="margin:28px 0 12px;color:${BRAND_COLOR};font-size:16px;border-top:1px solid #e5e7eb;padding-top:20px;">Shipment Invoice</h3>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+      <tr><td style="padding:10px 14px;background:#f9fafb;color:#6b7280;font-size:13px;">Waybill Number</td><td style="padding:10px 14px;text-align:right;font-size:13px;">${trackingNumber}</td></tr>
+      <tr><td style="padding:10px 14px;color:#6b7280;font-size:13px;">Quantity</td><td style="padding:10px 14px;text-align:right;font-size:13px;">${quantity ?? "-"}</td></tr>
+      ${weight ? `<tr><td style="padding:10px 14px;background:#f9fafb;color:#6b7280;font-size:13px;">Weight</td><td style="padding:10px 14px;text-align:right;font-size:13px;">${weight}</td></tr>` : ""}
+      <tr><td style="padding:10px 14px;${weight ? "" : "background:#f9fafb;"}color:#6b7280;font-size:13px;">Payment Method</td><td style="padding:10px 14px;text-align:right;font-size:13px;">${paymentMethod || "-"}</td></tr>
+      <tr><td style="padding:10px 14px;background:#f9fafb;color:#6b7280;font-size:13px;">Payment Status</td><td style="padding:10px 14px;text-align:right;font-size:13px;text-transform:capitalize;">${paymentStatus || "-"}</td></tr>
+      <tr><td style="padding:12px 14px;color:${BRAND_COLOR};font-weight:bold;font-size:14px;">Amount Due</td><td style="padding:12px 14px;text-align:right;color:${BRAND_COLOR};font-weight:bold;font-size:14px;">${amountToPay ?? "-"}</td></tr>
+    </table>`;
+
+  return { subject: `Shipment ${trackingNumber} is on its way`, html: wrapEmail(body, "Your shipment is on its way") };
 }
 
 function paymentUpdateTemplate(data: any): { subject: string; html: string } {
