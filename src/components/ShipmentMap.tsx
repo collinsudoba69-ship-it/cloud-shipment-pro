@@ -121,7 +121,7 @@ const ShipmentMap = ({ shipment }: ShipmentMapProps) => {
       <MapContainer center={currentCoords} zoom={3} scrollWheelZoom={false} worldCopyJump className="shipment-map-canvas">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; CARTO'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2du6_1_bfd27160961af66b79510afa"
           subdomains="abcd"
           maxZoom={20}
         />
