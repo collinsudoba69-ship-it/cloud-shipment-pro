@@ -11,10 +11,21 @@ const corsHeaders = {
 const SENDER = { name: "Cloud Shipment", email: "noreply@notify.cloudshipmentexpress.online" };
 const BRAND_COLOR = "#0a1f44";
 const ACCENT_COLOR = "#2563eb";
+const SITE_URL = "https://cloudshipmentexpress.online";
+const LOGO_URL = "https://cloudshipmentexpress.online/cloud-shipment-logo.png";
 
 interface Recipient {
   email: string;
   name?: string;
+}
+
+function ctaButton(label: string, url: string): string {
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+      <tr><td style="background:${ACCENT_COLOR};border-radius:8px;">
+        <a href="${url}" style="display:inline-block;padding:12px 28px;color:#ffffff;font-weight:bold;text-decoration:none;font-size:14px;">${label}</a>
+      </td></tr>
+    </table>`;
 }
 
 function wrapEmail(bodyHtml: string, preheader = ""): string {
@@ -26,14 +37,15 @@ function wrapEmail(bodyHtml: string, preheader = ""): string {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:24px 0;">
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
-        <tr><td style="background:${BRAND_COLOR};padding:24px 32px;">
-          <span style="color:#ffffff;font-size:20px;font-weight:bold;">Cloud Shipment</span>
+        <tr><td style="background:${BRAND_COLOR};padding:24px 32px;text-align:center;">
+          <img src="${LOGO_URL}" alt="Cloud Shipment" height="36" style="height:36px;display:inline-block;" />
         </td></tr>
         <tr><td style="padding:32px;color:#1f2937;font-size:15px;line-height:1.6;">
           ${bodyHtml}
         </td></tr>
-        <tr><td style="padding:20px 32px;background:#f9fafb;color:#9ca3af;font-size:12px;">
-          This is an automated message from Cloud Shipment. Please do not reply to this email.
+        <tr><td style="padding:20px 32px;background:#f9fafb;color:#9ca3af;font-size:12px;text-align:center;">
+          &copy; Cloud Shipment &middot; <a href="${SITE_URL}" style="color:#9ca3af;">cloudshipmentexpress.online</a><br>
+          This is an automated message. Please do not reply to this email.
         </td></tr>
       </table>
     </td></tr>
@@ -44,6 +56,7 @@ function wrapEmail(bodyHtml: string, preheader = ""): string {
 
 function statusUpdateTemplate(data: any): { subject: string; html: string } {
   const { trackingNumber, status, location, receiverName } = data;
+  const trackUrl = `${SITE_URL}/track?tn=${encodeURIComponent(trackingNumber)}`;
   const body = `
     <p>Hi ${receiverName || "there"},</p>
     <p>Your shipment <strong>${trackingNumber}</strong> has a new status update:</p>
@@ -53,12 +66,14 @@ function statusUpdateTemplate(data: any): { subject: string; html: string } {
         ${location ? `<br><span style="color:#6b7280;font-size:13px;">${location}</span>` : ""}
       </td></tr>
     </table>
-    <p>Track your shipment anytime at cloudshipmentexpress.online.</p>`;
+    ${ctaButton("Track Shipment", trackUrl)}
+    <p style="color:#6b7280;font-size:13px;">Or visit ${SITE_URL} and enter tracking number ${trackingNumber}.</p>`;
   return { subject: `Shipment ${trackingNumber} update: ${status.replace(/_/g, " ")}`, html: wrapEmail(body, "Your shipment status has changed") };
 }
 
 function newShipmentTemplate(data: any): { subject: string; html: string } {
   const { trackingNumber, receiverName, origin, destination } = data;
+  const trackUrl = `${SITE_URL}/track?tn=${encodeURIComponent(trackingNumber)}`;
   const body = `
     <p>Hi ${receiverName || "there"},</p>
     <p>A new shipment has been created for you.</p>
@@ -69,12 +84,13 @@ function newShipmentTemplate(data: any): { subject: string; html: string } {
         <p style="margin:0;"><strong>To:</strong> ${destination || "-"}</p>
       </td></tr>
     </table>
-    <p>Use your tracking number at cloudshipmentexpress.online to follow your shipment's journey.</p>`;
+    ${ctaButton("Track Shipment", trackUrl)}`;
   return { subject: `New shipment created: ${trackingNumber}`, html: wrapEmail(body, "A new shipment has been created") };
 }
 
 function paymentUpdateTemplate(data: any): { subject: string; html: string } {
   const { trackingNumber, amount, reason, receiverName } = data;
+  const trackUrl = `${SITE_URL}/track?tn=${encodeURIComponent(trackingNumber)}`;
   const body = `
     <p>Hi ${receiverName || "there"},</p>
     <p>A payment update is available for shipment <strong>${trackingNumber}</strong>:</p>
@@ -84,7 +100,7 @@ function paymentUpdateTemplate(data: any): { subject: string; html: string } {
         ${reason ? `<p style="margin:0;"><strong>Reason:</strong> ${reason}</p>` : ""}
       </td></tr>
     </table>
-    <p>Please check cloudshipmentexpress.online for full details.</p>`;
+    ${ctaButton("View Shipment", trackUrl)}`;
   return { subject: `Payment update for shipment ${trackingNumber}`, html: wrapEmail(body, "Payment update available") };
 }
 
@@ -92,7 +108,8 @@ function customTemplate(data: any): { subject: string; html: string } {
   const { subject, message, receiverName } = data;
   const body = `
     <p>Hi ${receiverName || "there"},</p>
-    <div>${(message || "").replace(/\n/g, "<br>")}</div>`;
+    <div>${(message || "").replace(/\n/g, "<br>")}</div>
+    ${ctaButton("Visit Cloud Shipment", SITE_URL)}`;
   return { subject: subject || "Update from Cloud Shipment", html: wrapEmail(body, subject || "") };
 }
 
