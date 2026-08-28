@@ -107,8 +107,8 @@ const Settings = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-primary" />
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl leading-tight">
+            <MessageCircle className="h-5 w-5 text-primary shrink-0" />
             WhatsApp Customer Support
           </CardTitle>
           <CardDescription>
@@ -135,8 +135,8 @@ const Settings = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-primary" />
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl leading-tight">
+            <Mail className="h-5 w-5 text-primary shrink-0" />
             Automatic Email Notifications
           </CardTitle>
           <CardDescription>
